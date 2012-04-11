@@ -1,0 +1,51 @@
+= Assembly-ObjectFile Gem
+
+==Overview 
+This gem contains classes used by the Stanford University Digital Library to perform
+file operations necessary for accessioning of content.  It is also used by related gems to perform
+content type specific operations (such as jp2 generation).
+
+==Releases
+
+- 1.0.0 initial release
+
+==Usage
+
+The gem currently has methods for:
+- filesize
+- exif
+
+==Running tests
+
+	bundle exec rspec spec
+
+==Generate documentation
+To generate documentation into the "doc" folder:
+
+	yard
+
+To keep a local server running with up to date code documentation that you can view in your browser:
+
+	yard server --reload
+
+==Prerequisites
+
+1. Exiftool
+            
+   RHEL: (RPM to install comming soon)
+   Download latest version from:  http://www.sno.phy.queensu.ca/~phil/exiftool
+
+       tar -xf Image-ExifTool-#.##.tar.gz
+       cd Image-ExifTool-#.##
+       perl Makefile.PL
+       make test
+       sudo make install
+
+   Mac users:
+       brew install exiftool
+
+2. Install md5 and sha1 command line tools.
+   
+   Mac users: 
+		brew install md5sha1sum
+		sudo brew link md5sha1sum
