@@ -10,6 +10,7 @@ describe Assembly::ObjectFile do
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.image?.should == true
+    @ai.object_type.should == :image
     @ai.valid_image?.should == true
   end
   
@@ -18,6 +19,7 @@ describe Assembly::ObjectFile do
     File.exists?(non_image_file).should be true
     @ai = Assembly::ObjectFile.new(non_image_file)
     @ai.image?.should == false
+    @ai.object_type.should == :text    
     @ai.valid_image?.should == false
   end
 

@@ -41,23 +41,30 @@ module Assembly
       check_for_file unless @filetype
       @mimetype ||= filetype.split(';')[0].strip
     end
-    
-    def self.mimetype
-      self.filetype.split(';')[0].strip
-    end
 
-    # Returns mimetype information for the current file (only on unix based systems).
+    # Returns encoding information for the current file (only on unix based systems).
     #
-    # @return [string] mime type for supplied file
+    # @return [string] encoding for supplied file
     #
     # Example:
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.mimetype # gives 'text/plain'
+    #   puts source_file.encoding # gives 'charset=ascii'
     def encoding
       check_for_file unless @filetype
       @encoding ||= filetype.split(';')[1].strip
     end
-    
+
+    # Returns a symbol with the objects type
+    #
+    # @return [symbol] the type of object, could be :application (for PDF or Word, etc), :audio, :image, :message, :model, :multipart, :text or :video
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.object_type # gives :image
+    def object_type
+      MIME::Types[mimetype][0].media_type.to_sym
+    end
+        
     # Returns if the object file is an image.
     #
     # @return [boolean] if object is an image
@@ -66,7 +73,7 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.image? # gives TRUE
     def image?
-      MIME::Types[mimetype][0].media_type=='image'
+      object_type == :image
     end
 
     # Examines the input image for validity.  Used to determine if image is correct and if JP2 generation is likely to succeed.
@@ -91,7 +98,11 @@ module Assembly
       
       return result
     end
-  
+    
+    def jp2able?
+      valid_image?
+    end
+      
     # Returns file size information for the current file in bytes.
     #
     # @return [integer] file size in bytes
