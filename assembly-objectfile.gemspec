@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.require_paths = ['lib']
 
   s.add_dependency 'mini_exiftool'
+  s.add_dependency 'mime-types'
 
   s.add_development_dependency "rspec", "~> 2.6"
   s.add_development_dependency "lyberteam-devel"
