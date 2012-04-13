@@ -21,6 +21,13 @@ describe Assembly::ObjectFile do
     @ai.image?.should == false
     @ai.object_type.should == :text    
     @ai.valid_image?.should == false
+
+    non_image_file=File.join(Assembly::PATH_TO_GEM,'README.rdoc')
+    File.exists?(non_image_file).should be true
+    @ai = Assembly::ObjectFile.new(non_image_file)
+    @ai.image?.should == false
+    @ai.object_type.should == :text    
+    @ai.valid_image?.should == false    
   end
 
   it "should tell us the size of an input file" do

@@ -38,8 +38,16 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.mimetype # gives 'text/plain'
     def mimetype
-      check_for_file unless @filetype
-      @mimetype ||= filetype.split(';')[0].strip
+      check_for_file unless @mimetype
+      if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
+        if exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
+          @mimetype ||= filetype.split(';')[0].strip
+        else
+          @mimetype ||= exif.mimetype
+        end
+      else
+        @mimetype # we already have the mimetype computed, return it
+      end
     end
 
     # Returns encoding information for the current file (only on unix based systems).
@@ -50,7 +58,7 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.encoding # gives 'charset=ascii'
     def encoding
-      check_for_file unless @filetype
+      check_for_file unless @encoding
       @encoding ||= filetype.split(';')[1].strip
     end
 
@@ -116,7 +124,7 @@ module Assembly
     end
     
     private
-    # private method to use unix level file command
+    # private method to use unix level file command for mimetype and encoding
     def filetype
       @filetype ||= `file -Ib #{@path}`.gsub(/\n/,"")
     end
