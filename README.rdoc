@@ -11,6 +11,7 @@ content type specific operations (such as jp2 generation).
 - 1.0.1 add in a valid_image? method
 - 1.0.2 add new mimetype and encoding methods
 - 1.0.3 add new object_type method
+- 1.0.4 add additional configuration parameters that are used by assembly and other consumers of the gem
 
 ==Usage
 
