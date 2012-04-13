@@ -1,5 +1,6 @@
 require 'mini_exiftool'
 require 'mime/types'
+require 'checksum-tools'
 
 module Assembly
 
@@ -30,6 +31,16 @@ module Assembly
       @exif ||= MiniExiftool.new @path  
     end
 
+    def md5
+      compute_checksums if @checksums.nil?
+      @checksums[:md5]
+    end
+    
+    def sha1
+      compute_checksums if @checksums.nil?
+      @checksums[:sha1]      
+    end
+    
     # Returns mimetype information for the current file (only on unix based systems).
     #
     # @return [string] mime type for supplied file
@@ -128,7 +139,15 @@ module Assembly
     def filetype
       @filetype ||= `file -Ib #{@path}`.gsub(/\n/,"")
     end
-    
+ 
+    # private method to compute checksums
+    def compute_checksums
+      check_for_file
+      cs_types = [:md5,:sha1]
+      cs_tool  = Checksum::Tools.new({}, *cs_types)
+      @checksums=cs_tool.digest_file(path)
+    end
+      
     # private method to check for file existence before operating on it
     def check_for_file
       raise "input file #{path} does not exist" unless File.exists?(@path)  
