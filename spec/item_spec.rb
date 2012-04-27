@@ -52,7 +52,7 @@ describe Assembly::ObjectFile do
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.mimetype.should == 'image/tiff'
-    @ai.encoding.should == 'charset=binary'
+    @ai.encoding.should == 'binary'
   end
         
 end

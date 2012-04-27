@@ -52,7 +52,7 @@ module Assembly
       check_for_file unless @mimetype
       if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
         if exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
-          @mimetype ||= filetype.split(';')[0].strip
+          @mimetype ||= `file --mime-type #{@path}`.gsub(/\n/,"").split(':')[1].strip
         else
           @mimetype ||= exif.mimetype
         end
@@ -67,10 +67,10 @@ module Assembly
     #
     # Example:
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.encoding # gives 'charset=ascii'
+    #   puts source_file.encoding # gives 'us-ascii'
     def encoding
       check_for_file unless @encoding
-      @encoding ||= filetype.split(';')[1].strip
+      @encoding ||= `file --mime-encoding #{@path}`.gsub(/\n/,"").split(':')[1].strip
     end
 
     # Returns a symbol with the objects type
@@ -132,12 +132,6 @@ module Assembly
     def filesize
       check_for_file
       @filesize ||= File.size @path
-    end
-    
-    private
-    # private method to use unix level file command for mimetype and encoding
-    def filetype
-      @filetype ||= `file -Ib #{@path}`.gsub(/\n/,"")
     end
  
     # private method to compute checksums
