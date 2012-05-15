@@ -23,6 +23,20 @@ describe Assembly::ObjectFile do
     @ai.md5.should == 'a2400500acf21e43f5440d93be894101'
     @ai.sha1.should == '8d11fab63089a24c8b17063d29a4b0eac359fb41'
   end
+
+  it "should indicate that the file is not found when a valid directory is supplied instead of a file or when an invalid file path is specified" do
+    path=Assembly::PATH_TO_GEM
+    @ai = Assembly::ObjectFile.new(path)
+    File.exists?(path).should be true
+    File.directory?(path).should be true
+    @ai.file_exists?.should be false
+    
+    path=File.join(Assembly::PATH_TO_GEM,'bogus.txt')
+    @ai = Assembly::ObjectFile.new(path)
+    File.exists?(path).should be false
+    File.directory?(path).should be false
+    @ai.file_exists?.should be false    
+  end
   
   it "should tell us if an input file is not an image" do
     non_image_file=File.join(Assembly::PATH_TO_GEM,'spec/item_spec.rb')

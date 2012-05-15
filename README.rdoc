@@ -15,6 +15,7 @@ content type specific operations (such as jp2 generation).
 - 1.0.5 try and get mimetype from exif before resorting to unix level file command
 - 1.1.0 add methods to compute sha1 and md5 for object using checksum-tools gem
 - 1.1.1 change computation of mimetype and encoding to work in more situations
+- 1.1.2 change jp2able? and image? methods so they return a file not found error if the file is not supplied, added a method to indicate if a file is found
 
 ==Usage
 

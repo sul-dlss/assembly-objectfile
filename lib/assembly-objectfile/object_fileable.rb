@@ -92,7 +92,7 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.image? # gives TRUE
     def image?
-      object_type == :image
+      object_type == :image 
     end
 
     # Examines the input image for validity.  Used to determine if image is correct and if JP2 generation is likely to succeed.
@@ -103,9 +103,7 @@ module Assembly
     # Example:
     #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.valid? # gives true
-    def valid_image?
-      
-      check_for_file
+    def valid_image?  
       
       # defaults to invalid, unless we pass all checks
       result=false
@@ -116,6 +114,7 @@ module Assembly
       end
       
       return result
+      
     end
     
     def jp2able?
@@ -142,9 +141,13 @@ module Assembly
       @checksums=cs_tool.digest_file(path)
     end
       
+    def file_exists?
+      File.exists?(@path) && !File.directory?(@path) 
+    end
+
     # private method to check for file existence before operating on it
     def check_for_file
-      raise "input file #{path} does not exist" unless File.exists?(@path)  
+      raise "input file #{path} does not exist" unless file_exists?
     end
     
   end
