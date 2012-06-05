@@ -14,8 +14,19 @@ describe Assembly::ObjectFile do
     @ai.image?.should == true
     @ai.object_type.should == :image
     @ai.valid_image?.should == true
+    @ai.jp2able?.should == true
   end
-  
+
+  it "should tell us that a jp2 file not jp2able and is not valid since it has no profile" do
+    generate_test_image(TEST_JP2_INPUT_FILE)
+    File.exists?(TEST_JP2_INPUT_FILE).should be true
+    @ai = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
+    @ai.image?.should == true
+    @ai.object_type.should == :image
+    @ai.valid_image?.should == false
+    @ai.jp2able?.should == false
+  end
+    
   it "should compute checksums for an image file" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true

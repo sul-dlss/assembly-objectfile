@@ -116,9 +116,17 @@ module Assembly
       return result
       
     end
+
+    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the mimetype is not already jp2.
+    # It is used by the assembly robots to decide if a jp2 will be created.
     
+    # @return [boolean] true if image should have a jp2 created, false if not.
+    #
+    # Example:
+    #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_img.jp2able? # gives true    
     def jp2able?
-      valid_image?
+      valid_image? && mimetype != 'image/jp2'
     end
       
     # Returns file size information for the current file in bytes.
