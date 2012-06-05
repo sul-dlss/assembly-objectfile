@@ -23,7 +23,7 @@ describe Assembly::ObjectFile do
     @ai = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
     @ai.image?.should == true
     @ai.object_type.should == :image
-    @ai.valid_image?.should == false
+    @ai.valid_image?.should == true
     @ai.jp2able?.should == false
   end
     

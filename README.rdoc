@@ -20,6 +20,7 @@ content type specific operations (such as jp2 generation).
 - 1.1.4 valid_image? will now return true for jp2 mimetypes
 - 1.1.5 valid_image? should be false if mimetype is correct but profile is not found
 - 1.1.6 add jp2able? method
+- 1.1.7 change the behavior of jp2able? and valid_image?
 
 ==Usage
 

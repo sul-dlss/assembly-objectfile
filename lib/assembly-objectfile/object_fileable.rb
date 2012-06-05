@@ -95,8 +95,7 @@ module Assembly
       object_type == :image 
     end
 
-    # Examines the input image for validity.  Used to determine if image is correct and if JP2 generation is likely to succeed.
-    #  This method is automatically called before you create a jp2 but it can be called separately earlier as a sanity check.
+    # Examines the input image for validity.  Used to determine if image is a valid and useful image.
     #
     # @return [boolean] true if image is valid, false if not.
     #
@@ -105,20 +104,13 @@ module Assembly
     #   puts source_img.valid? # gives true
     def valid_image?  
       
-      # defaults to invalid, unless we pass all checks
-      result=false
-      
-      unless exif.nil?
-        result=(Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)) # check for allowed image mimetypes
-        result=(exif['profiledescription'] != nil) # check for existence of profile description
-      end
-      
+      result=(Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)) # check for allowed image mimetypes
       return result
       
     end
 
-    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the mimetype is not already jp2.
-    # It is used by the assembly robots to decide if a jp2 will be created.
+    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description.
+    # It is used by the assembly robots to decide if a jp2 will be created and is also called before you create a jp2 using assembly-image.
     
     # @return [boolean] true if image should have a jp2 created, false if not.
     #
@@ -126,7 +118,14 @@ module Assembly
     #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.jp2able? # gives true    
     def jp2able?
-      valid_image? && mimetype != 'image/jp2'
+      
+      result=false
+      unless exif.nil?
+        result=valid_image?
+        result=(exif['profiledescription'] != nil) # check for existence of profile description
+      end
+      return result
+
     end
       
     # Returns file size information for the current file in bytes.
