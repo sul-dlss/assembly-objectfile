@@ -109,8 +109,8 @@ module Assembly
       result=false
       
       unless exif.nil?
-        result=(exif['profiledescription'] != nil) # check for existence of profile description
         result=(Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)) # check for allowed image mimetypes
+        result=(exif['profiledescription'] != nil) # check for existence of profile description
       end
       
       return result
