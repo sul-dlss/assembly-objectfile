@@ -3,8 +3,8 @@ module Assembly
   # the path to the gem, used to access profiles stored with the gem
   PATH_TO_GEM = File.expand_path(File.dirname(__FILE__) + '/..')
 
-  # if input image is not one of these mime types, an error will be raised
-  VALID_IMAGE_MIMETYPES=["image/jpeg","image/tiff"]
+  # if input image is not one of these mime types, it will not be regarded as a valid image
+  VALID_IMAGE_MIMETYPES=["image/jpeg","image/tiff","image/jp2"]
   
   # default publish/preserve/shelve attributes used in content metadata
   FILE_ATTRIBUTES=Hash.new
