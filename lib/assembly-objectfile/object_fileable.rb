@@ -104,10 +104,8 @@ module Assembly
     #   puts source_img.valid? # gives true
     def valid_image?  
       
-      result=false
-
-      result=(object_type == :image) # check for allowed image mimetypes
-      result=jp2able? if mimetype != 'image/jp2' # further checks if we are not already a jp2
+      result= image? ? true : false
+      result= jp2able? unless mimetype == 'image/jp2' # further checks if we are not already a jp2
 
       return result
       

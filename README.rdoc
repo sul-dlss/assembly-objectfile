@@ -21,6 +21,7 @@ content type specific operations (such as jp2 generation).
 - 1.1.5 valid_image? should be false if mimetype is correct but profile is not found
 - 1.1.6 add jp2able? method
 - 1.1.7 change the behavior of jp2able? and valid_image?
+- 1.1.8 update how the version number is set to allow users to see the gem version # more easily
 
 ==Usage
 

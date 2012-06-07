@@ -1,3 +1,7 @@
 module Assembly
-  VERSION = "1.1.7"
+  
+  class ObjectFile
+    VERSION = "1.1.8"
+  end
+
 end

@@ -3,7 +3,7 @@ require 'assembly-objectfile/version'
 
 Gem::Specification.new do |s|
   s.name        = 'assembly-objectfile'
-  s.version     = Assembly::VERSION
+  s.version     = Assembly::ObjectFile::VERSION
   s.authors     = ["Peter Mangiafico", "Renzo Sanchez-Silva","Monty Hindman","Tony Calavano"]
   s.email       = ["pmangiafico@stanford.edu"]
   s.homepage    = ""
