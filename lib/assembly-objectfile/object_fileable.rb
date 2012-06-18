@@ -4,6 +4,7 @@ require 'checksum-tools'
 
 module Assembly
 
+  # Namespace to include common behaviors we need for other classes in the gem
   module ObjectFileable
 
     # the full path to the input image
@@ -31,11 +32,25 @@ module Assembly
       @exif ||= MiniExiftool.new @path  
     end
 
+    # Compute md5 checksum or return value if already computed
+    #
+    # @return [string] md5 checksum for given file
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.md5 # gives XXX123XXX1243XX1243
     def md5
       compute_checksums if @checksums.nil?
       @checksums[:md5]
     end
-    
+
+    # Compute sha1 checksum or return value if already computed
+    #
+    # @return [string] sha1 checksum for given file
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.sha1 # gives XXX123XXX1243XX1243    
     def sha1
       compute_checksums if @checksums.nil?
       @checksums[:sha1]      
@@ -141,17 +156,26 @@ module Assembly
       check_for_file
       @filesize ||= File.size @path
     end
+
+
+    # Determines if the file exists (and is not a directory)
+    #
+    # @return [boolean] file exists
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.file_exists? # gives true
+    def file_exists?
+      File.exists?(@path) && !File.directory?(@path) 
+    end
  
     # private method to compute checksums
+    private
     def compute_checksums
       check_for_file
       cs_types = [:md5,:sha1]
       cs_tool  = Checksum::Tools.new({}, *cs_types)
       @checksums=cs_tool.digest_file(path)
-    end
-      
-    def file_exists?
-      File.exists?(@path) && !File.directory?(@path) 
     end
 
     # private method to check for file existence before operating on it
