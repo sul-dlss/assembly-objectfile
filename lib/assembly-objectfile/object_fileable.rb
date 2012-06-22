@@ -128,7 +128,6 @@ module Assembly
 
     # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description and further restricts mimetypes.
     # It is used by the assembly robots to decide if a jp2 will be created and is also called before you create a jp2 using assembly-image.
-    
     # @return [boolean] true if image should have a jp2 created, false if not.
     #
     # Example:

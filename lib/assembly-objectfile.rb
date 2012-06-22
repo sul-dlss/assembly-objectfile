@@ -12,7 +12,7 @@ module Assembly
   FILE_ATTRIBUTES['default']={:preserve=>'yes',:shelve=>'no',:publish=>'no'}
   FILE_ATTRIBUTES['image/tif']={:preserve=>'yes',:shelve=>'no',:publish=>'no'}
   FILE_ATTRIBUTES['image/jp2']={:preserve=>'no',:shelve=>'yes',:publish=>'yes'}
-  FILE_ATTRIBUTES['image/jpeg']={:preserve=>'no',:shelve=>'yes',:publish=>'yes'}
+  FILE_ATTRIBUTES['image/jpeg']={:preserve=>'yes',:shelve=>'no',:publish=>'no'}
   FILE_ATTRIBUTES['audio/wav']={:preserve=>'yes',:shelve=>'no',:publish=>'no'}
   FILE_ATTRIBUTES['audio/x-wav']={:preserve=>'yes',:shelve=>'no',:publish=>'no'}
   FILE_ATTRIBUTES['audio/mp3']={:preserve=>'no',:shelve=>'yes',:publish=>'yes'}
