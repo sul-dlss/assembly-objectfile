@@ -7,9 +7,12 @@ module Assembly
   # Namespace to include common behaviors we need for other classes in the gem
   module ObjectFileable
 
-    # the full path to the input image
+    # path is the full path to the user provided image
     attr_accessor :path
-
+    
+    # provider checksums are optional checksums given by the provider used in content metadata generation
+    attr_accessor :provider_md5, :provider_sha1
+    
     # Inititalize file from given path.
     #
     # @param [String] path full path to the file to be worked with 
