@@ -23,6 +23,7 @@ content type specific operations (such as jp2 generation).
 - 1.1.7 change the behavior of jp2able? and valid_image?
 - 1.1.8 update how the version number is set to allow users to see the gem version # more easily
 - 1.1.9 switch jpeg mimetype temporarily to publish=no, preserve=yes
+- 1.2.0 move content metadata generation method to this gem from assembly-image
 
 ==Usage
 
