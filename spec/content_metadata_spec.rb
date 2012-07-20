@@ -138,7 +138,11 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
     xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE
     xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
-    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE2    
+    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE2   
+    xml.xpath("//resource/file")[0].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test.tif'     
+    xml.xpath("//resource/file")[1].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test.jp2'
+    xml.xpath("//resource/file")[2].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test2.tif'
+    xml.xpath("//resource/file")[3].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test2.jp2'    
     xml.xpath("//label").length.should be 4
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..3 do
@@ -148,12 +152,16 @@ describe Assembly::ContentMetadata do
     end
   end
 
-  it "should generate valid content metadata for two tifs two associated jp2s of style=file" do
+  it "should generate valid content metadata for two tifs two associated jp2s of style=file using specific content metadata paths" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_TIF_INPUT_FILE2)
     generate_test_image(TEST_JP2_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE2)
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
+    objects[0].relative_path='input/test.tif'
+    objects[1].relative_path='input/test.jp2'
+    objects[2].relative_path='input/test2.tif'
+    objects[3].relative_path='input/test2.jp2'
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:file,:objects=>objects)
     result.class.should be String
     xml = Nokogiri::XML(result)
@@ -162,6 +170,10 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource").length.should be 4
     xml.xpath("//resource/file").length.should be 4
     xml.xpath("//label").length.should be 4
+    xml.xpath("//resource/file")[0].attributes['id'].value.should == 'input/test.tif'
+    xml.xpath("//resource/file")[1].attributes['id'].value.should == 'input/test.jp2'
+    xml.xpath("//resource/file")[2].attributes['id'].value.should == 'input/test2.tif'
+    xml.xpath("//resource/file")[3].attributes['id'].value.should == 'input/test2.jp2'
     for i in 0..3 do
       xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 1
       xml.xpath("//label")[i].text.should == "File #{i+1}"

@@ -27,6 +27,7 @@ content type specific operations (such as jp2 generation).
 - 1.2.1 allow content metadata to add user supplied checksums
 - 1.2.2 allow content metadata to bundle files into resources by filename or DPG filename specification, add book_as_image and file style content metadata generation
 - 1.2.3 small change to a parameter passed to content metadata generation
+- 1.2.4 allow user to control how file ID paths are generated in content metadata by using a 'relative_path' attribute
 
 ==Usage
 

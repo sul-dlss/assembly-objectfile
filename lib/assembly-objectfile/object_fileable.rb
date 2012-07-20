@@ -10,6 +10,10 @@ module Assembly
     # path is the full path to the user provided image
     attr_accessor :path
     
+    # relative path is useful when generating content metadata, if you want the file ids in the content metadata to be something other than the full path, it can be set
+    #  if not, content metadata will get the full path 
+    attr_accessor :relative_path
+    
     # provider checksums are optional checksums given by the provider used in content metadata generation
     attr_accessor :provider_md5, :provider_sha1
     
@@ -23,6 +27,14 @@ module Assembly
       @path = path
     end
 
+    # Returns the path to use for content metadata
+    #
+    # @param [String] path to use for content metadata, will be 'relative_path' if set, if not, defaults to 'path'
+    #
+    def content_metadata_path
+      @relative_path || @path
+    end
+    
     # Returns base DPG name for the current file.
     #
     # @return [String] DPG base filename, removing the extension and the '00','05', etc. placeholders

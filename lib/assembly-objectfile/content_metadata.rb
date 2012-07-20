@@ -97,7 +97,7 @@ module Assembly
                   resource_files.each do |obj|
                   
                     mimetype = obj.mimetype
-                    xml_file_params = {:id=> obj.path}
+                    xml_file_params = {:id=> obj.content_metadata_path}
                   
                     if add_file_attributes
                       file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
