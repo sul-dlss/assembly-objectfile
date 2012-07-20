@@ -122,13 +122,13 @@ describe Assembly::ContentMetadata do
     end
   end
   
-  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=none and no exif data" do
+  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=default and no exif data" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_TIF_INPUT_FILE2)
     generate_test_image(TEST_JP2_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE2)
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:none,:objects=>objects)
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:default,:objects=>objects)
     result.class.should be String
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0

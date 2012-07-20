@@ -10,21 +10,21 @@ module Assembly
       # and does not depend on a specific folder structure.  Note that it is class level method.
       #
       # @param [Hash] a hash containg parameters needed to produce content metadata
-      #   :druid = a string of druid of the repository object's druid id without 'druid:' prefix
-      #   :style = an optional ymbol containing the style of metadata to create, allowed values are
+      #   :druid = required - a string of druid of the repository object's druid id without 'druid:' prefix
+      #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata      
+      #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
       #                 :simple_book, contentMetadata type="book", resource type="page"
       #                 :book_with_pdf, contentMetadata type="book", resource type="page", but each pdf will get it's own resource as resource type="file"
       #                 :book_as_image, contentMetadata type="book", resource type="image"
-      #   :bundle = an optional symbol containing the method of bundling files into resources, allowed values are
-      #                 :none = all files get their own resources (default)
+      #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
+      #                 :default = all files get their own resources (default)
       #                 :filename = files with the same filename but different extensions get bundled together in a single resource
       #                 :dpg = files representing the same image but of different mimetype that use the SULAIR DPG filenaming standard (00 vs 05) get bundled together in a single resource
-      #   :add_exif = a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
-      #   :add_file_attributes = a boolean to indicate if publish/preserve/shelve attributes should be added using defaults of supplied override by mime/type, defaults to false and is not required if project goes through assembly
-      #   :file_attributes = an optional hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, e.g. {'image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
-      #   :objects = an array of Assembly::ObjectFile objects containing the list of files to add to content metadata
+      #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
+      #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve attributes should be added using defaults of supplied override by mime/type, defaults to false and is not required if project goes through assembly
+      #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, e.g. {'image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
       #
       # Example:
       #    Assembly::Image.create_content_metadata(:druid=>'nx288wh8889',:style=>:simple_image,:objects=>object_files,:file_attributes=>false)
@@ -37,7 +37,7 @@ module Assembly
         objects.each {|obj| raise "File #{obj.path} not found" unless obj.file_exists?}
         
         style=params[:style] || :simple_image
-        bundle=params[:bundle] || :none
+        bundle=params[:bundle] || :default
         add_exif=params[:add_exif] || false
         add_file_attributes=params[:add_file_attributes] || false
         file_attributes=params[:file_attributes] || {}
@@ -68,7 +68,7 @@ module Assembly
         # determine how many resources to create
         # setup an array if arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
         case bundle
-          when :none # one resource per object
+          when :default # one resource per object
             resources=objects.collect {|obj| [obj]}
           when :filename # one resource per distinct filename (excluding extension)
             # loop over distinct filenames, this determines how many resources we will have and
