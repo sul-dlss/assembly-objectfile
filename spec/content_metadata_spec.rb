@@ -1,6 +1,6 @@
 describe Assembly::ContentMetadata do
 
-  it "should generate valid content metadata with exif for a single tif and jp2 of type=simple_image" do
+  it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE)
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
@@ -37,7 +37,7 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file/imageData")[1].attributes['height'].value.should == "100"    
   end
 
-  it "should generate valid content metadata for a single tif and associated jp2 of type=simple_image with overriding file attributes and no exif data" do
+  it "should generate valid content metadata for a single tif and jp2 of style=simple_image with overriding file attributes and no exif data" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE)
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]    
@@ -65,11 +65,114 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file")[1].attributes['preserve'].value.should == "yes"
     xml.xpath("//resource/file")[1].attributes['shelve'].value.should == "yes" 
   end
-  
-  it "should generate valid content metadata for two tifs of type=simple_book" do
+
+  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=filename and no exif data" do
     generate_test_image(TEST_TIF_INPUT_FILE)
-    generate_test_image(TEST_TIF2_INPUT_FILE)
-    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF2_INPUT_FILE)]        
+    generate_test_image(TEST_TIF_INPUT_FILE2)
+    generate_test_image(TEST_JP2_INPUT_FILE)
+    generate_test_image(TEST_JP2_INPUT_FILE2)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:filename,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 2
+    xml.xpath("//resource/file").length.should be 4
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_JP2_INPUT_FILE
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_JP2_INPUT_FILE2
+    xml.xpath("//label").length.should be 2
+    xml.xpath("//resource/file/imageData").length.should be 0
+    for i in 0..1 do
+      xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 2
+      xml.xpath("//label")[i].text.should == "Image #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "image"
+    end
+  end
+
+  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=dpg and no exif data" do
+    test_dpg_tif=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
+    test_dpg_tif2=File.join(TEST_INPUT_DIR,'oo000oo0001_00_002.tif')
+    test_dpg_jp=File.join(TEST_INPUT_DIR,'oo000oo0001_05_001.jp2')
+    test_dpg_jp2=File.join(TEST_INPUT_DIR,'oo000oo0001_05_002.jp2')
+    generate_test_image(test_dpg_tif)
+    generate_test_image(test_dpg_tif2)
+    generate_test_image(test_dpg_jp)
+    generate_test_image(test_dpg_jp2)
+    objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:dpg,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 2
+    xml.xpath("//resource/file").length.should be 4
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == test_dpg_tif
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == test_dpg_jp
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == test_dpg_tif2
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == test_dpg_jp2
+    xml.xpath("//label").length.should be 2
+    xml.xpath("//resource/file/imageData").length.should be 0
+    for i in 0..1 do
+      xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 2
+      xml.xpath("//label")[i].text.should == "Image #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "image"
+    end
+  end
+  
+  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=none and no exif data" do
+    generate_test_image(TEST_TIF_INPUT_FILE)
+    generate_test_image(TEST_TIF_INPUT_FILE2)
+    generate_test_image(TEST_JP2_INPUT_FILE)
+    generate_test_image(TEST_JP2_INPUT_FILE2)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:none,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 4
+    xml.xpath("//resource/file").length.should be 4
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
+    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE2    
+    xml.xpath("//label").length.should be 4
+    xml.xpath("//resource/file/imageData").length.should be 0
+    for i in 0..3 do
+      xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 1
+      xml.xpath("//label")[i].text.should == "Image #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "image"
+    end
+  end
+
+  it "should generate valid content metadata for two tifs two associated jp2s of style=file" do
+    generate_test_image(TEST_TIF_INPUT_FILE)
+    generate_test_image(TEST_TIF_INPUT_FILE2)
+    generate_test_image(TEST_JP2_INPUT_FILE)
+    generate_test_image(TEST_JP2_INPUT_FILE2)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:file,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "file"
+    xml.xpath("//resource").length.should be 4
+    xml.xpath("//resource/file").length.should be 4
+    xml.xpath("//label").length.should be 4
+    for i in 0..3 do
+      xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 1
+      xml.xpath("//label")[i].text.should == "File #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "file"
+    end
+  end
+    
+  it "should generate valid content metadata for two tifs of style=simple_book" do
+    generate_test_image(TEST_TIF_INPUT_FILE)
+    generate_test_image(TEST_TIF_INPUT_FILE2)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2)]        
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:simple_book,:objects=>objects)
     result.class.should be String
     xml = Nokogiri::XML(result)
@@ -91,11 +194,32 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource")[0].attributes['type'].value.should == "page"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"
   end
+
+  it "should generate valid content metadata for two tifs and one pdf of style=book_with_pdf" do
+    generate_test_image(TEST_TIF_INPUT_FILE)
+    generate_test_image(TEST_TIF_INPUT_FILE2)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_PDF_FILE)]        
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:book_with_pdf,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
+    xml.xpath("//resource").length.should be 3
+    xml.xpath("//resource/file").length.should be 3
+    xml.xpath("//label").length.should be 3
+    xml.xpath("//label")[0].text.should =~ /Page 1/
+    xml.xpath("//label")[1].text.should =~ /Page 2/
+    xml.xpath("//label")[2].text.should =~ /File 1/
+    xml.xpath("//resource/file/imageData").length.should be 0
+    xml.xpath("//resource")[0].attributes['type'].value.should == "page"
+    xml.xpath("//resource")[1].attributes['type'].value.should == "page"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+  end
   
-   it "should generate valid content metadata for two tifs of type=book_as_image" do
+   it "should generate valid content metadata for two tifs of style=book_as_image" do
      generate_test_image(TEST_TIF_INPUT_FILE)
-     generate_test_image(TEST_TIF2_INPUT_FILE)
-     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF2_INPUT_FILE)]             
+     generate_test_image(TEST_TIF_INPUT_FILE2)
+     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2)]             
      result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:book_as_image,:objects=>objects)
      result.class.should be String
      xml = Nokogiri::XML(result)
@@ -118,13 +242,13 @@ describe Assembly::ContentMetadata do
      xml.xpath("//resource")[1].attributes['type'].value.should == "image"
    end
 
-   it "should generate valid content metadata with no exif but with user supplied checksums for two tifs of type=simple_image" do
+   it "should generate valid content metadata with no exif but with user supplied checksums for two tifs of style=simple_image" do
      generate_test_image(TEST_TIF_INPUT_FILE)
-     generate_test_image(TEST_TIF2_INPUT_FILE)
+     generate_test_image(TEST_TIF_INPUT_FILE2)
      obj1=Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
      obj1.provider_md5='123456789'
      obj1.provider_sha1='abcdefgh'
-     obj2=Assembly::ObjectFile.new(TEST_TIF2_INPUT_FILE)
+     obj2=Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2)
      obj2.provider_md5='qwerty'
      objects=[obj1,obj2]        
      result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:simple_book,:objects=>objects)
@@ -157,8 +281,8 @@ describe Assembly::ContentMetadata do
     generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     File.exists?(TEST_JP2_INPUT_FILE).should be false
-    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]        
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:objects=>objects).should be false
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]  
+    lambda {Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:objects=>objects)}.should raise_error 
   end
 
   after(:each) do

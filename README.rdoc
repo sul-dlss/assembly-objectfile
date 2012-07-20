@@ -25,6 +25,7 @@ content type specific operations (such as jp2 generation).
 - 1.1.9 switch jpeg mimetype temporarily to publish=no, preserve=yes
 - 1.2.0 move content metadata generation method to this gem from assembly-image
 - 1.2.1 allow content metadata to add user supplied checksums
+- 1.2.2 allow content metadata to bundle files into resources by filename or DPG filename specification, add book_as_image and file style content metadata generation
 
 ==Usage
 

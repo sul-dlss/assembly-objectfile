@@ -17,6 +17,19 @@ describe Assembly::ObjectFile do
     @ai.jp2able?.should == true
   end
 
+  it "should tell us information about the input file" do
+    @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
+    @ai.filename.should == "test.tif"
+    @ai.ext.should == ".tif"
+    @ai.filename_without_ext.should == "test"
+  end
+
+  it "should give us the DPG base name for an file" do
+    test_file=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
+    @ai = Assembly::ObjectFile.new(test_file)
+    @ai.dpg_basename.should == "oo000oo0001_001"
+  end
+  
   it "should tell us that a jp2 file not jp2able and is not valid since it has no profile" do
     generate_test_image(TEST_JP2_INPUT_FILE)
     File.exists?(TEST_JP2_INPUT_FILE).should be true
@@ -50,7 +63,7 @@ describe Assembly::ObjectFile do
   end
   
   it "should tell us if an input file is not an image" do
-    non_image_file=File.join(Assembly::PATH_TO_GEM,'spec/item_spec.rb')
+    non_image_file=File.join(Assembly::PATH_TO_GEM,'spec/object_file_spec.rb')
     File.exists?(non_image_file).should be true
     @ai = Assembly::ObjectFile.new(non_image_file)
     @ai.image?.should == false

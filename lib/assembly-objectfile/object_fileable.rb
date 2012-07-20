@@ -22,7 +22,52 @@ module Assembly
     def initialize(path)
       @path = path
     end
-  
+
+    # Returns base DPG name for the current file.
+    #
+    # @return [String] DPG base filename, removing the extension and the '00','05', etc. placeholders
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/cy565rm7188_00_001.tif')
+    #   puts source_file.dpg_basename # "cy565rm7188_001"
+    def dpg_basename
+      file_parts=File.basename(path,ext).split('_')
+      file_parts.size == 3 ? "#{file_parts[0]}_#{file_parts[2]}" : filename_without_ext
+    end
+
+    # Returns base filename for the current file.
+    #
+    # @return [String] base filename
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.filename # "path_to_file.tif"
+    def filename
+      File.basename(path)
+    end
+
+    # Returns filename extension
+    #
+    # @return [String] filename extension
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.ext # ".tif"
+    def ext
+      File.extname(path)
+    end
+    
+    # Returns base filename without extension for the current file.
+    #
+    # @return [String] base filename without extension
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.filename # "path_to_file"
+    def filename_without_ext
+      File.basename(path,ext)
+    end
+    
     # Returns exif information for the current file.
     #
     # @return [MiniExiftool] exif information stored as a hash and an object

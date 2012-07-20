@@ -1,13 +1,17 @@
 bootfile = File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 require bootfile
 
-TEST_INPUT_DIR       = File.join(Assembly::PATH_TO_GEM,'spec','test_data','input')
-TEST_OUTPUT_DIR      = File.join(Assembly::PATH_TO_GEM,'spec','test_data','output')
+TEST_DATA_DIR = File.join(Assembly::PATH_TO_GEM,'spec','test_data')
+TEST_INPUT_DIR       = File.join(TEST_DATA_DIR,'input')
+TEST_OUTPUT_DIR      = File.join(TEST_DATA_DIR,'output')
 TEST_TIF_INPUT_FILE  = File.join(TEST_INPUT_DIR,'test.tif')
-TEST_TIF2_INPUT_FILE  = File.join(TEST_INPUT_DIR,'test2.tif')
+TEST_TIF_INPUT_FILE2  = File.join(TEST_INPUT_DIR,'test2.tif')
 TEST_JPEG_INPUT_FILE  = File.join(TEST_INPUT_DIR,'test.jpg')
 TEST_JP2_INPUT_FILE  = File.join(TEST_INPUT_DIR,'test.jp2')
+TEST_JP2_INPUT_FILE2  = File.join(TEST_INPUT_DIR,'test2.jp2')
 TEST_JP2_OUTPUT_FILE = File.join(TEST_OUTPUT_DIR,'test.jp2')
+TEST_PDF_FILE = File.join(TEST_DATA_DIR,'test.pdf')
+
 TEST_DRUID           = "nx288wh8889"
 
 # generate a sample image file with a specified profile
