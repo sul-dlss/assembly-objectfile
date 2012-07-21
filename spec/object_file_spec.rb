@@ -7,6 +7,14 @@ describe Assembly::ObjectFile do
     lambda{@ai.md5}.should raise_error
   end
 
+  it "should return the common directory of a set of filenames passed into it, where the common part does not terminate on a directory" do
+    Assembly::ObjectFile.common_path(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2']).should == "/Users/peter/"    
+  end
+
+  it "should return the common directory of a set of filenames passed into it, where the common part does not terminate on a directory" do
+    Assembly::ObjectFile.common_path(['/Users/peter/00/test.tif','/Users/peter/00/test.jp2']).should == "/Users/peter/00/"    
+  end
+  
   it "should tell us if an input file is an image" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true

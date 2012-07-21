@@ -17,7 +17,7 @@ module Assembly
     # provider checksums are optional checksums given by the provider used in content metadata generation
     attr_accessor :provider_md5, :provider_sha1
     
-    # Inititalize file from given path.
+    # Initialize file from given path.
     #
     # @param [String] path full path to the file to be worked with 
     #
@@ -26,10 +26,10 @@ module Assembly
     def initialize(path)
       @path = path
     end
-
-    # Returns the path to use for content metadata
+    
+    # Returns the path to use for setting the file node's ID attribute when creating content metadata
     #
-    # @param [String] path to use for content metadata, will be 'relative_path' if set, if not, defaults to 'path'
+    # @return [String] path to use for content metadata, will be 'relative_path' if set, if not, defaults to 'path'
     #
     def content_metadata_path
       @relative_path || @path

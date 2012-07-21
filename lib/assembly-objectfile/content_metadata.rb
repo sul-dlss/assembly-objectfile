@@ -9,7 +9,7 @@ module Assembly
       # This method only produces content metadata for images
       # and does not depend on a specific folder structure.  Note that it is class level method.
       #
-      # @param [Hash] a hash containg parameters needed to produce content metadata
+      # @param [Hash] params a hash containg parameters needed to produce content metadata
       #   :druid = required - a string of druid of the repository object's druid id without 'druid:' prefix
       #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata      
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
