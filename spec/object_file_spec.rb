@@ -1,5 +1,11 @@
 describe Assembly::ObjectFile do
 
+  after(:each) do
+    # after each test, empty out the input and output test directories
+    remove_files(TEST_INPUT_DIR)
+    remove_files(TEST_OUTPUT_DIR)
+  end
+  
   it "should not run if no input file is passed in" do
     @ai=Assembly::ObjectFile.new('')
     lambda{@ai.filesize}.should raise_error

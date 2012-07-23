@@ -27,14 +27,6 @@ module Assembly
       @path = path
     end
     
-    # Returns the path to use for setting the file node's ID attribute when creating content metadata
-    #
-    # @return [String] path to use for content metadata, will be 'relative_path' if set, if not, defaults to 'path'
-    #
-    def content_metadata_path
-      @relative_path || @path
-    end
-    
     # Returns base DPG name for the current file.
     #
     # @return [String] DPG base filename, removing the extension and the '00','05', etc. placeholders
