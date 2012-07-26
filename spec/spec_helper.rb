@@ -24,6 +24,11 @@ def generate_test_image(file,params={})
   system(create_command)
 end
 
+# copy test pdf from known location to specified location for use in tests
+def generate_test_pdf(file)
+  system "cp #{TEST_PDF_FILE} #{file}"
+end
+
 def remove_files(dir)
   Dir.foreach(dir) {|f| fn = File.join(dir, f); File.delete(fn) if !File.directory?(fn) && File.basename(fn) != '.empty'}
 end

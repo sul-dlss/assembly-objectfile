@@ -29,6 +29,7 @@ content type specific operations (such as jp2 generation).
 - 1.2.3 small change to a parameter passed to content metadata generation
 - 1.2.4 allow user to control how file ID paths are generated in content metadata by using a 'relative_path' attribute
 - 1.2.5 add a class method to find the common directory between an array of filenames passed in
+- 1.2.6 bug fix in content metadata generation, and allow book types to have single <file> resource nodes if they do not contain any images
 
 ==Usage
 

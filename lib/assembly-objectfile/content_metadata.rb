@@ -15,9 +15,9 @@ module Assembly
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
-      #                 :simple_book, contentMetadata type="book", resource type="page"
-      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but each pdf will get it's own resource as resource type="file"
-      #                 :book_as_image, contentMetadata type="book", resource type="image"
+      #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resoruce type="file"
+      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="file"
+      #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
       #                 :default = all files get their own resources (default)
       #                 :filename = files with the same filename but different extensions get bundled together in a single resource
@@ -52,31 +52,28 @@ module Assembly
         
         common_path=Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
         
+        # these are the valid strings for each type of document
         content_type_descriptions={:file=>'file',:image=>'image',:book=>'book'}
         resource_type_descriptions={:file=>'file',:image=>'image',:book=>'page'}
-        
+
+        # set the content type id
         case style
           when :simple_image
             content_type_description = content_type_descriptions[:image]
-            resource_type_description = resource_type_descriptions[:image]
           when :file
             content_type_description = content_type_descriptions[:file]
-            resource_type_description = resource_type_descriptions[:file]           
           when :simple_book,:book_with_pdf
             content_type_description = content_type_descriptions[:book]
-            resource_type_description = resource_type_descriptions[:book]
           when :book_as_image
             content_type_description = content_type_descriptions[:book]
-            resource_type_description = resource_type_descriptions[:image]   
           else
             raise "Supplied style not valid"
         end
           
         sequence = 0
-        file_sequence = 0
         
         # determine how many resources to create
-        # setup an array if arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
+        # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
         case bundle
           when :default # one resource per object
             resources=objects.collect {|obj| [obj]}
@@ -96,56 +93,66 @@ module Assembly
         
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.contentMetadata(:objectId => "#{druid}",:type => content_type_description) {
-            resources.each do |resource_files|
+            resources.each do |resource_files| # iterate over all the resources
               sequence += 1
               resource_id = "#{druid}_#{sequence}"
               # start a new resource element
               
+                # grab all of the file types within a resource into an array so we can decide what the resource type should be
+                resource_file_types=resource_files.collect {|obj| obj.object_type}
+                resource_has_non_images=((resource_file_types-[:image]).size > 0)
+                
+                case style
+                   when :simple_image 
+                     resource_type_description = resource_type_descriptions[:image]
+                   when :file
+                     resource_type_description = resource_type_descriptions[:file]           
+                   when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to file
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:file] : resource_type_descriptions[:book]
+                   when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to file type
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:file] : resource_type_descriptions[:image]
+                   when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to file
+                     resource_type_description = resource_has_non_images ? resource_type_descriptions[:file] : resource_type_descriptions[:book]
+                 end             
+              
                 xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
                 xml.label "#{resource_type_description.capitalize} #{sequence}"
 
-                  resource_files.each do |obj|
+                resource_files.each do |obj| # iterate over all the files in a resource
+                
+                  mimetype = obj.mimetype
                   
-                    mimetype = obj.mimetype
-                    
-                    # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
-                    if obj.relative_path 
-                      file_id=obj.relative_path                      
-                    else 
-                      # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
-                      file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
-                    end
+                  # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
+                  if obj.relative_path 
+                    file_id=obj.relative_path                      
+                  else 
+                    # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
+                    file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
+                  end
 
-                    xml_file_params = {:id=> file_id}
-                  
-                    if add_file_attributes
-                      file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
-                      xml_file_params.merge!({
-                        :preserve => file_attributes_hash[:preserve],
-                        :publish  => file_attributes_hash[:publish],
-                        :shelve   => file_attributes_hash[:shelve],
-                      })
-                    end
-                    
-                    # if we are doing book as image format and we encounter a resource with an object that is not a file, switch the resource type and label to "file"
-                    if style=:book_as_image && !obj.image?
-                      file_sequence += 1
-                      xml.parent.attributes['type'].value=resource_type_descriptions[:file] 
-                      xml.parent.xpath("label")[0].content = "#{resource_type_descriptions[:file].capitalize} #{file_sequence}"
-                    end
-                    
-                    xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
-                    xml.file(xml_file_params) {
-                      if add_exif # add exif info if the user requested it
-                        xml.checksum(obj.sha1, :type => 'sha1')
-                        xml.checksum(obj.md5, :type => 'md5')                                
-                        xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
-                      elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
-                        xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
-                        xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
-                      end #add_exif
-                    }
-                  end # end resource_files.each
+                  xml_file_params = {:id=> file_id}
+                
+                  if add_file_attributes
+                    file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+                    xml_file_params.merge!({
+                      :preserve => file_attributes_hash[:preserve],
+                      :publish  => file_attributes_hash[:publish],
+                      :shelve   => file_attributes_hash[:shelve],
+                    })
+                  end
+                                                        
+                  xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
+                  xml.file(xml_file_params) {
+                    if add_exif # add exif info if the user requested it
+                      xml.checksum(obj.sha1, :type => 'sha1')
+                      xml.checksum(obj.md5, :type => 'md5')                                
+                      xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
+                    elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
+                      xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
+                      xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
+                    end #add_exif
+                  }
+                end # end resource_files.each
               }
             end # resources.each
           }

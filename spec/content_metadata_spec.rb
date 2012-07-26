@@ -127,7 +127,89 @@ describe Assembly::ContentMetadata do
       xml.xpath("//resource")[i].attributes['type'].value.should == "image"
     end
   end
-  
+
+  it "should generate valid content metadata for two tifs,two associated jp2s,two associated pdfs, and one lingering PDF of style=simple_book using bundle=dpg" do
+    test_dpg_tif=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
+    test_dpg_tif2=File.join(TEST_INPUT_DIR,'oo000oo0001_00_002.tif')
+    test_dpg_jp=File.join(TEST_INPUT_DIR,'oo000oo0001_05_001.jp2')
+    test_dpg_jp2=File.join(TEST_INPUT_DIR,'oo000oo0001_05_002.jp2')
+    test_dpg_pdf=File.join(TEST_INPUT_DIR,'oo000oo0001_15_001.pdf')
+    test_dpg_pdf2=File.join(TEST_INPUT_DIR,'oo000oo0001_15_002.pdf')
+    test_dpg_pdf3=File.join(TEST_INPUT_DIR,'oo000oo0001_book.pdf')
+    generate_test_image(test_dpg_tif)
+    generate_test_image(test_dpg_tif2)
+    generate_test_image(test_dpg_jp)
+    generate_test_image(test_dpg_jp2)
+    generate_test_pdf(test_dpg_pdf)
+    generate_test_pdf(test_dpg_pdf2)
+    generate_test_pdf(test_dpg_pdf3)
+    objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_pdf),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2),Assembly::ObjectFile.new(test_dpg_pdf2),Assembly::ObjectFile.new(test_dpg_pdf3)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:dpg,:objects=>objects,:style=>:simple_book)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
+    xml.xpath("//resource").length.should be 3
+    xml.xpath("//resource/file").length.should be 7
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == test_dpg_tif
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == test_dpg_jp
+    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value == test_dpg_pdf
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == test_dpg_tif2
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == test_dpg_jp2
+    xml.xpath("//resource[@sequence='2']/file")[2].attributes['id'].value == test_dpg_pdf2
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == test_dpg_pdf3
+    xml.xpath("//label").length.should be 3
+    xml.xpath("//resource/file/imageData").length.should be 0
+    for i in 0..1 do
+      xml.xpath("//resource[@sequence='#{i+1}']/file").length.should be 3
+      xml.xpath("//label")[i].text.should == "Page #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "page"
+    end
+    xml.xpath("//resource[@sequence='3']/file").length.should be 1
+    xml.xpath("//label")[2].text.should == "File 3"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+  end
+
+  it "should generate valid content metadata for two tifs,two associated jp2s,two associated pdfs, and one lingering PDF of style=book_with_pdf using bundle=dpg" do
+    test_dpg_tif=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
+    test_dpg_tif2=File.join(TEST_INPUT_DIR,'oo000oo0001_00_002.tif')
+    test_dpg_jp=File.join(TEST_INPUT_DIR,'oo000oo0001_05_001.jp2')
+    test_dpg_jp2=File.join(TEST_INPUT_DIR,'oo000oo0001_05_002.jp2')
+    test_dpg_pdf=File.join(TEST_INPUT_DIR,'oo000oo0001_15_001.pdf')
+    test_dpg_pdf3=File.join(TEST_INPUT_DIR,'oo000oo0001_book.pdf')
+    generate_test_image(test_dpg_tif)
+    generate_test_image(test_dpg_tif2)
+    generate_test_image(test_dpg_jp)
+    generate_test_image(test_dpg_jp2)
+    generate_test_pdf(test_dpg_pdf)
+    generate_test_pdf(test_dpg_pdf3)
+    objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_pdf),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2),Assembly::ObjectFile.new(test_dpg_pdf3)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:dpg,:objects=>objects,:style=>:book_with_pdf)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
+    xml.xpath("//resource").length.should be 3
+    xml.xpath("//resource/file").length.should be 6
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == test_dpg_tif
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == test_dpg_jp
+    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value == test_dpg_pdf
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == test_dpg_tif2
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == test_dpg_jp2
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == test_dpg_pdf3
+    xml.xpath("//label").length.should be 3
+    xml.xpath("//resource/file/imageData").length.should be 0
+    xml.xpath("//resource[@sequence='1']/file").length.should be 3
+    xml.xpath("//label")[0].text.should == "File 1"
+    xml.xpath("//resource")[0].attributes['type'].value.should == "file"
+    xml.xpath("//resource[@sequence='2']/file").length.should be 2
+    xml.xpath("//label")[1].text.should == "Page 2"
+    xml.xpath("//resource")[1].attributes['type'].value.should == "page"
+    xml.xpath("//resource[@sequence='3']/file").length.should be 1
+    xml.xpath("//label")[2].text.should == "File 3"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+  end
+    
   it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=default and no exif data" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_TIF_INPUT_FILE2)
@@ -257,7 +339,7 @@ describe Assembly::ContentMetadata do
     xml.xpath("//label").length.should be 3
     xml.xpath("//label")[0].text.should =~ /Page 1/
     xml.xpath("//label")[1].text.should =~ /Page 2/
-    xml.xpath("//label")[2].text.should =~ /File 1/
+    xml.xpath("//label")[2].text.should =~ /File 3/
     xml.xpath("//resource/file/imageData").length.should be 0
     xml.xpath("//resource")[0].attributes['type'].value.should == "page"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"
@@ -290,7 +372,7 @@ describe Assembly::ContentMetadata do
      xml.xpath("//resource")[1].attributes['type'].value.should == "image"
    end
 
-   it "should generate valid content metadata with no exif but with user supplied checksums for two tifs of style=simple_image" do
+   it "should generate valid content metadata with no exif but with user supplied checksums for two tifs of style=simple_book" do
      generate_test_image(TEST_TIF_INPUT_FILE)
      generate_test_image(TEST_TIF_INPUT_FILE2)
      obj1=Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
