@@ -25,6 +25,7 @@ module Assembly
       #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
       #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve attributes should be added using defaults of supplied override by mime/type, defaults to false and is not required if project goes through assembly
       #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, e.g. {'image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
+      #   :include_root_xml = optional - a boolean to indicate if the contentMetadata returned includes a root <?xml version="1.0"?> tag, defaults to true
       #   :preserve_common_paths = optional - When creating the file "id" attribute, content metadata uses the "relative_path" attribute of the ObjectFile objects passed in.  If the "relative_path" attribute is not set,  the "path" attribute is used instead,
       #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
       #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default it false.
@@ -45,6 +46,7 @@ module Assembly
         add_file_attributes=params[:add_file_attributes] || false
         file_attributes=params[:file_attributes] || {}
         preserve_common_paths=params[:preserve_common_paths] || false
+        include_root_xml=params[:include_root_xml]
                 
         all_paths=[]
         objects.each do |obj| 
@@ -159,8 +161,14 @@ module Assembly
             end # resources.each
           }
         end
-                
-        return builder.to_xml
+        
+        if include_root_xml == false
+          result = builder.doc.root.to_xml
+        else
+          result = builder.to_xml
+        end
+        
+        return result
 
       end
       

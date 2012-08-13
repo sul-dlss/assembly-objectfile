@@ -98,7 +98,7 @@ describe Assembly::ContentMetadata do
     end
   end
 
-  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=dpg and no exif data" do
+  it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=dpg and no exif data and no root xml node" do
     test_dpg_tif=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
     test_dpg_tif2=File.join(TEST_INPUT_DIR,'oo000oo0001_00_002.tif')
     test_dpg_jp=File.join(TEST_INPUT_DIR,'oo000oo0001_05_001.jp2')
@@ -109,8 +109,9 @@ describe Assembly::ContentMetadata do
     generate_test_image(test_dpg_jp2)
     objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2)]    
     test_druid="#{TEST_DRUID}"
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects)
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects,:include_root_xml=>false)
     result.class.should be String
+    result.include?('<?xml').should be false   
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
@@ -150,6 +151,7 @@ describe Assembly::ContentMetadata do
     test_druid="druid:#{TEST_DRUID}"
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects,:style=>:simple_book)
     result.class.should be String
+    result.include?('<?xml').should be true
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"

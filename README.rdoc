@@ -33,6 +33,7 @@ content type specific operations (such as jp2 generation).
 - 1.2.8 remove dependency on ChecksumTools gem to make it Ruby 1.9 compatible
 - 1.2.9 automatically strip druid: prefix in content metadata generation method
 - 1.2.10 bug fix
+- 1.2.11 add ability to suppress <xml> tag from generated contentMetadata
 
 ==Usage
 
