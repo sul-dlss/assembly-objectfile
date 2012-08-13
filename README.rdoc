@@ -31,6 +31,7 @@ content type specific operations (such as jp2 generation).
 - 1.2.5 add a class method to find the common directory between an array of filenames passed in
 - 1.2.6 bug fix in content metadata generation, and allow book types to have single <file> resource nodes if they do not contain any images
 - 1.2.8 remove dependency on ChecksumTools gem to make it Ruby 1.9 compatible
+- 1.2.9 automatically strip druid: prefix in content metadata generation method
 
 ==Usage
 

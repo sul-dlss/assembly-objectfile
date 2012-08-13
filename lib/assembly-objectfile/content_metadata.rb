@@ -36,7 +36,9 @@ module Assembly
         objects=params[:objects]
 
         raise "No objects and/or druid supplied" if druid.nil? || objects.nil? || objects.size == 0
-
+        
+        druid.gsub!('druid:','')
+        
         style=params[:style] || :simple_image
         bundle=params[:bundle] || :default
         add_exif=params[:add_exif] || false
