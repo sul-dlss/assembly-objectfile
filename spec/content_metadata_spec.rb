@@ -108,11 +108,13 @@ describe Assembly::ContentMetadata do
     generate_test_image(test_dpg_jp)
     generate_test_image(test_dpg_jp2)
     objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2)]    
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:dpg,:objects=>objects)
+    test_druid="#{TEST_DRUID}"
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects)
     result.class.should be String
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    test_druid.should == TEST_DRUID
     xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"    
     xml.xpath("//resource").length.should be 2
     xml.xpath("//resource/file").length.should be 4
@@ -145,12 +147,14 @@ describe Assembly::ContentMetadata do
     generate_test_pdf(test_dpg_pdf2)
     generate_test_pdf(test_dpg_pdf3)
     objects=[Assembly::ObjectFile.new(test_dpg_tif),Assembly::ObjectFile.new(test_dpg_jp),Assembly::ObjectFile.new(test_dpg_pdf),Assembly::ObjectFile.new(test_dpg_tif2),Assembly::ObjectFile.new(test_dpg_jp2),Assembly::ObjectFile.new(test_dpg_pdf2),Assembly::ObjectFile.new(test_dpg_pdf3)]    
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>"druid:#{TEST_DRUID}",:bundle=>:dpg,:objects=>objects,:style=>:simple_book)
+    test_druid="druid:#{TEST_DRUID}"
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects,:style=>:simple_book)
     result.class.should be String
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
     xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"
+    test_druid.should == "druid:#{TEST_DRUID}"
     xml.xpath("//resource").length.should be 3
     xml.xpath("//resource/file").length.should be 7
     xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == test_dpg_tif

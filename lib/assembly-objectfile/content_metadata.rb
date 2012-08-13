@@ -10,7 +10,7 @@ module Assembly
       # and does not depend on a specific folder structure.  Note that it is class level method.
       #
       # @param [Hash] params a hash containg parameters needed to produce content metadata
-      #   :druid = required - a string of druid of the repository object's druid id without 'druid:' prefix
+      #   :druid = required - a string of druid of the repository object's druid id (with or without 'druid:' prefix)
       #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata      
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
@@ -29,7 +29,7 @@ module Assembly
       #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
       #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default it false.
       # Example:
-      #    Assembly::Image.create_content_metadata(:druid=>'nx288wh8889',:style=>:simple_image,:objects=>object_files,:file_attributes=>false)
+      #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:file_attributes=>false)
       def self.create_content_metadata(params={})
 
         druid=params[:druid]
@@ -37,7 +37,7 @@ module Assembly
 
         raise "No objects and/or druid supplied" if druid.nil? || objects.nil? || objects.size == 0
         
-        druid.gsub!('druid:','')
+        pid=druid.gsub('druid:','')
         
         style=params[:style] || :simple_image
         bundle=params[:bundle] || :default
@@ -94,10 +94,10 @@ module Assembly
         end
         
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.contentMetadata(:objectId => "#{druid}",:type => content_type_description) {
+          xml.contentMetadata(:objectId => "#{pid}",:type => content_type_description) {
             resources.each do |resource_files| # iterate over all the resources
               sequence += 1
-              resource_id = "#{druid}_#{sequence}"
+              resource_id = "#{pid}_#{sequence}"
               # start a new resource element
               
                 # grab all of the file types within a resource into an array so we can decide what the resource type should be
