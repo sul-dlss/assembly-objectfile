@@ -19,13 +19,12 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mini_exiftool'
   s.add_dependency 'mime-types'
-  s.add_dependency 'checksum-tools'
+#  s.add_dependency 'checksum-tools'
   s.add_dependency 'nokogiri'
 
   s.add_development_dependency "rspec", "~> 2.6"
   s.add_development_dependency "lyberteam-devel"
   s.add_development_dependency "lyberteam-gems-devel"
-  s.add_development_dependency "lyberteam-capistrano-devel"  
   s.add_development_dependency "yard"
   
 end

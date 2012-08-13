@@ -1,6 +1,6 @@
 require 'mini_exiftool'
 require 'mime/types'
-require 'checksum-tools'
+#require 'checksum-tools'
 
 module Assembly
 
@@ -224,9 +224,14 @@ module Assembly
     private
     def compute_checksums
       check_for_file
-      cs_types = [:md5,:sha1]
-      cs_tool  = Checksum::Tools.new({}, *cs_types)
-      @checksums=cs_tool.digest_file(path)
+# When using Checksum::Tools gem, which is only Ruby 1.8 compatible
+#      cs_types = [:md5,:sha1]
+#      cs_tool  = Checksum::Tools.new({}, *cs_types)
+#      @checksums=cs_tool.digest_file(path)
+
+      @checksums={}
+      @checksums[:md5]=Digest::MD5.file(path).hexdigest
+      @checksums[:sha1]=Digest::SHA1.file(path).hexdigest
     end
 
     # private method to check for file existence before operating on it

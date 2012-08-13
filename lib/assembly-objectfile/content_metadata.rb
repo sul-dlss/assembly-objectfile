@@ -15,7 +15,7 @@ module Assembly
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
-      #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resoruce type="file"
+      #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="file"
       #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="file"
       #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
