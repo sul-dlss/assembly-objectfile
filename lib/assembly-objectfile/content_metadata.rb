@@ -15,8 +15,8 @@ module Assembly
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
-      #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="file"
-      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="file"
+      #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="object"
+      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object"
       #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
       #                 :default = all files get their own resources (default)
@@ -58,7 +58,7 @@ module Assembly
         
         # these are the valid strings for each type of document
         content_type_descriptions={:file=>'file',:image=>'image',:book=>'book'}
-        resource_type_descriptions={:file=>'file',:image=>'image',:book=>'page'}
+        resource_type_descriptions={:object=>'object',:file=>'file',:image=>'image',:book=>'page'}
 
         # set the content type id
         case style
@@ -111,12 +111,12 @@ module Assembly
                      resource_type_description = resource_type_descriptions[:image]
                    when :file
                      resource_type_description = resource_type_descriptions[:file]           
-                   when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to file
-                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:file] : resource_type_descriptions[:book]
-                   when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to file type
-                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:file] : resource_type_descriptions[:image]
-                   when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to file
-                     resource_type_description = resource_has_non_images ? resource_type_descriptions[:file] : resource_type_descriptions[:book]
+                   when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                   when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
+                   when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
+                     resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
                  end             
               
                 xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {

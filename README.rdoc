@@ -34,6 +34,7 @@ content type specific operations (such as jp2 generation).
 - 1.2.9 automatically strip druid: prefix in content metadata generation method
 - 1.2.10 bug fix
 - 1.2.11 add ability to suppress <xml> tag from generated contentMetadata
+- 1.3.0 continued refinement of content metadata generation for objects with download
 
 ==Usage
 

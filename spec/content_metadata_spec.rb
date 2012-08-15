@@ -174,8 +174,8 @@ describe Assembly::ContentMetadata do
       xml.xpath("//resource")[i].attributes['type'].value.should == "page"
     end
     xml.xpath("//resource[@sequence='3']/file").length.should be 1
-    xml.xpath("//label")[2].text.should == "File 3"
-    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+    xml.xpath("//label")[2].text.should == "Object 3"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "object"
   end
 
   it "should generate valid content metadata for two tifs,two associated jp2s,two associated pdfs, and one lingering PDF of style=book_with_pdf using bundle=dpg" do
@@ -208,14 +208,14 @@ describe Assembly::ContentMetadata do
     xml.xpath("//label").length.should be 3
     xml.xpath("//resource/file/imageData").length.should be 0
     xml.xpath("//resource[@sequence='1']/file").length.should be 3
-    xml.xpath("//label")[0].text.should == "File 1"
-    xml.xpath("//resource")[0].attributes['type'].value.should == "file"
+    xml.xpath("//label")[0].text.should == "Object 1"
+    xml.xpath("//resource")[0].attributes['type'].value.should == "object"
     xml.xpath("//resource[@sequence='2']/file").length.should be 2
     xml.xpath("//label")[1].text.should == "Page 2"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"
     xml.xpath("//resource[@sequence='3']/file").length.should be 1
-    xml.xpath("//label")[2].text.should == "File 3"
-    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+    xml.xpath("//label")[2].text.should == "Object 3"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "object"
   end
     
   it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=default and no exif data" do
@@ -347,11 +347,11 @@ describe Assembly::ContentMetadata do
     xml.xpath("//label").length.should be 3
     xml.xpath("//label")[0].text.should =~ /Page 1/
     xml.xpath("//label")[1].text.should =~ /Page 2/
-    xml.xpath("//label")[2].text.should =~ /File 3/
+    xml.xpath("//label")[2].text.should =~ /Object 3/
     xml.xpath("//resource/file/imageData").length.should be 0
     xml.xpath("//resource")[0].attributes['type'].value.should == "page"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"
-    xml.xpath("//resource")[2].attributes['type'].value.should == "file"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "object"
   end
   
    it "should generate valid content metadata for two tifs of style=book_as_image" do
