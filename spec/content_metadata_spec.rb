@@ -46,9 +46,7 @@ describe Assembly::ContentMetadata do
   it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image overriding file labels" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE)
-    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
-    objects[0].label='Sample tif label!'
-    objects[1].label='Sample jp2 label!'
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE,:label=>'Sample tif label!'),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE,:label=>'Sample jp2 label!')]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>true,:add_file_attributes=>true,:objects=>objects)
     result.class.should be String
     xml = Nokogiri::XML(result)

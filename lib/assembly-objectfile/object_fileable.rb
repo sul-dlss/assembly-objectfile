@@ -26,8 +26,9 @@ module Assembly
     #
     # Example:
     #   Assembly::ObjectFile.new('/input/path_to_file.tif')
-    def initialize(path)
+    def initialize(path,params={})
       @path = path
+      @label = params[:label]
     end
     
     # Returns base DPG name for the current file.
