@@ -43,6 +43,45 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file/imageData")[1].attributes['height'].value.should == "100"    
   end
 
+  it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image overriding file labels" do
+    generate_test_image(TEST_TIF_INPUT_FILE)
+    generate_test_image(TEST_JP2_INPUT_FILE)
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
+    objects[0].label='Sample tif label!'
+    objects[1].label='Sample jp2 label!'
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>true,:add_file_attributes=>true,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 2
+    xml.xpath("//resource/file").length.should be 2
+    xml.xpath("//resource/file/checksum").length.should be 4  
+    xml.xpath("//resource/file/checksum")[0].text.should == "8d11fab63089a24c8b17063d29a4b0eac359fb41"
+    xml.xpath("//resource/file/checksum")[1].text.should == "a2400500acf21e43f5440d93be894101"
+    xml.xpath("//resource/file/checksum")[2].text.should == "b965b5787e0100ec2d43733144120feab327e88c"      
+    xml.xpath("//resource/file/checksum")[3].text.should == "4eb54050d374291ece622d45e84f014d"      
+    xml.xpath("//label").length.should be 2
+    xml.xpath("//label")[0].text.should =~ /Sample tif label!/
+    xml.xpath("//label")[1].text.should =~ /Sample jp2 label!/
+    xml.xpath("//resource")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource")[1].attributes['type'].value.should == "image"
+    xml.xpath("//resource/file")[0].attributes['size'].value.should == "63542"
+    xml.xpath("//resource/file")[0].attributes['mimetype'].value.should == "image/tiff"
+    xml.xpath("//resource/file")[0].attributes['publish'].value.should == "no"
+    xml.xpath("//resource/file")[0].attributes['preserve'].value.should == "yes"
+    xml.xpath("//resource/file")[0].attributes['shelve'].value.should == "no"
+    xml.xpath("//resource/file/imageData")[0].attributes['width'].value.should == "100"
+    xml.xpath("//resource/file/imageData")[0].attributes['height'].value.should == "100"
+    xml.xpath("//resource/file")[1].attributes['size'].value.should == "306"
+    xml.xpath("//resource/file")[1].attributes['mimetype'].value.should == "image/jp2"
+    xml.xpath("//resource/file")[1].attributes['publish'].value.should == "yes"
+    xml.xpath("//resource/file")[1].attributes['preserve'].value.should == "no"
+    xml.xpath("//resource/file")[1].attributes['shelve'].value.should == "yes"
+    xml.xpath("//resource/file/imageData")[1].attributes['width'].value.should == "100"
+    xml.xpath("//resource/file/imageData")[1].attributes['height'].value.should == "100"    
+  end
+
   it "should generate valid content metadata for a single tif and jp2 of style=simple_image with overriding file attributes and no exif data" do
     generate_test_image(TEST_TIF_INPUT_FILE)
     generate_test_image(TEST_JP2_INPUT_FILE)

@@ -120,47 +120,54 @@ module Assembly
                  end             
               
                 xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
-                xml.label "#{resource_type_description.capitalize} #{sequence}"
 
-                resource_files.each do |obj| # iterate over all the files in a resource
-                
-                  mimetype = obj.mimetype
+                  # create a generic resource label
+                  resource_label = "#{resource_type_description.capitalize} #{sequence}"                   
+
+                  # but if one of files has a label, use it instead
+                  resource_files.each {|obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
                   
-                  # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
-                  if obj.relative_path 
-                    file_id=obj.relative_path                      
-                  else 
-                    # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
-                    file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
-                  end
+                  xml.label resource_label
 
-                  xml_file_params = {:id=> file_id}
+                  resource_files.each do |obj| # iterate over all the files in a resource
                 
-                  if add_file_attributes
-                    file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
-                    xml_file_params.merge!({
-                      :preserve => file_attributes_hash[:preserve],
-                      :publish  => file_attributes_hash[:publish],
-                      :shelve   => file_attributes_hash[:shelve],
-                    })
-                  end
+                    mimetype = obj.mimetype
+                  
+                    # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
+                    if obj.relative_path 
+                      file_id=obj.relative_path                      
+                    else 
+                      # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
+                      file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
+                    end
+
+                    xml_file_params = {:id=> file_id}
+                
+                    if add_file_attributes
+                      file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+                      xml_file_params.merge!({
+                        :preserve => file_attributes_hash[:preserve],
+                        :publish  => file_attributes_hash[:publish],
+                        :shelve   => file_attributes_hash[:shelve],
+                      })
+                    end
                                                         
-                  xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
-                  xml.file(xml_file_params) {
-                    if add_exif # add exif info if the user requested it
-                      xml.checksum(obj.sha1, :type => 'sha1')
-                      xml.checksum(obj.md5, :type => 'md5')                                
-                      xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
-                    elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
-                      xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
-                      xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
-                    end #add_exif
-                  }
-                end # end resource_files.each
-              }
-            end # resources.each
-          }
-        end
+                    xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
+                    xml.file(xml_file_params) {
+                      if add_exif # add exif info if the user requested it
+                        xml.checksum(obj.sha1, :type => 'sha1')
+                        xml.checksum(obj.md5, :type => 'md5')                                
+                        xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
+                      elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
+                        xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
+                        xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
+                      end #add_exif
+                    }
+                  end # end resource_files.each
+                }
+              end # resources.each
+            }
+          end
         
         if include_root_xml == false
           result = builder.doc.root.to_xml

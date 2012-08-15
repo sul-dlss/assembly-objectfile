@@ -10,6 +10,9 @@ module Assembly
     # path is the full path to the user provided image
     attr_accessor :path
     
+    # an optional label that can be set for each file -- if provided, this will be used as a resource label when generating content metadata (files bundlded together will just get the first's files label attribute if set)
+    attr_accessor :label
+    
     # relative path is useful when generating content metadata, if you want the file ids in the content metadata to be something other than the full path, it can be set
     #  if not, content metadata will get the full path 
     attr_accessor :relative_path
