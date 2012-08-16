@@ -43,6 +43,18 @@ module Assembly
       file_parts.size == 3 ? "#{file_parts[0]}_#{file_parts[2]}" : filename_without_ext
     end
 
+    # Returns DPG subfolder for the current file.
+    #
+    # @return [String] DPG subfolder for the given filename, i.e. '00','05', etc. 
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/cy565rm7188_00_001.tif')
+    #   puts source_file.dpg_folder # "00"
+    def dpg_folder
+      file_parts=File.basename(path,ext).split('_')
+      file_parts.size == 3 ? file_parts[1] : ''
+    end
+
     # Returns base filename for the current file.
     #
     # @return [String] base filename

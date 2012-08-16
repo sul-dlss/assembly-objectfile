@@ -1,10 +1,4 @@
 describe Assembly::ObjectFile do
-
-  after(:each) do
-    # after each test, empty out the input and output test directories
-    remove_files(TEST_INPUT_DIR)
-    remove_files(TEST_OUTPUT_DIR)
-  end
   
   it "should not run if no input file is passed in" do
     @ai=Assembly::ObjectFile.new('')
@@ -22,7 +16,6 @@ describe Assembly::ObjectFile do
   end
   
   it "should tell us if an input file is an image" do
-    generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.image?.should == true
@@ -38,14 +31,19 @@ describe Assembly::ObjectFile do
     @ai.filename_without_ext.should == "test"
   end
 
-  it "should give us the DPG base name for an file" do
+  it "should give us the DPG base name for a file" do
     test_file=File.join(TEST_INPUT_DIR,'oo000oo0001_00_001.tif')
     @ai = Assembly::ObjectFile.new(test_file)
     @ai.dpg_basename.should == "oo000oo0001_001"
   end
+
+  it "should give us the DPG subfolder name for a file" do
+    test_file=File.join(TEST_INPUT_DIR,'oo000oo0001_05_001.tif')
+    @ai = Assembly::ObjectFile.new(test_file)
+    @ai.dpg_folder.should == "05"
+  end
   
   it "should tell us that a jp2 file not jp2able and is not valid since it has no profile" do
-    generate_test_image(TEST_JP2_INPUT_FILE)
     File.exists?(TEST_JP2_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
     @ai.image?.should == true
@@ -55,7 +53,6 @@ describe Assembly::ObjectFile do
   end
     
   it "should compute checksums for an image file" do
-    generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.md5.should == 'a2400500acf21e43f5440d93be894101'
@@ -93,14 +90,12 @@ describe Assembly::ObjectFile do
   end
 
   it "should tell us the size of an input file" do
-    generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.filesize.should == 63542
   end
 
   it "should tell us the mimetype and encoding of an input file" do
-    generate_test_image(TEST_TIF_INPUT_FILE)
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.mimetype.should == 'image/tiff'

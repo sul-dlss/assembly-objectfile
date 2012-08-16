@@ -2,6 +2,9 @@ require 'nokogiri'
 
 module Assembly
 
+  SPECIAL_DPG_FOLDERS=['31','50']  # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
+                                   # these are used when :bundle=>:dpg only
+                                   
   # This class generates content metadata for image files
   class ContentMetadata
     
@@ -38,7 +41,7 @@ module Assembly
 
         raise "No objects and/or druid supplied" if druid.nil? || objects.nil? || objects.size == 0
         
-        pid=druid.gsub('druid:','')
+        pid=druid.gsub('druid:','') # remove druid prefix when creating IDs
         
         style=params[:style] || :simple_image
         bundle=params[:bundle] || :default
@@ -92,8 +95,13 @@ module Assembly
             # create one resource node per distinct dpg base name, collecting the relevant objects with the distinct names into that resource
             resources=[]
             distinct_filenames=objects.collect {|obj| obj.dpg_basename}.uniq # find all the unique DPG filenames in the set of objects
-            distinct_filenames.each {|distinct_filename| resources << objects.collect {|obj| obj if obj.dpg_basename == distinct_filename}.compact }
+            distinct_filenames.each do |distinct_filename| 
+              resources << objects.collect {|obj| obj if obj.dpg_basename == distinct_filename && !self.is_special_dpg_folder?(obj.dpg_folder)}.compact
+            end
+            objects.each {|obj| resources << [obj] if self.is_special_dpg_folder?(obj.dpg_folder)} # certain subfolders require individual resources for files within them regardless of file-naming convention      
         end
+        
+        resources.delete([]) # delete any empty elements
         
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.contentMetadata(:objectId => "#{pid}",:type => content_type_description) {
@@ -105,20 +113,25 @@ module Assembly
                 # grab all of the file types within a resource into an array so we can decide what the resource type should be
                 resource_file_types=resource_files.collect {|obj| obj.object_type}
                 resource_has_non_images=((resource_file_types-[:image]).size > 0)
+                resource_from_special_dpg_folder=resource_files.collect {|obj| self.is_special_dpg_folder?(obj.dpg_folder)}.uniq
                 
-                case style
-                   when :simple_image 
-                     resource_type_description = resource_type_descriptions[:image]
-                   when :file
-                     resource_type_description = resource_type_descriptions[:file]           
-                   when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
-                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-                   when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
-                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
-                   when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
-                     resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-                 end             
-              
+                if bundle == :dpg && resource_from_special_dpg_folder.include?(true)  # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
+                  resource_type_description = resource_type_descriptions[:object]
+                else # otherwise look at the style to determine the resource_type_description
+                  case style
+                     when :simple_image 
+                       resource_type_description = resource_type_descriptions[:image]
+                     when :file
+                       resource_type_description = resource_type_descriptions[:file]           
+                     when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
+                       resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                     when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
+                       resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
+                     when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
+                       resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                   end             
+                end
+                              
                 xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
 
                   # create a generic resource label
@@ -174,11 +187,15 @@ module Assembly
         else
           result = builder.to_xml
         end
-        
+                
         return result
-
+        
+      end # create_content_metadata
+      
+      def self.is_special_dpg_folder?(folder)
+        SPECIAL_DPG_FOLDERS.include?(folder)
       end
       
-  end
+  end # class
   
-end
+end # module

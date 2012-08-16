@@ -37,6 +37,7 @@ content type specific operations (such as jp2 generation).
 - 1.3.0 continued refinement of content metadata generation for objects with download
 - 1.3.1 allow the user specify a label with the ObjectFile object that is picked up when generating content metadata (in specifying resource labels)
 - 1.3.2 allow the user to set the label on object creation
+- 1.3.3 update tests to avoid dependency on kakadu; contentMetadata will now generate new resources of type=object when files are present in special DPG folders
 
 ==Usage
 
@@ -73,8 +74,3 @@ To keep a local server running with up to date code documentation that you can v
    Mac users:
        brew install exiftool
 
-2. Install md5 and sha1 command line tools.
-   
-   Mac users: 
-		brew install md5sha1sum
-		sudo brew link md5sha1sum
