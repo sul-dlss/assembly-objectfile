@@ -38,6 +38,7 @@ content type specific operations (such as jp2 generation).
 - 1.3.1 allow the user specify a label with the ObjectFile object that is picked up when generating content metadata (in specifying resource labels)
 - 1.3.2 allow the user to set the label on object creation
 - 1.3.3 update tests to avoid dependency on kakadu; contentMetadata will now generate new resources of type=object when files are present in special DPG folders
+- 1.3.4 fix rspec test to have it run on CI server
 
 ==Usage
 

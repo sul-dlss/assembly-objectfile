@@ -272,14 +272,10 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
     xml.xpath("//resource").length.should be 4
     xml.xpath("//resource/file").length.should be 4
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE
-    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
-    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE2   
-    xml.xpath("//resource/file")[0].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test.tif'     
-    xml.xpath("//resource/file")[1].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test.jp2'
-    xml.xpath("//resource/file")[2].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test2.tif'
-    xml.xpath("//resource/file")[3].attributes['id'].value.should == '/Users/peter/Sites/development/assembly-objectfile/spec/test_data/input/test2.jp2'    
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == TEST_TIF_INPUT_FILE
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == TEST_JP2_INPUT_FILE
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value.should == TEST_TIF_INPUT_FILE2
+    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value.should == TEST_JP2_INPUT_FILE2   
     xml.xpath("//label").length.should be 4
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..3 do
