@@ -106,10 +106,10 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
     xml.xpath("//resource").length.should be 2
     xml.xpath("//resource/file").length.should be 4
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
-    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_JP2_INPUT_FILE
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
-    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_JP2_INPUT_FILE2
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == 'test.tif'
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == 'test.jp2'
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == 'test2.tif'
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should == 'test2.jp2'
     xml.xpath("//label").length.should be 2
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..1 do
@@ -132,10 +132,10 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"    
     xml.xpath("//resource").length.should be 2
     xml.xpath("//resource/file").length.should be 4
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_DPG_TIF
-    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_DPG_JP
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_DPG_TIF2
-    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_DPG_JP2
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == "00/oo000oo0001_00_001.tif"
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == "05/oo000oo0001_05_001.jp2"
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == "00/oo000oo0001_00_002.tif"
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should == "05/oo000oo0001_05_002.jp2"
     xml.xpath("//label").length.should be 2
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..1 do
@@ -145,9 +145,9 @@ describe Assembly::ContentMetadata do
     end
   end
 
-  it "should generate valid content metadata for two tifs, two associated jp2s, one combined pdf and one special tif of style=simple_book using bundle=dpg and no exif data and no root xml node" do
+  it "should generate valid content metadata for two tifs, two associated jp2s, one combined pdf and one special tif of style=simple_book using bundle=dpg and no exif data and no root xml node, flattening folder structure" do
     objects=[Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF2),Assembly::ObjectFile.new(TEST_DPG_SPECIAL_TIF),Assembly::ObjectFile.new(TEST_DPG_TIF),Assembly::ObjectFile.new(TEST_DPG_JP),Assembly::ObjectFile.new(TEST_DPG_TIF2),Assembly::ObjectFile.new(TEST_DPG_JP2)]    
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:simple_book,:bundle=>:dpg,:objects=>objects,:include_root_xml=>false)
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:simple_book,:bundle=>:dpg,:objects=>objects,:include_root_xml=>false,:flatten_folder_structure=>true)
     result.class.should be String
     result.include?('<?xml').should be false 
     xml = Nokogiri::XML(result)
@@ -156,12 +156,12 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"    
     xml.xpath("//resource").length.should be 4
     xml.xpath("//resource/file").length.should be 6
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_DPG_TIF
-    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_DPG_JP
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_DPG_TIF2
-    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_DPG_JP2
-    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_DPG_SPECIAL_PDF2
-    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_DPG_SPECIAL_TIF
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == "oo000oo0001_00_001.tif"
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == "oo000oo0001_05_001.jp2"
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == "oo000oo0001_00_002.tif"
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should == "oo000oo0001_05_002.jp2"
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value.should == "oo000oo0001_31_001.pdf"
+    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value.should == "oo000oo0001_50_001.tif"
     xml.xpath("//label").length.should be 4
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..1 do
@@ -170,17 +170,17 @@ describe Assembly::ContentMetadata do
       xml.xpath("//resource")[i].attributes['type'].value.should == "page"
     end
     xml.xpath("//resource[@sequence='3']/file").length.should be 1
-    xml.xpath("//label")[2].text.should == "Object 3"
+    xml.xpath("//label")[2].text.should == "Object 1"
     xml.xpath("//resource")[2].attributes['type'].value.should == "object"
     xml.xpath("//resource[@sequence='4']/file").length.should be 1
-    xml.xpath("//label")[3].text.should == "Object 4"
+    xml.xpath("//label")[3].text.should == "Object 2"
     xml.xpath("//resource")[3].attributes['type'].value.should == "object"
   end
   
-  it "should generate valid content metadata with item having a 'druid:' prefix for two tifs,two associated jp2s,two associated pdfs, and one lingering PDF of style=simple_book using bundle=dpg" do
+  it "should generate valid content metadata with item having a 'druid:' prefix for two tifs,two associated jp2s,two associated pdfs, and one lingering PDF of style=simple_book using bundle=dpg, flattening folder structure" do
     objects=[Assembly::ObjectFile.new(TEST_DPG_TIF),Assembly::ObjectFile.new(TEST_DPG_JP),Assembly::ObjectFile.new(TEST_DPG_PDF),Assembly::ObjectFile.new(TEST_DPG_TIF2),Assembly::ObjectFile.new(TEST_DPG_JP2),Assembly::ObjectFile.new(TEST_DPG_PDF2),Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF1)]    
     test_druid="druid:#{TEST_DRUID}"
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects,:style=>:simple_book)
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>test_druid,:bundle=>:dpg,:objects=>objects,:style=>:simple_book,:flatten_folder_structure=>true)
     result.class.should be String
     result.include?('<?xml').should be true
     xml = Nokogiri::XML(result)
@@ -189,14 +189,15 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"
     test_druid.should == "druid:#{TEST_DRUID}"
     xml.xpath("//resource").length.should be 3
-    xml.xpath("//resource/file").length.should be 7
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_DPG_TIF
-    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_DPG_JP
-    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value == TEST_DPG_PDF
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_DPG_TIF2
-    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_DPG_JP2
-    xml.xpath("//resource[@sequence='2']/file")[2].attributes['id'].value == TEST_DPG_PDF2
-    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_DPG_SPECIAL_PDF1
+    xml.xpath("//resource/file").length.should be 7                                  
+    
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == "oo000oo0001_00_001.tif"
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == "oo000oo0001_05_001.jp2"
+    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value.should == "oo000oo0001_15_001.pdf"
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == "oo000oo0001_00_002.tif"
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should == "oo000oo0001_05_002.jp2"
+    xml.xpath("//resource[@sequence='2']/file")[2].attributes['id'].value.should == "oo000oo0001_15_002.pdf"
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value.should == "oo000oo0001_book.pdf"
     xml.xpath("//label").length.should be 3
     xml.xpath("//resource/file/imageData").length.should be 0
     for i in 0..1 do
@@ -205,7 +206,7 @@ describe Assembly::ContentMetadata do
       xml.xpath("//resource")[i].attributes['type'].value.should == "page"
     end
     xml.xpath("//resource[@sequence='3']/file").length.should be 1
-    xml.xpath("//label")[2].text.should == "Object 3"
+    xml.xpath("//label")[2].text.should == "Object 1"
     xml.xpath("//resource")[2].attributes['type'].value.should == "object"
   end
 
@@ -218,22 +219,22 @@ describe Assembly::ContentMetadata do
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
     xml.xpath("//resource").length.should be 3
     xml.xpath("//resource/file").length.should be 6
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_DPG_TIF
-    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value == TEST_DPG_JP  
-    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value == TEST_DPG_PDF 
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_DPG_TIF2
-    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value == TEST_DPG_JP2 
-    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_DPG_SPECIAL_PDF1
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == "00/oo000oo0001_00_001.tif"
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == "05/oo000oo0001_05_001.jp2" 
+    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value.should == "15/oo000oo0001_15_001.pdf" 
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should == "00/oo000oo0001_00_002.tif"
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should == "05/oo000oo0001_05_002.jp2" 
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value.should == "oo000oo0001_book.pdf"
     xml.xpath("//label").length.should be 3
     xml.xpath("//resource/file/imageData").length.should be 0
     xml.xpath("//resource[@sequence='1']/file").length.should be 3
     xml.xpath("//label")[0].text.should == "Object 1"
     xml.xpath("//resource")[0].attributes['type'].value.should == "object"
     xml.xpath("//resource[@sequence='2']/file").length.should be 2
-    xml.xpath("//label")[1].text.should == "Page 2"
+    xml.xpath("//label")[1].text.should == "Page 1"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"
     xml.xpath("//resource[@sequence='3']/file").length.should be 1
-    xml.xpath("//label")[2].text.should == "Object 3"
+    xml.xpath("//label")[2].text.should == "Object 2"
     xml.xpath("//resource")[2].attributes['type'].value.should == "object"
   end
     
@@ -245,11 +246,7 @@ describe Assembly::ContentMetadata do
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
     xml.xpath("//resource").length.should be 4
-    xml.xpath("//resource/file").length.should be 4
-    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE
-    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE
-    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value == TEST_TIF_INPUT_FILE2
-    xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value == TEST_JP2_INPUT_FILE2   
+    xml.xpath("//resource/file").length.should be 4  
     xml.xpath("//resource/file")[0].attributes['id'].value.should == 'test.tif'     
     xml.xpath("//resource/file")[1].attributes['id'].value.should == 'test.jp2'
     xml.xpath("//resource/file")[2].attributes['id'].value.should == 'test2.tif'
@@ -346,7 +343,7 @@ describe Assembly::ContentMetadata do
     xml.xpath("//label").length.should be 3
     xml.xpath("//label")[0].text.should =~ /Page 1/
     xml.xpath("//label")[1].text.should =~ /Page 2/
-    xml.xpath("//label")[2].text.should =~ /Object 3/
+    xml.xpath("//label")[2].text.should =~ /Object 1/
     xml.xpath("//resource/file/imageData").length.should be 0
     xml.xpath("//resource")[0].attributes['type'].value.should == "page"
     xml.xpath("//resource")[1].attributes['type'].value.should == "page"

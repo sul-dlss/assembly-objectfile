@@ -32,6 +32,8 @@ module Assembly
       #   :preserve_common_paths = optional - When creating the file "id" attribute, content metadata uses the "relative_path" attribute of the ObjectFile objects passed in.  If the "relative_path" attribute is not set,  the "path" attribute is used instead,
       #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
       #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default it false.
+      #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).  
+      #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.  
       # Example:
       #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:file_attributes=>false)
       def self.create_content_metadata(params={})
@@ -49,6 +51,7 @@ module Assembly
         add_file_attributes=params[:add_file_attributes] || false
         file_attributes=params[:file_attributes] || {}
         preserve_common_paths=params[:preserve_common_paths] || false
+        flatten_folder_structure=params[:flatten_folder_structure] || false
         include_root_xml=params[:include_root_xml]
                 
         all_paths=[]
@@ -59,10 +62,16 @@ module Assembly
         
         common_path=Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
         
-        # these are the valid strings for each type of document
+        # these are the valid strings for each type of document to be use contentMetadata type and resourceType
         content_type_descriptions={:file=>'file',:image=>'image',:book=>'book'}
         resource_type_descriptions={:object=>'object',:file=>'file',:image=>'image',:book=>'page'}
-
+      
+        # global sequence for resource IDs
+        sequence = 0
+        
+        # a counter to use when creating auto-labels for resources, with incremenets for each type
+        resource_type_counters=Hash.new(0)
+        
         # set the content type id
         case style
           when :simple_image
@@ -77,7 +86,6 @@ module Assembly
             raise "Supplied style not valid"
         end
           
-        sequence = 0
         
         # determine how many resources to create
         # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
@@ -106,81 +114,85 @@ module Assembly
         builder = Nokogiri::XML::Builder.new do |xml|
           xml.contentMetadata(:objectId => "#{pid}",:type => content_type_description) {
             resources.each do |resource_files| # iterate over all the resources
+
+              # start a new resource element              
               sequence += 1
               resource_id = "#{pid}_#{sequence}"
-              # start a new resource element
+
+              # grab all of the file types within a resource into an array so we can decide what the resource type should be
+              resource_file_types=resource_files.collect {|obj| obj.object_type}
+              resource_has_non_images=((resource_file_types-[:image]).size > 0)
+              resource_from_special_dpg_folder=resource_files.collect {|obj| self.is_special_dpg_folder?(obj.dpg_folder)}.uniq
+                
+              if bundle == :dpg && resource_from_special_dpg_folder.include?(true)  # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
+                resource_type_description = resource_type_descriptions[:object]
+              else # otherwise look at the style to determine the resource_type_description
+                case style
+                   when :simple_image 
+                     resource_type_description = resource_type_descriptions[:image]
+                   when :file
+                     resource_type_description = resource_type_descriptions[:file]           
+                   when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                   when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
+                     resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
+                   when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
+                     resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                 end             
+              end
               
-                # grab all of the file types within a resource into an array so we can decide what the resource type should be
-                resource_file_types=resource_files.collect {|obj| obj.object_type}
-                resource_has_non_images=((resource_file_types-[:image]).size > 0)
-                resource_from_special_dpg_folder=resource_files.collect {|obj| self.is_special_dpg_folder?(obj.dpg_folder)}.uniq
-                
-                if bundle == :dpg && resource_from_special_dpg_folder.include?(true)  # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
-                  resource_type_description = resource_type_descriptions[:object]
-                else # otherwise look at the style to determine the resource_type_description
-                  case style
-                     when :simple_image 
-                       resource_type_description = resource_type_descriptions[:image]
-                     when :file
-                       resource_type_description = resource_type_descriptions[:file]           
-                     when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
-                       resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-                     when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
-                       resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
-                     when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
-                       resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-                   end             
-                end
+              resource_type_counters[resource_type_description.to_sym]+=1
                               
-                xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
+              xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
 
-                  # create a generic resource label
-                  resource_label = "#{resource_type_description.capitalize} #{sequence}"                   
+                # create a generic resource label
+                resource_label = "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}"                   
 
-                  # but if one of files has a label, use it instead
-                  resource_files.each {|obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
-                  
-                  xml.label resource_label
-
-                  resource_files.each do |obj| # iterate over all the files in a resource
+                # but if one of files has a label, use it instead
+                resource_files.each {|obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
                 
-                    mimetype = obj.mimetype
-                  
-                    # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
-                    if obj.relative_path 
-                      file_id=obj.relative_path                      
-                    else 
-                      # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
-                      file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
-                    end
+                xml.label resource_label
 
-                    xml_file_params = {:id=> file_id}
+                resource_files.each do |obj| # iterate over all the files in a resource
+              
+                  mimetype = obj.mimetype
                 
-                    if add_file_attributes
-                      file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
-                      xml_file_params.merge!({
-                        :preserve => file_attributes_hash[:preserve],
-                        :publish  => file_attributes_hash[:publish],
-                        :shelve   => file_attributes_hash[:shelve],
-                      })
-                    end
-                                                        
-                    xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
-                    xml.file(xml_file_params) {
-                      if add_exif # add exif info if the user requested it
-                        xml.checksum(obj.sha1, :type => 'sha1')
-                        xml.checksum(obj.md5, :type => 'md5')                                
-                        xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
-                      elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
-                        xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
-                        xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
-                      end #add_exif
-                    }
-                  end # end resource_files.each
-                }
-              end # resources.each
-            }
-          end
+                  # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
+                  if obj.relative_path 
+                    file_id=obj.relative_path                      
+                  else 
+                    # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path 
+                    file_id=preserve_common_paths ? obj.path : obj.path.gsub(common_path,'')
+                    file_id=File.basename(file_id) if flatten_folder_structure
+                  end
+
+                  xml_file_params = {:id=> file_id}
+              
+                  if add_file_attributes
+                    file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+                    xml_file_params.merge!({
+                      :preserve => file_attributes_hash[:preserve],
+                      :publish  => file_attributes_hash[:publish],
+                      :shelve   => file_attributes_hash[:shelve],
+                    })
+                  end
+                                                      
+                  xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
+                  xml.file(xml_file_params) {
+                    if add_exif # add exif info if the user requested it
+                      xml.checksum(obj.sha1, :type => 'sha1')
+                      xml.checksum(obj.md5, :type => 'md5')                                
+                      xml.imageData(:height => obj.exif.imageheight, :width => obj.exif.imagewidth) if obj.image? # add image data for an image
+                    elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
+                      xml.checksum(obj.provider_sha1, :type => 'sha1') if obj.provider_sha1
+                      xml.checksum(obj.provider_md5, :type => 'md5') if obj.provider_md5                                                    
+                    end #add_exif
+                  }
+                end # end resource_files.each
+              }
+            end # resources.each
+          }
+        end
         
         if include_root_xml == false
           result = builder.doc.root.to_xml
