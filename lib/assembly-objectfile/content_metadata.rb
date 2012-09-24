@@ -14,7 +14,8 @@ module Assembly
       #
       # @param [Hash] params a hash containg parameters needed to produce content metadata
       #   :druid = required - a string of druid of the repository object's druid id (with or without 'druid:' prefix)
-      #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata      
+      #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata
+      #                NOTE: if you set the :bundle option to "prebundlded", you will need to pass in an array of arrays, and not a flat array, as noted below      
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
@@ -25,9 +26,12 @@ module Assembly
       #                 :default = all files get their own resources (default)
       #                 :filename = files with the same filename but different extensions get bundled together in a single resource
       #                 :dpg = files representing the same image but of different mimetype that use the SULAIR DPG filenaming standard (00 vs 05) get bundled together in a single resource
+      #                 :prebundlded = this option requires you to prebundled the files passed in as an array of arrays, indicating how files are bundlded into resources; this is the most flexible option since it gives you full control
       #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
-      #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve attributes should be added using defaults of supplied override by mime/type, defaults to false and is not required if project goes through assembly
-      #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, e.g. {'image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
+      #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve attributes should be added using defaults or by supplied override by mime/type, defaults to false and is not required if project goes through assembly
+      #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, 
+      #             If a mimetype match is not found in your hash, the default is used (either your supplied default or the gems).
+      #             e.g. {'default'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'},image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
       #   :include_root_xml = optional - a boolean to indicate if the contentMetadata returned includes a root <?xml version="1.0"?> tag, defaults to true
       #   :preserve_common_paths = optional - When creating the file "id" attribute, content metadata uses the "relative_path" attribute of the ObjectFile objects passed in.  If the "relative_path" attribute is not set,  the "path" attribute is used instead,
       #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
@@ -55,7 +59,7 @@ module Assembly
         include_root_xml=params[:include_root_xml]
                 
         all_paths=[]
-        objects.each do |obj| 
+        objects.flatten.each do |obj| 
           raise "File '#{obj.path}' not found" unless obj.file_exists?
           all_paths << obj.path unless preserve_common_paths # collect all of the filenames into an array
         end
@@ -107,6 +111,11 @@ module Assembly
               resources << objects.collect {|obj| obj if obj.dpg_basename == distinct_filename && !self.is_special_dpg_folder?(obj.dpg_folder)}.compact
             end
             objects.each {|obj| resources << [obj] if self.is_special_dpg_folder?(obj.dpg_folder)} # certain subfolders require individual resources for files within them regardless of file-naming convention      
+          when :prebundled
+            # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
+            resources=objects
+          else
+            raise "Invalid bundle method"
         end
         
         resources.delete([]) # delete any empty elements
@@ -169,7 +178,7 @@ module Assembly
                   xml_file_params = {:id=> file_id}
               
                   if add_file_attributes
-                    file_attributes_hash=file_attributes[mimetype] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+                    file_attributes_hash=file_attributes[mimetype] || file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
                     xml_file_params.merge!({
                       :preserve => file_attributes_hash[:preserve],
                       :publish  => file_attributes_hash[:publish],

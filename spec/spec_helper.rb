@@ -22,4 +22,23 @@ TEST_DPG_SPECIAL_PDF1=File.join(TEST_INPUT_DIR,'oo000oo0001','oo000oo0001_book.p
 TEST_DPG_SPECIAL_PDF2=File.join(TEST_INPUT_DIR,'oo000oo0001','31','oo000oo0001_31_001.pdf')
 TEST_DPG_SPECIAL_TIF=File.join(TEST_INPUT_DIR,'oo000oo0001','50','oo000oo0001_50_001.tif')
 
+TEST_RES1_TIF1=File.join(TEST_INPUT_DIR,'res1_image1.tif')
+TEST_RES1_JP1=File.join(TEST_INPUT_DIR,'res1_image1.jp2')
+TEST_RES1_TIF2=File.join(TEST_INPUT_DIR,'res1_image2.tif')
+TEST_RES1_JP2=File.join(TEST_INPUT_DIR,'res1_image2.jp2')
+TEST_RES1_TEI=File.join(TEST_INPUT_DIR,'res1_teifile.txt')
+TEST_RES1_TEXT=File.join(TEST_INPUT_DIR,'res1_textfile.txt')
+TEST_RES1_PDF=File.join(TEST_INPUT_DIR,'res1_transcript.pdf')
+
+TEST_RES2_TIF1=File.join(TEST_INPUT_DIR,'res2_image1.tif')
+TEST_RES2_JP1=File.join(TEST_INPUT_DIR,'res2_image1.jp2')
+TEST_RES2_TIF2=File.join(TEST_INPUT_DIR,'res2_image2.tif')
+TEST_RES2_JP2=File.join(TEST_INPUT_DIR,'res2_image2.jp2')
+TEST_RES2_TEI=File.join(TEST_INPUT_DIR,'res2_teifile.txt')
+TEST_RES2_TEXT=File.join(TEST_INPUT_DIR,'res2_textfile.txt')
+
+TEST_RES3_TIF1=File.join(TEST_INPUT_DIR,'res3_image1.tif')
+TEST_RES3_JP1=File.join(TEST_INPUT_DIR,'res3_image1.jp2')
+TEST_RES3_TEI=File.join(TEST_INPUT_DIR,'res3_teifile.txt')
+
 TEST_DRUID           = "nx288wh8889"

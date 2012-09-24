@@ -1,6 +1,6 @@
 describe Assembly::ContentMetadata do
   
-  it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image" do
+  it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image, adding file attributes" do
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>true,:add_file_attributes=>true,:objects=>objects)
     result.class.should be String
@@ -96,6 +96,24 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file")[1].attributes['preserve'].value.should == "yes"
     xml.xpath("//resource/file")[1].attributes['shelve'].value.should == "yes" 
   end
+
+  it "should generate valid content metadata for a single tif and jp2 of style=simple_image with overriding file attributes, including a default value, and no exif data" do
+    objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]    
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_file_attributes=>true,:file_attributes=>{'default'=>{:publish=>'yes',:preserve=>'no',:shelve=>'no'},'image/jp2'=>{:publish=>'yes',:preserve=>'yes',:shelve=>'yes'}},:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//resource/file").length.should be 2
+    xml.xpath("//resource/file")[0].attributes['mimetype'].should be nil
+    xml.xpath("//resource/file")[0].attributes['publish'].value.should == "yes"
+    xml.xpath("//resource/file")[0].attributes['preserve'].value.should == "no"
+    xml.xpath("//resource/file")[0].attributes['shelve'].value.should == "no"    
+    xml.xpath("//resource/file")[1].attributes['mimetype'].should be nil
+    xml.xpath("//resource/file")[1].attributes['publish'].value.should == "yes"
+    xml.xpath("//resource/file")[1].attributes['preserve'].value.should == "yes"
+    xml.xpath("//resource/file")[1].attributes['shelve'].value.should == "yes" 
+  end
+
 
   it "should generate valid content metadata for two tifs two associated jp2s of style=simple_image using bundle=filename and no exif data" do
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]    
@@ -413,6 +431,46 @@ describe Assembly::ContentMetadata do
     File.exists?(junk_file).should be false
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(junk_file)]  
     lambda {Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:objects=>objects)}.should raise_error 
+  end
+
+  it "should generate valid content metadata for images and associated text files, of style=simple_image using bundle=prebundled, and no exif data" do
+    files=[[TEST_RES1_TIF1,TEST_RES1_JP1,TEST_RES1_TIF2,TEST_RES1_JP2,TEST_RES1_TEI,TEST_RES1_TEXT,TEST_RES1_PDF],[TEST_RES2_TIF1,TEST_RES2_JP1,TEST_RES2_TIF2,TEST_RES2_JP2,TEST_RES2_TEI,TEST_RES2_TEXT],[TEST_RES3_TIF1,TEST_RES3_JP1,TEST_RES3_TEI]]
+    objects=files.collect {|resource| resource.collect {|file| Assembly::ObjectFile.new(file)} }
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:prebundled,:style=>:simple_image,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 3
+    xml.xpath("//resource/file").length.should be 16
+    xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value.should == 'res1_image1.tif'
+    xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value.should == 'res1_image1.jp2'
+    xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value.should == 'res1_image2.tif'
+    xml.xpath("//resource[@sequence='1']/file")[3].attributes['id'].value.should == 'res1_image2.jp2'
+    xml.xpath("//resource[@sequence='1']/file")[4].attributes['id'].value.should == 'res1_teifile.txt'
+    xml.xpath("//resource[@sequence='1']/file")[5].attributes['id'].value.should == 'res1_textfile.txt'
+    xml.xpath("//resource[@sequence='1']/file")[6].attributes['id'].value.should == 'res1_transcript.pdf'
+    xml.xpath("//resource[@sequence='1']/file").length.should be 7
+                                                                                     
+    xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value.should ==  'res2_image1.tif'
+    xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value.should ==  'res2_image1.jp2'
+    xml.xpath("//resource[@sequence='2']/file")[2].attributes['id'].value.should ==  'res2_image2.tif'
+    xml.xpath("//resource[@sequence='2']/file")[3].attributes['id'].value.should ==  'res2_image2.jp2'
+    xml.xpath("//resource[@sequence='2']/file")[4].attributes['id'].value.should ==  'res2_teifile.txt'
+    xml.xpath("//resource[@sequence='2']/file")[5].attributes['id'].value.should ==  'res2_textfile.txt'
+    xml.xpath("//resource[@sequence='2']/file").length.should be 6
+
+    xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value.should == 'res3_image1.tif'
+    xml.xpath("//resource[@sequence='3']/file")[1].attributes['id'].value.should == 'res3_image1.jp2'
+    xml.xpath("//resource[@sequence='3']/file")[2].attributes['id'].value.should == 'res3_teifile.txt'
+    xml.xpath("//resource[@sequence='3']/file").length.should be 3
+
+    xml.xpath("//label").length.should be 3
+    xml.xpath("//resource/file/imageData").length.should be 0
+    for i in 0..2 do
+      xml.xpath("//label")[i].text.should == "Image #{i+1}"
+      xml.xpath("//resource")[i].attributes['type'].value.should == "image"
+    end
   end
 
 end
