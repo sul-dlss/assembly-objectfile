@@ -42,6 +42,7 @@ content type specific operations (such as jp2 generation).
 - 1.3.5 add a parameter to flatten folder structure when creating file IDs; increment resource labels by object type
 - 1.3.6 allow user to supply default file attributes as well as by mimetype --- useful if file attributes should be added and are the same regardless of mimetype
 - 1.3.7 add a new bundle style called "prebundled" which allows users to pass in an array of arrays
+- 1.3.8 update to latest lyberteam devel gems
 
 ==Usage
 
