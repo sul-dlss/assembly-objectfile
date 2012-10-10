@@ -9,7 +9,7 @@ module Assembly
 
     # path is the full path to the user provided image
     attr_accessor :path
-    
+        
     # an optional label that can be set for each file -- if provided, this will be used as a resource label when generating content metadata (files bundlded together will just get the first's files label attribute if set)
     attr_accessor :label
     
@@ -108,8 +108,8 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.md5 # gives XXX123XXX1243XX1243
     def md5
-      compute_checksums if @checksums.nil?
-      @checksums[:md5]
+      check_for_file unless @md5
+      @md5 ||= Digest::MD5.file(path).hexdigest
     end
 
     # Compute sha1 checksum or return value if already computed
@@ -120,8 +120,8 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.sha1 # gives XXX123XXX1243XX1243    
     def sha1
-      compute_checksums if @checksums.nil?
-      @checksums[:sha1]      
+      check_for_file unless @sha1
+      @sha1 ||= Digest::SHA1.file(path).hexdigest
     end
     
     # Returns mimetype information for the current file (only on unix based systems).
@@ -236,20 +236,7 @@ module Assembly
       File.exists?(@path) && !File.directory?(@path) 
     end
  
-    # private method to compute checksums
     private
-    def compute_checksums
-      check_for_file
-# When using Checksum::Tools gem, which is only Ruby 1.8 compatible
-#      cs_types = [:md5,:sha1]
-#      cs_tool  = Checksum::Tools.new({}, *cs_types)
-#      @checksums=cs_tool.digest_file(path)
-
-      @checksums={}
-      @checksums[:md5]=Digest::MD5.file(path).hexdigest
-      @checksums[:sha1]=Digest::SHA1.file(path).hexdigest
-    end
-
     # private method to check for file existence before operating on it
     def check_for_file
       raise "input file #{path} does not exist" unless file_exists?
