@@ -19,6 +19,8 @@ describe Assembly::ObjectFile do
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.image?.should == true
+    @ai.exif.should_not be nil
+    @ai.mimetype.should == 'image/tiff'
     @ai.object_type.should == :image
     @ai.valid_image?.should == true
     @ai.jp2able?.should == true
@@ -29,6 +31,13 @@ describe Assembly::ObjectFile do
     @ai.filename.should == "test.tif"
     @ai.ext.should == ".tif"
     @ai.filename_without_ext.should == "test"
+  end
+
+  it "should give us the mimetype of a file even if the exif information is damaged" do
+    @ai = Assembly::ObjectFile.new(TEST_FILE_NO_EXIF)
+    @ai.filename.should == "file_with_no_exif.xml"
+    @ai.ext.should == ".xml"
+    @ai.mimetype.should == 'text/html'
   end
 
   it "should give us the DPG base name for a file" do

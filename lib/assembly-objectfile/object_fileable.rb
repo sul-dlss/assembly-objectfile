@@ -97,7 +97,11 @@ module Assembly
     #   puts source_file.exif # gives hash with exif information
     def exif
       check_for_file unless @exif
-      @exif ||= MiniExiftool.new @path  
+      begin
+        @exif ||= MiniExiftool.new @path  
+      rescue
+        @exif = nil
+      end
     end
 
     # Compute md5 checksum or return value if already computed
@@ -134,7 +138,7 @@ module Assembly
     def mimetype
       check_for_file unless @mimetype
       if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
-        if exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
+        if exif.nil? || exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
           @mimetype ||= `file --mime-type #{@path}`.gsub(/\n/,"").split(':')[1].strip
         else
           @mimetype ||= exif.mimetype
