@@ -37,7 +37,7 @@ describe Assembly::ObjectFile do
     @ai = Assembly::ObjectFile.new(TEST_FILE_NO_EXIF)
     @ai.filename.should == "file_with_no_exif.xml"
     @ai.ext.should == ".xml"
-    @ai.mimetype.should == 'text/html'
+    ['text/html','application/xml'].include?(@ai.mimetype).should be true # we could get either of these mimetypes depending on the OS
   end
 
   it "should give us the DPG base name for a file" do
