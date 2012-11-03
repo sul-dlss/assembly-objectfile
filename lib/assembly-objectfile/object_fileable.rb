@@ -139,7 +139,7 @@ module Assembly
       check_for_file unless @mimetype
       if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
         if exif.nil? || exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
-          @mimetype ||= `file --mime-type #{@path}`.gsub(/\n/,"").split(':')[1].strip
+          @mimetype ||= `file --mime-type "#{@path}"`.gsub(/\n/,"").split(':')[1].strip
         else
           @mimetype ||= exif.mimetype
         end
@@ -157,7 +157,7 @@ module Assembly
     #   puts source_file.encoding # gives 'us-ascii'
     def encoding
       check_for_file unless @encoding
-      @encoding ||= `file --mime-encoding #{@path}`.gsub(/\n/,"").split(':')[1].strip
+      @encoding ||= `file --mime-encoding "#{@path}"`.gsub(/\n/,"").split(':')[1].strip
     end
 
     # Returns a symbol with the objects type
