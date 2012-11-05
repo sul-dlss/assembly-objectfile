@@ -22,6 +22,7 @@ module Assembly
       #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="object"
       #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object"
       #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
+      #                 :map, like simple_image, but with contentMetadata type="map", resoruce type="image" 
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
       #                 :default = all files get their own resources (default)
       #                 :filename = files with the same filename but different extensions get bundled together in a single resource
@@ -67,8 +68,8 @@ module Assembly
         common_path=Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
         
         # these are the valid strings for each type of document to be use contentMetadata type and resourceType
-        content_type_descriptions={:file=>'file',:image=>'image',:book=>'book'}
-        resource_type_descriptions={:object=>'object',:file=>'file',:image=>'image',:book=>'page'}
+        content_type_descriptions={:file=>'file',:image=>'image',:book=>'book',:map=>'map'}
+        resource_type_descriptions={:object=>'object',:file=>'file',:image=>'image',:book=>'page',:map=>'image'}
       
         # global sequence for resource IDs
         sequence = 0
@@ -86,6 +87,8 @@ module Assembly
             content_type_description = content_type_descriptions[:book]
           when :book_as_image
             content_type_description = content_type_descriptions[:book]
+          when :map
+            content_type_description = content_type_descriptions[:map]
           else
             raise "Supplied style not valid"
         end
@@ -147,6 +150,8 @@ module Assembly
                      resource_type_description = (resource_has_non_images && resource_file_types.include?(:image) == false) ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
                    when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
                      resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
+                   when :map # 
+                     resource_type_description = resource_type_descriptions[:map]
                  end             
               end
               
@@ -164,7 +169,7 @@ module Assembly
 
                 resource_files.each do |obj| # iterate over all the files in a resource
               
-                  mimetype = obj.mimetype
+                  mimetype = obj.mimetype if (add_file_attributes || add_exif)
                 
                   # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
                   if obj.relative_path 
