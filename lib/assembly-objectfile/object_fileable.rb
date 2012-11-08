@@ -168,7 +168,8 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.object_type # gives :image
     def object_type
-      MIME::Types[mimetype][0].media_type.to_sym
+      lookup=MIME::Types[mimetype][0]
+      return (lookup.nil? ? "other".to_sym : lookup.media_type.to_sym)
     end
         
     # Returns if the object file is an image.

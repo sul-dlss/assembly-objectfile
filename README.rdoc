@@ -47,6 +47,7 @@ content type specific operations (such as jp2 generation).
 - 1.4.0 compute mimetype correctly even if exif information in a file is damaged
 - 1.4.1 fix errors that could error if there was a space in the filename
 - 1.4.2 Support map style content metadata; don't compute mimetype when generating content metadata unless its needed
+- 1.4.3 object_type method should return :other if it is an unknown mimetype
 
 ==Usage
 
