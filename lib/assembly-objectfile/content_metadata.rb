@@ -40,13 +40,13 @@ module Assembly
       #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).  
       #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.  
       # Example:
-      #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:file_attributes=>false)
+      #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
       def self.create_content_metadata(params={})
 
         druid=params[:druid]
         objects=params[:objects]
 
-        raise "No objects and/or druid supplied" if druid.nil? || objects.nil? || objects.size == 0
+        raise "No objects and/or druid supplied" if druid.nil? || objects.nil?
         
         pid=druid.gsub('druid:','') # remove druid prefix when creating IDs
         

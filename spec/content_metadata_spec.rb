@@ -501,4 +501,15 @@ describe Assembly::ContentMetadata do
     end
   end
 
+  it "should generate content metadata even when no objects are passed in" do
+    objects=[]
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:prebundled,:style=>:file,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "file"
+    xml.xpath("//resource").length.should be 0
+    xml.xpath("//resource/file").length.should be 0
+  end
+
 end
