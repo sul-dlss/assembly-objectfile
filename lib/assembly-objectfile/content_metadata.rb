@@ -155,21 +155,21 @@ module Assembly
                  end             
               end
               
-              resource_type_counters[resource_type_description.to_sym]+=1
+              resource_type_counters[resource_type_description.to_sym]+=1  # each resource type description gets its own incrementing counter
                               
               xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
 
                 # create a generic resource label
                 resource_label = "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}"                   
 
-                # but if one of files has a label, use it instead
+                # but if one of the files has a label, use it instead
                 resource_files.each {|obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
                 
                 xml.label resource_label
 
                 resource_files.each do |obj| # iterate over all the files in a resource
               
-                  mimetype = obj.mimetype if (add_file_attributes || add_exif)
+                  mimetype = obj.mimetype if (add_file_attributes || add_exif) # we only need to compute the mimetype if we are adding file attributes or exif info, otherwise skip it for performance reasons
                 
                   # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
                   if obj.relative_path 
@@ -183,7 +183,7 @@ module Assembly
                   xml_file_params = {:id=> file_id}
               
                   if add_file_attributes
-                    file_attributes_hash=file_attributes[mimetype] || file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+                    file_attributes_hash=obj.file_attributes || file_attributes[mimetype] || file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
                     xml_file_params.merge!({
                       :preserve => file_attributes_hash[:preserve],
                       :publish  => file_attributes_hash[:publish],

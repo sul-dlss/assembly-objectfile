@@ -35,6 +35,41 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file/imageData")[1].attributes['height'].value.should == "100"    
   end
 
+  it "should generate valid content metadata with no exif for a single tif and jp2 of style=simple_image, adding specific file attributes for 2 objects, and defaults for 1 object" do
+    obj1=Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
+    obj2=Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
+    obj3=Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)
+    obj1.file_attributes={:publish=>'no',:preserve=>'no',:shelve=>'no'}
+    obj2.file_attributes={:publish=>'yes',:preserve=>'yes',:shelve=>'yes'}
+    objects=[obj1,obj2,obj3]
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>false,:add_file_attributes=>true,:objects=>objects)
+    result.class.should be String
+    xml = Nokogiri::XML(result)
+    xml.errors.size.should be 0
+    xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource").length.should be 3
+    xml.xpath("//resource/file").length.should be 3
+    xml.xpath("//resource/file/checksum").length.should be 0   
+    xml.xpath("//resource/file/imageData").length.should be 0       
+    xml.xpath("//label").length.should be 3
+    xml.xpath("//label")[0].text.should =~ /Image 1/
+    xml.xpath("//label")[1].text.should =~ /Image 2/
+    xml.xpath("//label")[2].text.should =~ /Image 3/
+    xml.xpath("//resource")[0].attributes['type'].value.should == "image"
+    xml.xpath("//resource")[1].attributes['type'].value.should == "image"
+    xml.xpath("//resource")[2].attributes['type'].value.should == "image"
+    xml.xpath("//resource/file")[0].attributes['publish'].value.should == "no"    # specificially set in object
+    xml.xpath("//resource/file")[0].attributes['preserve'].value.should == "no" # specificially set in object
+    xml.xpath("//resource/file")[0].attributes['shelve'].value.should == "no" # specificially set in object
+    xml.xpath("//resource/file")[1].attributes['publish'].value.should == "yes" # specificially set in object
+    xml.xpath("//resource/file")[1].attributes['preserve'].value.should == "yes"  # specificially set in object
+    xml.xpath("//resource/file")[1].attributes['shelve'].value.should == "yes"  # specificially set in object
+    xml.xpath("//resource/file")[2].attributes['publish'].value.should == "yes" # defaults by mimetype
+    xml.xpath("//resource/file")[2].attributes['preserve'].value.should == "no" # defaults by mimetype
+    xml.xpath("//resource/file")[2].attributes['shelve'].value.should == "yes"    # defaults by mimetype 
+  end
+
+
   it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image overriding file labels" do
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE,:label=>'Sample tif label!'),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE,:label=>'Sample jp2 label!')]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>true,:add_file_attributes=>true,:objects=>objects)
