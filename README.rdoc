@@ -50,6 +50,7 @@ content type specific operations (such as jp2 generation).
 - 1.4.3 object_type method should return :other if it is an unknown mimetype
 - 1.4.4 produce blank content metadata if no objects are passed in 
 - 1.4.5 allow the user to supply optional file specific attributes for publish, preserve, shelve for creating content metadata
+- 1.4.6 add dirname attribute to objectfile class
 
 ==Usage
 

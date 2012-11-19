@@ -31,6 +31,7 @@ describe Assembly::ObjectFile do
     @ai.filename.should == "test.tif"
     @ai.ext.should == ".tif"
     @ai.filename_without_ext.should == "test"
+    @ai.dirname.should == File.dirname(TEST_TIF_INPUT_FILE)
   end
 
   it "should give us the mimetype of a file even if the exif information is damaged" do

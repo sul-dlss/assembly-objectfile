@@ -70,6 +70,17 @@ module Assembly
       File.basename(path)
     end
 
+    # Returns base directory path for the current file.
+    #
+    # @return [String] base directory
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_file.dirname # "/input"    
+    def dirname
+      File.dirname(path)
+    end
+
     # Returns filename extension
     #
     # @return [String] filename extension
