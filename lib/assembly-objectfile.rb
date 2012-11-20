@@ -20,6 +20,7 @@ module Assembly
   FILE_ATTRIBUTES['audio/mpeg']={:preserve=>'no',:shelve=>'yes',:publish=>'yes'}
   FILE_ATTRIBUTES['application/pdf']={:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}
   FILE_ATTRIBUTES['plain/text']={:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}
+  FILE_ATTRIBUTES['text/plain']={:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}
   
 end
 

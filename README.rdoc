@@ -51,7 +51,7 @@ content type specific operations (such as jp2 generation).
 - 1.4.4 produce blank content metadata if no objects are passed in 
 - 1.4.5 allow the user to supply optional file specific attributes for publish, preserve, shelve for creating content metadata
 - 1.4.6 add dirname attribute to objectfile class
-
+- 1.4.7 add an additional default mimetype for file perservation attributes
 ==Usage
 
 The gem currently has methods for:
