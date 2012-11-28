@@ -53,6 +53,7 @@ content type specific operations (such as jp2 generation).
 - 1.4.6 add dirname attribute to objectfile class
 - 1.4.7 add an additional default mimetype for file perservation attributes
 - 1.4.8 compute mimetype with file unix command by default, and then check for existence of mimetype in exif unless we have a "trusted" mimetype
+- 1.4.9 update list of trusted mimetypes
 
 ==Usage
 
