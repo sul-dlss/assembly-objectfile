@@ -9,7 +9,7 @@ module Assembly
   # the list of mimetypes that will be "trusted" by the unix file command; if a mimetype other than one of these is returned
   #  by the file command, then a check will be made to see if exif data exists...if so, the mimetype returned by the exif data will be used
   #  if no exif data exists, then the mimetype returned by the unix file command will be used
-  TRUSTED_MIMETYPES=["text/plain","plain/text"]
+  TRUSTED_MIMETYPES=["text/plain","plain/text","application/pdf","text/html","application/xml"]
   
   # default publish/preserve/shelve attributes used in content metadata
   FILE_ATTRIBUTES=Hash.new
