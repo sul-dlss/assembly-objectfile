@@ -153,14 +153,10 @@ module Assembly
     def mimetype
       check_for_file unless @mimetype
       if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
-        if exif.nil? || exif.mimetype.nil? || exif.mimetype.empty?  # if we can't get the mimetype from the exif information, try the unix level file command
-          @mimetype ||= `file --mime-type "#{@path}"`.gsub(/\n/,"").split(':')[1].strip
-        else
-          @mimetype ||= exif.mimetype
-        end
-      else
-        @mimetype # we already have the mimetype computed, return it
+        @mimetype = `file --mime-type "#{@path}"`.gsub(/\n/,"").split(':')[1].strip # first try and get the mimetype from the unix file command
+        @mimetype = exif.mimetype if (!Assembly::TRUSTED_MIMETYPES.include?(@mimetype) && !exif.nil? && !exif.mimetype.nil?)  # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
       end
+      return @mimetype 
     end
 
     # Returns encoding information for the current file (only on unix based systems).
@@ -204,7 +200,7 @@ module Assembly
     #
     # Example:
     #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_img.valid? # gives true
+    #   puts source_img.valid_image? # gives true
     def valid_image?  
       
       result= image? ? true : false

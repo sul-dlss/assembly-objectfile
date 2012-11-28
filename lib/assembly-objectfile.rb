@@ -6,6 +6,11 @@ module Assembly
   # if input image is not one of these mime types, it will not be regarded as a valid image
   VALID_IMAGE_MIMETYPES=["image/jpeg","image/tiff","image/jp2","image/tif"]
   
+  # the list of mimetypes that will be "trusted" by the unix file command; if a mimetype other than one of these is returned
+  #  by the file command, then a check will be made to see if exif data exists...if so, the mimetype returned by the exif data will be used
+  #  if no exif data exists, then the mimetype returned by the unix file command will be used
+  TRUSTED_MIMETYPES=["text/plain","plain/text"]
+  
   # default publish/preserve/shelve attributes used in content metadata
   FILE_ATTRIBUTES=Hash.new
   # if no mimetype specific attributes are specified for a given file, define some defaults, and override for specific mimetypes below
