@@ -105,6 +105,19 @@ describe Assembly::ContentMetadata do
     xml.xpath("//resource/file/imageData")[1].attributes['height'].value.should == "100"    
   end
 
+  it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image overriding file labels for one, and skipping auto labels for the others or for where the label is set but is blank" do
+     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE,:label=>'Sample tif label!'),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE,:label=>'')]
+     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:auto_labels=>false,:add_file_attributes=>true,:objects=>objects)
+     result.class.should be String
+     xml = Nokogiri::XML(result)
+     xml.errors.size.should be 0
+     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "image"
+     xml.xpath("//resource").length.should be 3
+     xml.xpath("//resource/file").length.should be 3
+     xml.xpath("//label").length.should be 1
+     xml.xpath("//label")[0].text.should =~ /Sample tif label!/
+  end
+
   it "should generate valid content metadata for a single tif and jp2 of style=simple_image with overriding file attributes and no exif data" do
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]    
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_file_attributes=>true,:file_attributes=>{'image/tiff'=>{:publish=>'no',:preserve=>'no',:shelve=>'no'},'image/jp2'=>{:publish=>'yes',:preserve=>'yes',:shelve=>'yes'}},:objects=>objects)

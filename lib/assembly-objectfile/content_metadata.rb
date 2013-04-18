@@ -39,6 +39,7 @@ module Assembly
       #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default it false.
       #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).  
       #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.  
+      #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true. 
       # Example:
       #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
       def self.create_content_metadata(params={})
@@ -53,12 +54,13 @@ module Assembly
         style=params[:style] || :simple_image
         bundle=params[:bundle] || :default
         add_exif=params[:add_exif] || false
+        auto_labels=(params[:auto_labels].nil? ? true : params[:auto_labels])
         add_file_attributes=params[:add_file_attributes] || false
         file_attributes=params[:file_attributes] || {}
         preserve_common_paths=params[:preserve_common_paths] || false
         flatten_folder_structure=params[:flatten_folder_structure] || false
         include_root_xml=params[:include_root_xml]
-                
+                      
         all_paths=[]
         objects.flatten.each do |obj| 
           raise "File '#{obj.path}' not found" unless obj.file_exists?
@@ -159,13 +161,13 @@ module Assembly
                               
               xml.resource(:id => resource_id,:sequence => sequence,:type => resource_type_description) {
 
-                # create a generic resource label
-                resource_label = "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}"                   
-
+                # create a generic resource label if needed
+                resource_label = (auto_labels == true ? "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}" : "") 
+                
                 # but if one of the files has a label, use it instead
                 resource_files.each {|obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
                 
-                xml.label resource_label
+                xml.label(resource_label) unless resource_label.empty?
 
                 resource_files.each do |obj| # iterate over all the files in a resource
               
