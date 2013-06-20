@@ -4,6 +4,8 @@ require 'assembly-objectfile/version'
 Gem::Specification.new do |s|
   s.name        = 'assembly-objectfile'
   s.version     = Assembly::ObjectFile::VERSION
+  s.platform    = Gem::Platform::RUBY
+  s.required_ruby_version = '~> 1.8.7'
   s.authors     = ["Peter Mangiafico", "Renzo Sanchez-Silva","Monty Hindman","Tony Calavano"]
   s.email       = ["pmangiafico@stanford.edu"]
   s.homepage    = ""
@@ -19,8 +21,9 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'mini_exiftool'
   s.add_dependency 'mime-types'
-  s.add_dependency 'nokogiri'
+  s.add_dependency 'nokogiri', ((RUBY_VERSION < '1.9') ? "~> 1.5.10" : "~> 1") # 1.6.x requires ruby 1.9
 
+  s.add_development_dependency 'json'
   s.add_development_dependency "rspec", "~> 2.6"
   s.add_development_dependency "lyberteam-devel", '>= 1.0.1'
   s.add_development_dependency "lyberteam-gems-devel", "> 1.0.0"
