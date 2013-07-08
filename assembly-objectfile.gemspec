@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.add_dependency 'mini_exiftool'
+  s.add_dependency 'mini_exiftool', "~> 1.6"
   s.add_dependency 'mime-types'
   s.add_dependency 'nokogiri'
 
