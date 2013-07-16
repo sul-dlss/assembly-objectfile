@@ -2,3 +2,9 @@ require "bundler/gem_tasks"
 
 require 'dlss/rake/dlss_release'
 Dlss::Release.new
+
+desc "Run console with irb (default), pry, etc."
+task :console, :irb do |t, args|
+  irb = args[:irb].nil?? 'irb' : args[:irb]
+  sh irb, "-r", "#{File.dirname(__FILE__)}/config/boot.rb"
+end
