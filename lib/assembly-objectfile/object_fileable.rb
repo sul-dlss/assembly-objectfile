@@ -218,7 +218,7 @@ module Assembly
     #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.has_color_profile? # gives true
     def has_color_profile?
-      exif.nil? ? false : !exif['profiledescription'].nil? # check for existence of profile description  
+      exif.nil? ? false : (!exif['profiledescription'].nil? || !exif['colorspace'].nil?) # check for existence of profile description  
     end
 
     # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description and further restricts mimetypes.

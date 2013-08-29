@@ -53,14 +53,14 @@ describe Assembly::ObjectFile do
     @ai.dpg_folder.should == "05"
   end
   
-  it "should tell us that a jp2 file is not jp2able" do
+  it "should tell us that a jp2 file is not jp2able but does have a color profile" do
     File.exists?(TEST_JP2_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
     @ai.image?.should == true
     @ai.object_type.should == :image
     @ai.valid_image?.should == true
     @ai.jp2able?.should == false
-    @ai.has_color_profile?.should == false
+    @ai.has_color_profile?.should == true
   end
 
   it "should tell us that a tiff file is jp2able and has a color profile" do
