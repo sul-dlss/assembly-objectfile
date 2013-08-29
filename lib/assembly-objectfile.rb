@@ -3,8 +3,8 @@ module Assembly
   # the path to the gem, used to access profiles stored with the gem
   PATH_TO_GEM = File.expand_path(File.dirname(__FILE__) + '/..')
 
-  # if input image is not one of these mime types, it will not be regarded as a valid image
-  VALID_IMAGE_MIMETYPES=["image/jpeg","image/tiff","image/jp2","image/tif","image/png"]
+  # if input image is not one of these mime types, it will not be regarded as a valid image for the purpose of generating a JP2 derivative
+  VALID_IMAGE_MIMETYPES=["image/jpeg","image/tiff","image/tif","image/png"]
   
   # the list of mimetypes that will be "trusted" by the unix file command; if a mimetype other than one of these is returned
   #  by the file command, then a check will be made to see if exif data exists...if so, the mimetype returned by the exif data will be used
