@@ -22,6 +22,8 @@ TEST_DPG_SPECIAL_PDF1=File.join(TEST_INPUT_DIR,'oo000oo0001','oo000oo0001_book.p
 TEST_DPG_SPECIAL_PDF2=File.join(TEST_INPUT_DIR,'oo000oo0001','31','oo000oo0001_31_001.pdf')
 TEST_DPG_SPECIAL_TIF=File.join(TEST_INPUT_DIR,'oo000oo0001','50','oo000oo0001_50_001.tif')
 
+TEST_TIFF_NO_COLOR_FILE=File.join(TEST_INPUT_DIR,'test_no_color_profile.tif')
+
 TEST_RES1_TIF1=File.join(TEST_INPUT_DIR,'res1_image1.tif')
 TEST_RES1_JP1=File.join(TEST_INPUT_DIR,'res1_image1.jp2')
 TEST_RES1_TIF2=File.join(TEST_INPUT_DIR,'res1_image2.tif')

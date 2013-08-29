@@ -194,7 +194,7 @@ module Assembly
       object_type == :image 
     end
 
-    # Examines the input image for validity.  Used to determine if image is a valid and useful image.  If image is not a jp2, also checks for a valid profile.
+    # Examines the input image for validity.  Used to determine if image is a valid and useful image.  If image is not a jp2, also checks if it is jp2able?
     #
     # @return [boolean] true if image is valid, false if not.
     #
@@ -210,6 +210,17 @@ module Assembly
       
     end
 
+    # Examines the input image for a color profile.
+    #
+    # @return [boolean] true if image has a color profile, false if not.
+    #
+    # Example:
+    #   source_img=Assembly::ObjectFile.new('/input/path_to_file.tif')
+    #   puts source_img.has_color_profile? # gives true
+    def has_color_profile?
+      exif.nil? ? false : !exif['profiledescription'].nil? # check for existence of profile description  
+    end
+
     # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description and further restricts mimetypes.
     # It is used by the assembly robots to decide if a jp2 will be created and is also called before you create a jp2 using assembly-image.
     # @return [boolean] true if image should have a jp2 created, false if not.
@@ -222,7 +233,6 @@ module Assembly
       result=false
       unless exif.nil?
         result=(Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)) # check for allowed image mimetypes that can be converted to jp2
-        result=(exif['profiledescription'] != nil) # check for existence of profile description
       end
       return result
 

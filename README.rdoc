@@ -58,6 +58,7 @@ content type specific operations (such as jp2 generation).
 - 1.5.1 Pin mini_exiftool to 1.x and Nokogiri to 1.5.x branch for Ruby 1.8.7, added image/png and application/zip
 - 1.5.2 Fix for Rails 4 and support for 'rake console'
 - 1.5.3 More gemfile updates
+- 1.5.4 jp2able? method now returns true even if profile description is missing; add new method which does a check for existing color profile in an image
 
 ==Usage
 

@@ -53,13 +53,34 @@ describe Assembly::ObjectFile do
     @ai.dpg_folder.should == "05"
   end
   
-  it "should tell us that a jp2 file not jp2able and is not valid since it has no profile" do
+  it "should tell us that a jp2 file is jp2able but has no color profile" do
     File.exists?(TEST_JP2_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
     @ai.image?.should == true
     @ai.object_type.should == :image
     @ai.valid_image?.should == true
-    @ai.jp2able?.should == false
+    @ai.jp2able?.should == true
+    @ai.has_color_profile?.should == false
+  end
+
+  it "should tell us that a tiff file is jp2able and has a color profile" do
+    File.exists?(TEST_RES1_TIF1).should be true
+    @ai = Assembly::ObjectFile.new(TEST_RES1_TIF1)
+    @ai.image?.should == true
+    @ai.object_type.should == :image
+    @ai.valid_image?.should == true
+    @ai.jp2able?.should == true
+    @ai.has_color_profile?.should == true
+  end
+  
+  it "should tell us that a tiff file is not jp2able and is not valid since it has no profile" do
+    File.exists?(TEST_TIFF_NO_COLOR_FILE).should be true
+    @ai = Assembly::ObjectFile.new(TEST_TIFF_NO_COLOR_FILE)
+    @ai.image?.should == true
+    @ai.object_type.should == :image
+    @ai.valid_image?.should == true
+    @ai.jp2able?.should == true
+    @ai.has_color_profile?.should == false
   end
     
   it "should compute checksums for an image file" do
