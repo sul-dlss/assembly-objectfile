@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe Assembly::ObjectFile do
   
   it "should not run if no input file is passed in" do

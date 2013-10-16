@@ -1,3 +1,5 @@
+require 'spec_helper'
+
 describe Assembly::ContentMetadata do
   
   it "should generate valid content metadata with exif for a single tif and jp2 of style=simple_image, adding file attributes" do

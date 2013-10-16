@@ -8,3 +8,10 @@ task :console, :irb do |t, args|
   irb = args[:irb].nil?? 'irb' : args[:irb]
   sh irb, "-r", "#{File.dirname(__FILE__)}/config/boot.rb"
 end
+
+require 'rspec/core/rake_task'
+
+desc "Run specs"
+RSpec::Core::RakeTask.new(:spec)
+
+task :default => :spec
