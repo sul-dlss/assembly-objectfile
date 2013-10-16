@@ -10,3 +10,4 @@ pkg/*
 tags
 tmp
 .yardoc/*
+Gemfile.lock
