@@ -111,7 +111,7 @@ describe Assembly::ObjectFile do
     File.exists?(non_image_file).should be true
     @ai = Assembly::ObjectFile.new(non_image_file)
     @ai.image?.should == false
-    @ai.object_type.should == :text    
+    @ai.object_type.should_not == :image
     @ai.valid_image?.should == false
 
     non_image_file=File.join(Assembly::PATH_TO_GEM,'README.rdoc')
