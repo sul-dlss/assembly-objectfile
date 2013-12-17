@@ -63,6 +63,7 @@ content type specific operations (such as jp2 generation).
 - 1.5.6 do a further check for alternate existence of color profile in exif
 - 1.5.7 include Gemfile.lock, pin Nokogiri to 1.5.x and ActiveSupport to 3.2.x
 - 1.6.1 remove dependencies on sulgems
+- 1.6.2 Added APLv2 artifacts
 
 ==Usage
 
