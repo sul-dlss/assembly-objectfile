@@ -113,7 +113,7 @@ module Assembly
     def exif
       check_for_file unless @exif
       begin
-        @exif ||= MiniExiftool.new @path  
+        @exif ||= MiniExiftool.new(@path,:convert_encoding=>true)
       rescue
         @exif = nil
       end
