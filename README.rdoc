@@ -78,6 +78,11 @@ The gem currently has methods for:
 
 	bundle exec rspec spec
 
+==Releasing the gem
+
+gem build assembly-objectfile.gemspec
+gem push assembly-objectfile-x.y.z.gem  # replace x-y-z with the version number, you'll need a ruby gems account to do this
+ 
 ==Generate documentation
 To generate documentation into the "doc" folder:
 
