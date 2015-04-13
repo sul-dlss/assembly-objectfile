@@ -23,11 +23,12 @@ describe Assembly::ObjectFile do
     @ai.image?.should == true
     @ai.exif.should_not be nil
     @ai.mimetype.should == 'image/tiff'
+    @ai.file_mimetype.should == 'image/tiff'
     @ai.object_type.should == :image
     @ai.valid_image?.should == true
     @ai.jp2able?.should == true
   end
-
+  
   it "should tell us information about the input file" do
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.filename.should == "test.tif"
@@ -118,7 +119,7 @@ describe Assembly::ObjectFile do
     File.exists?(non_image_file).should be true
     @ai = Assembly::ObjectFile.new(non_image_file)
     @ai.image?.should == false
-    @ai.object_type.should == :text    
+    @ai.object_type.should == :other    
     @ai.valid_image?.should == false    
   end
 
@@ -132,6 +133,7 @@ describe Assembly::ObjectFile do
     File.exists?(TEST_TIF_INPUT_FILE).should be true
     @ai = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
     @ai.mimetype.should == 'image/tiff'
+    @ai.file_mimetype.should == 'image/tiff'
     @ai.encoding.should == 'binary'
   end
         

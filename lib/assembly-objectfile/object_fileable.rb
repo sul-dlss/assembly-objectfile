@@ -113,7 +113,7 @@ module Assembly
     def exif
       check_for_file unless @exif
       begin
-        @exif ||= MiniExiftool.new(@path,:convert_encoding=>true)
+        @exif ||= MiniExiftool.new(@path,replace_invalid_chars: '?')
       rescue
         @exif = nil
       end
@@ -142,8 +142,8 @@ module Assembly
       check_for_file unless @sha1
       @sha1 ||= Digest::SHA1.file(path).hexdigest
     end
-    
-    # Returns mimetype information for the current file (only on unix based systems).
+
+    # Returns mimetype information for the current file based on file extension or exif data (if available)
     #
     # @return [string] mime type for supplied file
     #
@@ -151,12 +151,32 @@ module Assembly
     #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.mimetype # gives 'text/plain'
     def mimetype
-      check_for_file unless @mimetype
       if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
-        @mimetype = `file --mime-type "#{@path}"`.gsub(/\n/,"").split(':')[1].strip # first try and get the mimetype from the unix file command
-        @mimetype = exif.mimetype if (!Assembly::TRUSTED_MIMETYPES.include?(@mimetype) && !exif.nil? && !exif.mimetype.nil?)  # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        if (!exif.nil? && !exif.mimetype.nil?)  # try and get the mimetype from the exif data if it exists
+          @mimetype = exif.mimetype
+        else # otherwise get it from the mime-types gem (using the file extension) assuming we can find, if not, return blank     
+          mimetype = MIME::Types.type_for(@path).first
+          @mimetype= mimetype ? mimetype.content_type : ''
+        end
       end
       return @mimetype 
+    end
+
+    
+    # Returns mimetype information for the current file based on unix file system command or exif data (if available).
+    #
+    # @return [string] mime type for supplied file
+    #
+    # Example:
+    #   source_file=Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.file_mimetype # gives 'text/plain'
+    def file_mimetype
+      check_for_file unless @file_mimetype
+      if @file_mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
+        @file_mimetype = `file --mime-type "#{@path}"`.gsub(/\n/,"").split(':')[1].strip # first try and get the mimetype from the unix file command
+        @file_mimetype = exif.mimetype if (!Assembly::TRUSTED_MIMETYPES.include?(@file_mimetype) && !exif.nil? && !exif.mimetype.nil?)  # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+      end
+      return @file_mimetype 
     end
 
     # Returns encoding information for the current file (only on unix based systems).
