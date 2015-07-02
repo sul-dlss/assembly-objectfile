@@ -2,7 +2,7 @@ require 'nokogiri'
 
 module Assembly
 
-  SPECIAL_DPG_FOLDERS=['31','50']  # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
+  SPECIAL_DPG_FOLDERS=['31','44','50']  # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
                                    # these are used when :bundle=>:dpg only
                                    
   # This class generates content metadata for image files
