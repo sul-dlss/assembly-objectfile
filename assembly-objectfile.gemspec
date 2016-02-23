@@ -22,12 +22,8 @@ Gem::Specification.new do |s|
   s.add_dependency 'mini_exiftool'
   s.add_dependency 'mime-types'
   s.add_dependency 'nokogiri'
-  # s.add_dependency 'activesupport'
 
   s.add_development_dependency 'rake'
-  s.add_development_dependency 'json'
   s.add_development_dependency "rspec", "~> 2.6"
-  # s.add_development_dependency "lyberteam-gems-devel", "> 1.0.0"
   s.add_development_dependency "yard"
-  
 end
