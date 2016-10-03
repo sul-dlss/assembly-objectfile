@@ -126,7 +126,7 @@ module Assembly
         resources.delete([]) # delete any empty elements
         
         builder = Nokogiri::XML::Builder.new do |xml|
-          xml.contentMetadata(:objectId => "#{pid}",:type => content_type_description) {
+          xml.contentMetadata(:objectId => "#{druid}",:type => content_type_description) {
             resources.each do |resource_files| # iterate over all the resources
 
               # start a new resource element              

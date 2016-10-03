@@ -282,7 +282,7 @@ describe Assembly::ContentMetadata do
     xml = Nokogiri::XML(result)
     xml.errors.size.should be 0
     xml.xpath("//contentMetadata")[0].attributes['type'].value.should == "book"
-    xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == "#{TEST_DRUID}"
+    xml.xpath("//contentMetadata")[0].attributes['objectId'].value.should == test_druid
     test_druid.should == "druid:#{TEST_DRUID}"
     xml.xpath("//resource").length.should be 3
     xml.xpath("//resource/file").length.should be 7                                  
