@@ -1,6 +1,9 @@
 notifications:
   email: false
-
+addons:
+  apt:
+    packages:
+    - libimage-exiftool-perl
 rvm:
   - 2.2.5
   - 2.3.1
