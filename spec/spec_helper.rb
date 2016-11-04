@@ -1,6 +1,10 @@
 bootfile = File.expand_path(File.dirname(__FILE__) + '/../config/boot')
 require bootfile
 
+RSpec.configure do |config|
+  config.order = 'random'
+end
+
 TEST_DATA_DIR = File.join(Assembly::PATH_TO_GEM,'spec','test_data')
 TEST_INPUT_DIR       = File.join(TEST_DATA_DIR,'input')
 TEST_OUTPUT_DIR      = File.join(TEST_DATA_DIR,'output')
