@@ -15,14 +15,14 @@ module Assembly
       # @param [Hash] params a hash containg parameters needed to produce content metadata
       #   :druid = required - a string of druid of the repository object's druid id (with or without 'druid:' prefix)
       #   :objects = required - an array of Assembly::ObjectFile objects containing the list of files to add to content metadata
-      #                NOTE: if you set the :bundle option to "prebundlded", you will need to pass in an array of arrays, and not a flat array, as noted below      
+      #                NOTE: if you set the :bundle option to :prebundled, you will need to pass in an array of arrays, and not a flat array, as noted below      
       #   :style = optional - a symbol containing the style of metadata to create, allowed values are
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
       #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="object"
       #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object"
       #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
-      #                 :map, like simple_image, but with contentMetadata type="map", resoruce type="image" 
+      #                 :map, like simple_image, but with contentMetadata type="map", resource type="image" 
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
       #                 :default = all files get their own resources (default)
       #                 :filename = files with the same filename but different extensions get bundled together in a single resource
@@ -36,7 +36,7 @@ module Assembly
       #   :include_root_xml = optional - a boolean to indicate if the contentMetadata returned includes a root <?xml version="1.0"?> tag, defaults to true
       #   :preserve_common_paths = optional - When creating the file "id" attribute, content metadata uses the "relative_path" attribute of the ObjectFile objects passed in.  If the "relative_path" attribute is not set,  the "path" attribute is used instead,
       #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
-      #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default it false.
+      #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default is false.
       #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).  
       #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.  
       #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true. 
@@ -79,15 +79,13 @@ module Assembly
         # a counter to use when creating auto-labels for resources, with incremenets for each type
         resource_type_counters=Hash.new(0)
         
-        # set the content type id
+        # set the object level content type id
         case style
           when :simple_image
             content_type_description = content_type_descriptions[:image]
           when :file
             content_type_description = content_type_descriptions[:file]
-          when :simple_book,:book_with_pdf
-            content_type_description = content_type_descriptions[:book]
-          when :book_as_image
+          when :simple_book,:book_with_pdf,:book_as_image
             content_type_description = content_type_descriptions[:book]
           when :map
             content_type_description = content_type_descriptions[:map]

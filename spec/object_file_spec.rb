@@ -4,9 +4,9 @@ describe Assembly::ObjectFile do
   
   it "should not run if no input file is passed in" do
     @ai=Assembly::ObjectFile.new('')
-    expect{@ai.filesize}.to raise_error
-    expect{@ai.sha1}.to raise_error
-    expect{@ai.md5}.to raise_error
+    expect{@ai.filesize}.to raise_error(RuntimeError,'input file  does not exist')
+    expect{@ai.sha1}.to raise_error(RuntimeError,'input file  does not exist')
+    expect{@ai.md5}.to raise_error(RuntimeError,'input file  does not exist')
   end
 
   it "should return the common directory of a set of filenames passed into it, where the common part does not terminate on a directory" do

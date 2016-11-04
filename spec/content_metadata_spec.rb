@@ -508,7 +508,7 @@ describe Assembly::ContentMetadata do
     junk_file='/tmp/flim_flam_floom.jp2'
     expect(File.exists?(junk_file)).to be false
     objects=[Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(junk_file)]  
-    expect {Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:objects=>objects)}.to raise_error 
+    expect {Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:objects=>objects)}.to raise_error(RuntimeError,"File '#{junk_file}' not found")
   end
 
   it "should generate valid content metadata for images and associated text files, of style=simple_image using bundle=prebundled, and no exif data" do
