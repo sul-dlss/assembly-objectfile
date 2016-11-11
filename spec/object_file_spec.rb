@@ -107,6 +107,24 @@ describe Assembly::ObjectFile do
     expect(@ai.file_exists?).to be false    
   end
   
+  it "should set attributes correctly when initializing" do
+    @ai = Assembly::ObjectFile.new('/some/file.txt')
+    expect(@ai.path).to eq('/some/file.txt')
+    expect(@ai.label).to be_nil 
+    expect(@ai.file_attributes).to be_nil
+    expect(@ai.provider_sha1).to be_nil
+    expect(@ai.provider_md5).to be_nil
+    expect(@ai.relative_path).to be_nil
+    
+    @ai = Assembly::ObjectFile.new('/some/file.txt',:label=>'some label',:file_attributes=>{'shelve'=>'yes','publish'=>'yes','preserve'=>'no'},:relative_path=>'/tmp')
+    expect(@ai.path).to eq('/some/file.txt')
+    expect(@ai.label).to eq('some label')
+    expect(@ai.file_attributes).to eq({'shelve'=>'yes','publish'=>'yes','preserve'=>'no'})
+    expect(@ai.provider_sha1).to be_nil
+    expect(@ai.provider_md5).to be_nil
+    expect(@ai.relative_path).to eq('/tmp')
+  end
+  
   it "should tell us if an input file is not an image" do
     non_image_file=File.join(Assembly::PATH_TO_GEM,'spec/object_file_spec.rb')
     expect(File.exists?(non_image_file)).to be true
