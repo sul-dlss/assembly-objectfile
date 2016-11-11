@@ -41,7 +41,7 @@ module Assembly
       #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.  
       #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true. 
       # Example:
-      #    Assembly::Image.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
+      #    Assembly::ContentMetadata.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
       def self.create_content_metadata(params={})
 
         druid=params[:druid]
