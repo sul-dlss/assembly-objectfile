@@ -2,9 +2,11 @@ require 'nokogiri'
 
 module Assembly
 
-  SPECIAL_DPG_FOLDERS=['31','44','50']  # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
+  SPECIAL_DPG_FOLDERS = ['31', '44', '50']  # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
                                    # these are used when :bundle=>:dpg only
-                                   
+  
+  DEPRECATED_STYLES = [:book_with_pdf, :book_as_image]
+                                  
   # This class generates content metadata for image files
   class ContentMetadata
     
@@ -20,8 +22,8 @@ module Assembly
       #                 :simple_image (default), contentMetadata type="image", resource type="image"
       #                 :file, contentMetadata type="file", resource type="file"      
       #                 :simple_book, contentMetadata type="book", resource type="page", but any resource which has file(s) other than an image, and also contains no images at all, will be resource type="object"
-      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object"
-      #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)
+      #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object" - NOTE: THIS IS DEPRECATED
+      #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)  - NOTE: THIS IS DEPRECATED
       #                 :map, like simple_image, but with contentMetadata type="map", resource type="image" 
       #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
       #                 :default = all files get their own resources (default)
@@ -93,6 +95,7 @@ module Assembly
             raise "Supplied style not valid"
         end
           
+        puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
         
         # determine how many resources to create
         # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
