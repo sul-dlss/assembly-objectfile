@@ -23,6 +23,7 @@ module Assembly
     #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object" - NOTE: THIS IS DEPRECATED
     #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)  - NOTE: THIS IS DEPRECATED
     #                 :map, like simple_image, but with contentMetadata type="map", resource type="image"
+    #                 :3d, contentMetadata type="3d", ".obj" files go into resource_type="3d", everything else into resource_type="file"
     #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
     #                 :default = all files get their own resources (default)
     #                 :filename = files with the same filename but different extensions get bundled together in a single resource
@@ -70,8 +71,8 @@ module Assembly
       common_path = Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
 
       # these are the valid strings for each type of document to be use contentMetadata type and resourceType
-      content_type_descriptions = { file: 'file', image: 'image', book: 'book', map: 'map' }
-      resource_type_descriptions = { object: 'object', file: 'file', image: 'image', book: 'page', map: 'image' }
+      content_type_descriptions = { file: 'file', image: 'image', book: 'book', map: 'map', '3d': '3d' }
+      resource_type_descriptions = { object: 'object', file: 'file', image: 'image', book: 'page', map: 'image', '3d': '3d' }
 
       # global sequence for resource IDs
       sequence = 0
@@ -89,6 +90,8 @@ module Assembly
         content_type_description = content_type_descriptions[:book]
       when :map
         content_type_description = content_type_descriptions[:map]
+      when :'3d'
+        content_type_description = content_type_descriptions[:'3d']
       else
         raise 'Supplied style not valid'
       end
@@ -152,6 +155,14 @@ module Assembly
                 resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
               when :map
                 resource_type_description = resource_type_descriptions[:map]
+              when :'3d'
+                 resource_extensions = resource_files.collect {|obj| obj.ext}
+                 has_obj_files = resource_extensions.include?('.obj')
+                 if has_obj_files # if this resource contains an .obj file, the resource type is 3d
+                   resource_type_description = resource_type_descriptions[:'3d']
+                 else # otherwise the resource type is file
+                   resource_type_description = resource_type_descriptions[:file]
+                 end
                end
             end
 

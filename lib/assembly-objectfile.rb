@@ -25,8 +25,9 @@ module Assembly
   FILE_ATTRIBUTES['application/pdf'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
   FILE_ATTRIBUTES['plain/text'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
   FILE_ATTRIBUTES['text/plain'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['image/png'] = { preserve: 'no', shelve: 'yes', publish: 'yes' }
+  FILE_ATTRIBUTES['image/png'] = { preserve: 'yes', shelve: 'yes', publish: 'no'}
   FILE_ATTRIBUTES['application/zip'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
+  FILE_ATTRIBUTES['application/json'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
 end
 
 require 'assembly-objectfile/content_metadata'

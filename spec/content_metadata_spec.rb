@@ -511,6 +511,25 @@ describe Assembly::ContentMetadata do
     expect { described_class.create_content_metadata(druid: TEST_DRUID, objects: objects) }.to raise_error(RuntimeError, "File '#{junk_file}' not found")
   end
 
+  it 'generates valid content metadata for a 3d object with a single obj file and 2 other supporting files' do
+    objects=[Assembly::ObjectFile.new(TEST_OBJ_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_PDF_FILE)]
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:'3d',:objects=>objects)
+    expect(result.class).to be String
+    xml = Nokogiri::XML(result)
+    expect(xml.errors.size).to be 0
+    expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('3d')
+    expect(xml.xpath('//resource').length).to be 3
+    expect(xml.xpath('//resource/file').length).to be 3
+    expect(xml.xpath('//label').length).to be 3
+    expect(xml.xpath('//label')[0].text).to match(/3d 1/)
+    expect(xml.xpath('//label')[1].text).to match(/File 1/)
+    expect(xml.xpath('//label')[2].text).to match(/File 2/)
+    expect(xml.xpath('//resource/file/imageData').length).to be 0
+    expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('3d')
+    expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('file')
+    expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('file')
+  end
+
   it 'generates valid content metadata for images and associated text files, of style=simple_image using bundle=prebundled, and no exif data' do
     files = [[TEST_RES1_TIF1, TEST_RES1_JP1, TEST_RES1_TIF2, TEST_RES1_JP2, TEST_RES1_TEI, TEST_RES1_TEXT, TEST_RES1_PDF], [TEST_RES2_TIF1, TEST_RES2_JP1, TEST_RES2_TIF2, TEST_RES2_JP2, TEST_RES2_TEI, TEST_RES2_TEXT], [TEST_RES3_TIF1, TEST_RES3_JP1, TEST_RES3_TEI]]
     objects = files.collect { |resource| resource.collect { |file| Assembly::ObjectFile.new(file) } }
