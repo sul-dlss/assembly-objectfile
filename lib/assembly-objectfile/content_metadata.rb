@@ -31,8 +31,8 @@ module Assembly
       #                 :dpg = files representing the same image but of different mimetype that use the SULAIR DPG filenaming standard (00 vs 05) get bundled together in a single resource
       #                 :prebundlded = this option requires you to prebundled the files passed in as an array of arrays, indicating how files are bundlded into resources; this is the most flexible option since it gives you full control
       #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
-      #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve attributes should be added using defaults or by supplied override by mime/type, defaults to false and is not required if project goes through assembly
-      #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true, 
+      #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve/role attributes should be added using defaults or by supplied override by mime/type, defaults to false and is not required if project goes through assembly
+      #   :file_attributes = optional - a hash of file attributes by mimetype to use instead of defaults, only used if add_file_attributes is also true,
       #             If a mimetype match is not found in your hash, the default is used (either your supplied default or the gems).
       #             e.g. {'default'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'},'image/tif'=>{:preserve=>'yes',:shelve=>'no',:publish=>'no'},'application/pdf'=>{:preserve=>'yes',:shelve=>'yes',:publish=>'yes'}}
       #   :include_root_xml = optional - a boolean to indicate if the contentMetadata returned includes a root <?xml version="1.0"?> tag, defaults to true
@@ -191,6 +191,7 @@ module Assembly
                       :preserve => file_attributes_hash[:preserve],
                       :publish  => file_attributes_hash[:publish],
                       :shelve   => file_attributes_hash[:shelve],
+                      :role     => file_attributes_hash[:role],
                     })
                   end
                                                       
