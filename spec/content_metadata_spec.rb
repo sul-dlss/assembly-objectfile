@@ -137,11 +137,13 @@ describe Assembly::ContentMetadata do
     expect(xml.xpath("//resource")[1].attributes['type'].value).to eq("image")
     expect(xml.xpath("//resource/file")[0].attributes['size']).to be nil
     expect(xml.xpath("//resource/file")[0].attributes['mimetype']).to be nil
+    expect(xml.xpath("//resource/file")[0].attributes['role']).to be nil
     expect(xml.xpath("//resource/file")[0].attributes['publish'].value).to eq("no")
     expect(xml.xpath("//resource/file")[0].attributes['preserve'].value).to eq("no")
     expect(xml.xpath("//resource/file")[0].attributes['shelve'].value).to eq("no")    
     expect(xml.xpath("//resource/file")[1].attributes['size']).to be nil
     expect(xml.xpath("//resource/file")[1].attributes['mimetype']).to be nil
+    expect(xml.xpath("//resource/file")[1].attributes['role']).to be nil
     expect(xml.xpath("//resource/file")[1].attributes['publish'].value).to eq("yes")
     expect(xml.xpath("//resource/file")[1].attributes['preserve'].value).to eq("yes")
     expect(xml.xpath("//resource/file")[1].attributes['shelve'].value).to eq("yes") 
