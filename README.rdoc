@@ -69,6 +69,7 @@ content type specific operations (such as jp2 generation).
 - 1.6.3 Integrate with TravisCI
 - 1.6.4 Try and solve UTF-8 encoding issues with exif data in images
 - 1.6.5 Just use mime-types extension by default to compute mimetype to prevent calling to shell all the time (and avoid potential memory problems).  A new method allows you to call out to shell if you really want to.
+- 1.7.0 Support the `role` attribute on files
 
 ==Usage
 
