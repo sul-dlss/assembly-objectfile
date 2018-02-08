@@ -551,6 +551,23 @@ describe Assembly::ContentMetadata do
     end
   end
 
+  it "should generate role attributes for content metadata for a tif" do
+    obj1=Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
+    obj1.file_attributes={:publish=>'no',:preserve=>'no',:shelve=>'no',:role=>'master-role'}
+    objects=[obj1]
+    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:add_exif=>false,:add_file_attributes=>true,:objects=>objects)
+    expect(result.class).to be String
+    xml = Nokogiri::XML(result)
+    expect(xml.errors.size).to be 0
+    expect(xml.xpath("//contentMetadata")[0].attributes['type'].value).to eq("image")
+    expect(xml.xpath("//resource").length).to be 1
+    expect(xml.xpath("//resource/file").length).to be 1
+    expect(xml.xpath("//resource/file").length).to be 1
+    expect(xml.xpath("//resource/file")[0].attributes['role'].value).to eq("master-role")
+  end
+
+
+
   it "should generate content metadata even when no objects are passed in" do
     objects=[]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:bundle=>:prebundled,:style=>:file,:objects=>objects)
