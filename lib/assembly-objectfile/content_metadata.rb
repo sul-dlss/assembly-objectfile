@@ -193,6 +193,7 @@ module Assembly
                       :shelve   => file_attributes_hash[:shelve],
                       :role     => file_attributes_hash[:role],
                     })
+                    xml_file_params.reject! { |k, v| v.nil? || v.empty? }
                   end
                                                       
                   xml_file_params.merge!({:mimetype => mimetype,:size => obj.filesize}) if add_exif
