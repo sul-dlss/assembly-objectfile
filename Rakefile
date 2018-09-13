@@ -1,17 +1,17 @@
-require "bundler/gem_tasks"
+require 'bundler/gem_tasks'
 
-#require 'dlss/rake/dlss_release'
-#Dlss::Release.new
+# require 'dlss/rake/dlss_release'
+# Dlss::Release.new
 
-desc "Run console with irb (default), pry, etc."
-task :console, :irb do |t, args|
-  irb = args[:irb].nil?? 'irb' : args[:irb]
-  sh irb, "-r", "#{File.dirname(__FILE__)}/config/boot.rb"
+desc 'Run console with irb (default), pry, etc.'
+task :console, :irb do |_t, args|
+  irb = args[:irb].nil? ? 'irb' : args[:irb]
+  sh irb, '-r', "#{File.dirname(__FILE__)}/config/boot.rb"
 end
 
 require 'rspec/core/rake_task'
 
-desc "Run specs"
+desc 'Run specs'
 RSpec::Core::RakeTask.new(:spec)
 
-task :default => :spec
+task default: :spec
