@@ -5,11 +5,7 @@ require 'mime/types'
 module Assembly
   # Common behaviors we need for other classes in the gem
   module ObjectFileable
-    attr_accessor :path
-    attr_accessor :file_attributes
-    attr_accessor :label
-    attr_accessor :provider_md5, :provider_sha1
-    attr_accessor :relative_path
+    attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path
 
     # @param [String] path full path to the file to be worked with
     # @param [Hash<Symbol => Object>] params options used during content metadata generation
@@ -84,12 +80,12 @@ module Assembly
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.exif # hash with exif information
     def exif
-      check_for_file unless @exif
-      begin
-        @exif ||= MiniExiftool.new(@path, replace_invalid_chars: '?')
-      rescue StandardError
-        @exif = nil
-      end
+      @exif ||= begin
+                  check_for_file
+                  MiniExiftool.new(path, replace_invalid_chars: '?')
+                rescue StandardError
+                  nil
+                end
     end
 
     # Computes md5 checksum or returns cached value
@@ -118,15 +114,14 @@ module Assembly
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.mimetype # 'text/plain'
     def mimetype
-      if @mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
-        if !exif.nil? && !exif.mimetype.nil? # try and get the mimetype from the exif data if it exists
-          @mimetype = exif.mimetype
-        else # otherwise get it from the mime-types gem (using the file extension) assuming we can find, if not, return blank
-          mimetype = MIME::Types.type_for(@path).first
-          @mimetype = mimetype ? mimetype.content_type : ''
+      @mimetype ||= begin
+        if exif && exif.mimetype # try exif first
+          exif.mimetype
+        else # otherwise get it from the mime-types gem (using the file extension), else blank
+          mtype = MIME::Types.type_for(path).first
+          mtype ? mtype.content_type : ''
         end
       end
-      @mimetype
     end
 
     # Returns mimetype information for the current file based on unix file system command or exif data (if available).
@@ -135,12 +130,12 @@ module Assembly
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.file_mimetype # 'text/plain'
     def file_mimetype
-      check_for_file unless @file_mimetype
-      if @file_mimetype.nil? # if we haven't computed it yet once for this object, try and get the mimetype
-        @file_mimetype = `file --mime-type "#{@path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
-        @file_mimetype = exif.mimetype if !Assembly::TRUSTED_MIMETYPES.include?(@file_mimetype) && !exif.nil? && !exif.mimetype.nil? # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+      @file_mimetype ||= begin
+        check_for_file
+        mtype = `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
+        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(mtype) && exif && exif.mimetype # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        prefer_exif ? exif.mimetype : mtype
       end
-      @file_mimetype
     end
 
     # @note Uses shell call to "file", only expected to work on unix based systems
@@ -149,8 +144,10 @@ module Assembly
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.encoding # 'us-ascii'
     def encoding
-      check_for_file unless @encoding
-      @encoding ||= `file --mime-encoding "#{@path}"`.delete("\n").split(':')[1].strip
+      @encoding ||= begin
+        check_for_file
+        `file --mime-encoding "#{path}"`.delete("\n").split(':')[1].strip
+      end
     end
 
     # @return [Symbol] the type of object, could be :application (for PDF or Word, etc), :audio, :image, :message, :model, :multipart, :text or :video
@@ -177,9 +174,9 @@ module Assembly
     #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.valid_image? # true
     def valid_image?
-      result = image? ? true : false
-      result = jp2able? unless mimetype == 'image/jp2' # further checks if we are not already a jp2
-      result
+      return false unless image?
+
+      mimetype == 'image/jp2' || jp2able? ? true : false
     end
 
     # @return [Boolean] true if image has a color profile, false if not.
@@ -187,7 +184,9 @@ module Assembly
     #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.has_color_profile? # true
     def has_color_profile?
-      exif.nil? ? false : (!exif['profiledescription'].nil? || !exif['colorspace'].nil?) # check for existence of profile description
+      return false unless exif
+
+      exif['profiledescription'] || exif['colorspace'] ? true : false
     end
 
     # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description and further restricts mimetypes.
@@ -197,11 +196,9 @@ module Assembly
     #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_img.jp2able? # true
     def jp2able?
-      result = false
-      unless exif.nil?
-        result = Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype) # check for allowed image mimetypes that can be converted to jp2
-      end
-      result
+      return false unless exif
+
+      Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)
     end
 
     # Returns file size information for the current file in bytes.
@@ -211,7 +208,7 @@ module Assembly
     #   puts source_file.filesize # 1345
     def filesize
       check_for_file
-      @filesize ||= File.size @path
+      @filesize ||= File.size(path)
     end
 
     # Determines if the file exists (and is not a directory)
@@ -220,7 +217,7 @@ module Assembly
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.file_exists? # true
     def file_exists?
-      File.exist?(@path) && !File.directory?(@path)
+      File.exist?(path) && !File.directory?(path)
     end
 
     private
