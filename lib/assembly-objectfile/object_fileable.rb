@@ -21,7 +21,7 @@ module Assembly
       @label = params[:label]
       @file_attributes = params[:file_attributes]
       @relative_path = params[:relative_path]
-      @provider_md5 = params[:provide_md5]
+      @provider_md5 = params[:provider_md5]
       @provider_sha1 = params[:provider_sha1]
     end
 
