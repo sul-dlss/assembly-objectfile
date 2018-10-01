@@ -124,6 +124,11 @@ describe Assembly::ObjectFile do
     expect(@ai.relative_path).to eq('/tmp')
   end
 
+  it 'sets md5_provider attribute' do
+    ai = described_class.new('/some/file.txt', provider_md5: 'XYZ')
+    expect(ai.provider_md5).to eq('XYZ')
+  end
+
   it 'tells us if an input file is not an image' do
     non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/object_file_spec.rb')
     expect(File.exist?(non_image_file)).to be true
