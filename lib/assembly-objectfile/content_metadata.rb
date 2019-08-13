@@ -23,7 +23,7 @@ module Assembly
     #                 :book_with_pdf, contentMetadata type="book", resource type="page", but any resource which has any file(s) other than an image will be resource type="object" - NOTE: THIS IS DEPRECATED
     #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)  - NOTE: THIS IS DEPRECATED
     #                 :map, like simple_image, but with contentMetadata type="map", resource type="image"
-    #                 :3d, contentMetadata type="3d", ".obj" files go into resource_type="3d", everything else into resource_type="file"
+    #                 :3d, contentMetadata type="3d", ".obj" and other configured 3d extension files go into resource_type="3d", everything else into resource_type="file"
     #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
     #                 :default = all files get their own resources (default)
     #                 :filename = files with the same filename but different extensions get bundled together in a single resource
@@ -157,11 +157,10 @@ module Assembly
                 resource_type_description = resource_type_descriptions[:map]
               when :'3d'
                  resource_extensions = resource_files.collect {|obj| obj.ext}
-                 has_obj_files = resource_extensions.include?('.obj')
-                 if has_obj_files # if this resource contains an .obj file, the resource type is 3d
-                   resource_type_description = resource_type_descriptions[:'3d']
-                 else # otherwise the resource type is file
+                 if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
                    resource_type_description = resource_type_descriptions[:file]
+                 else # otherwise the resource type is 3d
+                   resource_type_description = resource_type_descriptions[:'3d']
                  end
                end
             end
