@@ -511,7 +511,7 @@ describe Assembly::ContentMetadata do
     expect { described_class.create_content_metadata(druid: TEST_DRUID, objects: objects) }.to raise_error(RuntimeError, "File '#{junk_file}' not found")
   end
 
-  it 'generates valid content metadata for a 3d object with a single obj file and 2 other supporting files' do
+  it 'generates valid content metadata for a 3d object with two 3d type files and two other supporting files' do
     objects=[Assembly::ObjectFile.new(TEST_OBJ_FILE),Assembly::ObjectFile.new(TEST_PLY_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_PDF_FILE)]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:'3d',:objects=>objects)
     expect(result.class).to be String
