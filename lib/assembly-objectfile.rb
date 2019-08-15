@@ -31,6 +31,7 @@ module Assembly
   FILE_ATTRIBUTES['image/png'] = { preserve: 'yes', shelve: 'yes', publish: 'no'}
   FILE_ATTRIBUTES['application/zip'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
   FILE_ATTRIBUTES['application/json'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
+  FILE_ATTRIBUTES['application/x-tgif'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' } # .obj 3d file types have this mimetype
 end
 
 require 'assembly-objectfile/content_metadata'
