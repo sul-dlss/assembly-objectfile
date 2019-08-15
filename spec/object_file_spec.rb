@@ -36,6 +36,41 @@ describe Assembly::ObjectFile do
     expect(@ai.dirname).to eq(File.dirname(TEST_TIF_INPUT_FILE))
   end
 
+  it 'sets the correct mimetype of plain/text for .txt files' do
+    @ai = described_class.new(TEST_RES1_TEXT)
+    expect(@ai.mimetype).to eq('text/plain')
+  end
+
+  it 'sets the correct mimetype of plain/text for .xml files' do
+    @ai = described_class.new(TEST_RES1_TEXT)
+    expect(@ai.mimetype).to eq('text/plain')
+  end
+
+  it 'sets the correct mimetype of plain/text for .obj 3d files' do
+    @ai = described_class.new(TEST_OBJ_FILE)
+    expect(@ai.mimetype).to eq('text/plain')
+  end
+
+  it 'sets the correct mimetype of plain/text for .ply 3d files' do
+    @ai = described_class.new(TEST_PLY_FILE)
+    expect(@ai.mimetype).to eq('text/plain')
+  end
+
+  it 'sets the correct mimetype of image/tiff for .tif files' do
+    @ai = described_class.new(TEST_TIF_INPUT_FILE)
+    expect(@ai.mimetype).to eq('image/tiff')
+  end
+
+  it 'sets the correct mimetype of image/jp2 for .jp2 files' do
+    @ai = described_class.new(TEST_JP2_INPUT_FILE)
+    expect(@ai.mimetype).to eq('image/jp2')
+  end
+
+  it 'sets the correct mimetype of application/pdf for .pdf files' do
+    @ai = described_class.new(TEST_RES1_PDF)
+    expect(@ai.mimetype).to eq('application/pdf')
+  end
+
   it 'gives us the mimetype of a file even if the exif information is damaged' do
     @ai = described_class.new(TEST_FILE_NO_EXIF)
     expect(@ai.filename).to eq('file_with_no_exif.xml')
@@ -141,7 +176,7 @@ describe Assembly::ObjectFile do
     expect(File.exist?(non_image_file)).to be true
     @ai = described_class.new(non_image_file)
     expect(@ai.image?).to eq(false)
-    expect(@ai.object_type).to eq(:other)
+    expect(@ai.object_type).not_to eq(:image)
     expect(@ai.valid_image?).to eq(false)
   end
 

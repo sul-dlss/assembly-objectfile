@@ -108,23 +108,26 @@ module Assembly
       @sha1 ||= Digest::SHA1.file(path).hexdigest
     end
 
-    # Returns mimetype information for the current file based on file extension or exif data (if available)
+    # Returns mimetype information for the current file based on
+    #   (1) exifdata (if available), (2) unix file type or (3) file extension using the mimetypes gem, in this priority order
     # @return [String] mime type
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.mimetype # 'text/plain'
     def mimetype
       @mimetype ||= begin
-        if exif && exif.mimetype # try exif first
-          exif.mimetype
-        else # otherwise get it from the mime-types gem (using the file extension), else blank
+        if exif_mimetype # first, try the exif data
+          exif_mimetype
+        elsif file_mimetype # next, try exif/unix file system command
+          file_mimetype
+        else  # finally, get it from the mime-types gem (using the file extension) if both of those failed for some reason
           mtype = MIME::Types.type_for(path).first
           mtype ? mtype.content_type : ''
         end
       end
     end
 
-    # Returns mimetype information for the current file based on unix file system command or exif data (if available).
+    # Returns mimetype information for the current file based on unix file system command.
     # @return [String] mime type for supplied file
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
@@ -132,9 +135,20 @@ module Assembly
     def file_mimetype
       @file_mimetype ||= begin
         check_for_file
-        mtype = `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
-        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(mtype) && exif && exif.mimetype # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
-        prefer_exif ? exif.mimetype : mtype
+        `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
+      end
+    end
+
+    # Returns mimetype information for the current file based on exif data (if available and not a trusted source that we'd rather get from the file system command)
+    # @return [String] mime type for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.exif_mimetype # 'text/plain'
+    def exif_mimetype
+      @exif_mimetype ||= begin
+        check_for_file
+        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        exif.mimetype if exif && exif.mimetype && prefer_exif
       end
     end
 
