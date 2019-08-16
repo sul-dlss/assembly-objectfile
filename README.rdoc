@@ -2,7 +2,7 @@
 
 = Assembly-ObjectFile Gem
 
-==Overview 
+==Overview
 This gem contains classes used by the Stanford University Digital Library to perform
 file operations necessary for accessioning of content.  It is also used by related gems to perform
 content type specific operations (such as jp2 generation).
@@ -50,7 +50,7 @@ content type specific operations (such as jp2 generation).
 - 1.4.1 fix errors that could error if there was a space in the filename
 - 1.4.2 Support map style content metadata; don't compute mimetype when generating content metadata unless its needed
 - 1.4.3 object_type method should return :other if it is an unknown mimetype
-- 1.4.4 produce blank content metadata if no objects are passed in 
+- 1.4.4 produce blank content metadata if no objects are passed in
 - 1.4.5 allow the user to supply optional file specific attributes for publish, preserve, shelve for creating content metadata
 - 1.4.6 add dirname attribute to objectfile class
 - 1.4.7 add an additional default mimetype for file perservation attributes
@@ -70,6 +70,9 @@ content type specific operations (such as jp2 generation).
 - 1.6.4 Try and solve UTF-8 encoding issues with exif data in images
 - 1.6.5 Just use mime-types extension by default to compute mimetype to prevent calling to shell all the time (and avoid potential memory problems).  A new method allows you to call out to shell if you really want to.
 - 1.7.0 Support the `role` attribute on files
+- 1.7.1 Don't produce empty XML attributes
+- 1.7.2 Allow for 3d content metadata generation
+- 1.8.0 Add in mime-type generation from the shell again to correctly set 3D and other mimetypes (if exif data does not exist)
 
 ==Usage
 
@@ -86,7 +89,7 @@ The gem currently has methods for:
 
 gem build assembly-objectfile.gemspec
 gem push assembly-objectfile-x.y.z.gem  # replace x-y-z with the version number, you'll need a ruby gems account to do this
- 
+
 ==Generate documentation
 To generate documentation into the "doc" folder:
 
@@ -99,7 +102,7 @@ To keep a local server running with up to date code documentation that you can v
 ==Prerequisites
 
 1. Exiftool
-            
+
    RHEL: (RPM to install comming soon)
    Download latest version from:  http://www.sno.phy.queensu.ca/~phil/exiftool
 
