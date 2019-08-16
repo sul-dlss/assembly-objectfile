@@ -2,6 +2,6 @@
 module Assembly
   class ObjectFile
     # Project version number
-    VERSION = '1.7.2'.freeze
+    VERSION = '1.8.0'.freeze
   end
 end
