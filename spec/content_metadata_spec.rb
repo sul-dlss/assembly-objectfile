@@ -597,4 +597,13 @@ describe Assembly::ContentMetadata do
     expect(xml.xpath('//resource').length).to be 0
     expect(xml.xpath('//resource/file').length).to be 0
   end
+
+  it 'generates an error message when an unknown style is passed in' do
+    objects = []
+    expect {
+      described_class.create_content_metadata(druid: TEST_DRUID, bundle: :prebundled, style: :borked, objects: objects)
+    }.to raise_error { |error|
+      expect(error.message).to eq('Supplied style (borked) not valid')
+    }
+  end
 end
