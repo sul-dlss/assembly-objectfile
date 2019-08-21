@@ -73,6 +73,7 @@ content type specific operations (such as jp2 generation).
 - 1.7.1 Don't produce empty XML attributes
 - 1.7.2 Allow for 3d content metadata generation
 - 1.8.0 Add in mime-type generation from the shell again to correctly set 3D and other mimetypes (if exif data does not exist)
+- 1.8.1 Adds style to error message when style is invalid
 
 ==Usage
 

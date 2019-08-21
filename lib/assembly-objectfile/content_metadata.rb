@@ -93,7 +93,7 @@ module Assembly
       when :'3d'
         content_type_description = content_type_descriptions[:'3d']
       else
-        raise 'Supplied style not valid'
+        raise "Supplied style (#{style}) not valid"
       end
 
       puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
