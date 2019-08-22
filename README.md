@@ -29,19 +29,6 @@ bundle exec spec
 rake release
 ```
 
-## Generate documentation
-
-To generate documentation into the "doc" folder:
-```
-yard
-```
-
-To keep a local server running with up to date code documentation that you can
-view in your browser:
-```
-yard server --reload
-```
-
 ## Prerequisites
 
 1.  Exiftool
