@@ -4,6 +4,7 @@
 .bundle
 config/certs/*
 config/environments/*
+coverage/*
 doc/*
 log/*
 pkg/*
