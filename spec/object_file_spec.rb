@@ -172,7 +172,7 @@ describe Assembly::ObjectFile do
     expect(@ai.object_type).not_to eq(:image)
     expect(@ai.valid_image?).to eq(false)
 
-    non_image_file = File.join(Assembly::PATH_TO_GEM, 'README.rdoc')
+    non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
     expect(File.exist?(non_image_file)).to be true
     @ai = described_class.new(non_image_file)
     expect(@ai.image?).to eq(false)
