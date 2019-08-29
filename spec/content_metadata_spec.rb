@@ -511,7 +511,7 @@ describe Assembly::ContentMetadata do
     expect { described_class.create_content_metadata(druid: TEST_DRUID, objects: objects) }.to raise_error(RuntimeError, "File '#{junk_file}' not found")
   end
 
-  it 'generates valid content metadata for a 3d object with two 3d type files and two other supporting files' do
+  it 'generates valid content metadata for a 3d object with one 3d type files and three other supporting files (where one supporting file is a non-viewable but downloadable 3d file)' do
     objects=[Assembly::ObjectFile.new(TEST_OBJ_FILE),Assembly::ObjectFile.new(TEST_PLY_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_PDF_FILE)]
     result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:'3d',:objects=>objects)
     expect(result.class).to be String
@@ -522,12 +522,12 @@ describe Assembly::ContentMetadata do
     expect(xml.xpath('//resource/file').length).to be 4
     expect(xml.xpath('//label').length).to be 4
     expect(xml.xpath('//label')[0].text).to match(/3d 1/)
-    expect(xml.xpath('//label')[1].text).to match(/3d 2/)
-    expect(xml.xpath('//label')[2].text).to match(/File 1/)
-    expect(xml.xpath('//label')[3].text).to match(/File 2/)
+    expect(xml.xpath('//label')[1].text).to match(/File 1/)
+    expect(xml.xpath('//label')[2].text).to match(/File 2/)
+    expect(xml.xpath('//label')[3].text).to match(/File 3/)
     expect(xml.xpath('//resource/file/imageData').length).to be 0
     expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('3d')
-    expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('3d')
+    expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('file')
     expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('file')
     expect(xml.xpath('//resource')[3].attributes['type'].value).to eq('file')
   end
