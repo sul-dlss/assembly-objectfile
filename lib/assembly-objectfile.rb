@@ -6,7 +6,7 @@ module Assembly
   VALID_IMAGE_MIMETYPES = ['image/jpeg', 'image/tiff', 'image/tif', 'image/png'].freeze
 
   # if input file has one of these extensions in a 3D object, it will get the 3d resource type
-  VALID_THREE_DIMENSION_EXTENTIONS = ['.obj', '.ply', '.threejs', '.gltf'].freeze
+  VALID_THREE_DIMENSION_EXTENTIONS = ['.obj'].freeze
 
   # the list of mimetypes that will be "trusted" by the unix file command; if a mimetype other than one of these is returned
   #  by the file command, then a check will be made to see if exif data exists...if so, the mimetype returned by the exif data will be used
