@@ -87,7 +87,7 @@ RSpec/InstanceVariable:
 # Offense count: 38
 # Configuration parameters: AggregateFailuresByDefault.
 RSpec/MultipleExpectations:
-  Max: 29
+  Max: 36
 
 # Offense count: 2
 RSpec/RepeatedDescription:

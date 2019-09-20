@@ -616,30 +616,56 @@ RSpec.describe Assembly::ContentMetadata do
       end
     end
 
-    context 'when using a 3d object with one 3d type files and three other supporting files (where one supporting file is a non-viewable but downloadable 3d file)' do
+    context 'when using a 3d object with one 3d type files and three other supporting files (where two supporting files are non-viewable but downloadable 3d file)' do
       let(:objects) do
         [Assembly::ObjectFile.new(TEST_OBJ_FILE),
          Assembly::ObjectFile.new(TEST_PLY_FILE),
          Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),
-         Assembly::ObjectFile.new(TEST_PDF_FILE)]
+         Assembly::ObjectFile.new(TEST_PDF_FILE),
+         Assembly::ObjectFile.new(TEST_JPEG_INPUT_FILE),
+         Assembly::ObjectFile.new(TEST_PNG_INPUT_FILE)]
       end
       let(:style) { :'3d' }
 
       it 'generates valid content metadata' do
+        result = described_class.create_content_metadata(druid: TEST_DRUID, style: style, objects: objects, add_exif: true, add_file_attributes: true)
+        xml = Nokogiri::XML(result)
         expect(xml.errors.size).to eq 0
         expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('3d')
-        expect(xml.xpath('//resource').length).to eq 4
-        expect(xml.xpath('//resource/file').length).to eq 4
-        expect(xml.xpath('//label').length).to eq 4
+        expect(xml.xpath('//resource/file').length).to eq 6
         expect(xml.xpath('//label')[0].text).to match(/3d 1/)
         expect(xml.xpath('//label')[1].text).to match(/File 1/)
         expect(xml.xpath('//label')[2].text).to match(/File 2/)
         expect(xml.xpath('//label')[3].text).to match(/File 3/)
-        expect(xml.xpath('//resource/file/imageData').length).to eq 0
+        expect(xml.xpath('//label')[4].text).to match(/File 4/)
+        expect(xml.xpath('//label')[5].text).to match(/File 5/)
+        expect(xml.xpath('//resource/file/imageData').length).to be 3
         expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('3d')
         expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('file')
         expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('file')
         expect(xml.xpath('//resource')[3].attributes['type'].value).to eq('file')
+        expect(xml.xpath('//resource')[4].attributes['type'].value).to eq('file')
+        expect(xml.xpath('//resource')[5].attributes['type'].value).to eq('file')
+        expect(xml.xpath('//resource/file')[0].attributes['mimetype'].value).to eq('text/plain')
+        expect(xml.xpath('//resource/file')[0].attributes['id'].value).to eq('someobject.obj')
+        expect(xml.xpath('//resource/file')[0].attributes['publish'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[0].attributes['preserve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[0].attributes['shelve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[1].attributes['mimetype'].value).to eq('text/plain')
+        expect(xml.xpath('//resource/file')[1].attributes['id'].value).to eq('someobject.ply')
+        expect(xml.xpath('//resource/file')[1].attributes['publish'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[1].attributes['preserve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[1].attributes['shelve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[4].attributes['mimetype'].value).to eq('image/jpeg')
+        expect(xml.xpath('//resource/file')[4].attributes['id'].value).to eq('test.jpeg')
+        expect(xml.xpath('//resource/file')[4].attributes['publish'].value).to eq('no')
+        expect(xml.xpath('//resource/file')[4].attributes['preserve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[4].attributes['shelve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[5].attributes['mimetype'].value).to eq('image/png')
+        expect(xml.xpath('//resource/file')[5].attributes['id'].value).to eq('test.png')
+        expect(xml.xpath('//resource/file')[5].attributes['publish'].value).to eq('no')
+        expect(xml.xpath('//resource/file')[5].attributes['preserve'].value).to eq('yes')
+        expect(xml.xpath('//resource/file')[5].attributes['shelve'].value).to eq('yes')
       end
     end
 

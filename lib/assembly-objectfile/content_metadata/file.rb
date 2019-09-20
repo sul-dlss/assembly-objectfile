@@ -13,7 +13,7 @@ module Assembly
         'image/tif' => { preserve: 'yes', shelve: 'no', publish: 'no' },
         'image/tiff' => { preserve: 'yes', shelve: 'no', publish: 'no' },
         'image/jp2' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
-        'image/jpeg' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'image/jpeg' => { preserve: 'yes', shelve: 'yes', publish: 'no' },
         'audio/wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
         'audio/x-wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
         'audio/mp3' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
