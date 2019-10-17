@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'mini_exiftool'
 require 'mime/types'
 # require 'checksum-tools'
@@ -120,7 +122,7 @@ module Assembly
           exif_mimetype
         elsif file_mimetype # next, try exif/unix file system command
           file_mimetype
-        else  # finally, get it from the mime-types gem (using the file extension) if both of those failed for some reason
+        else # finally, get it from the mime-types gem (using the file extension) if both of those failed for some reason
           mtype = MIME::Types.type_for(path).first
           mtype ? mtype.content_type : ''
         end
@@ -148,7 +150,8 @@ module Assembly
       @exif_mimetype ||= begin
         check_for_file
         prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
-        exif.mimetype if exif && exif.mimetype && prefer_exif
+        exif.mimetype if
+exif&.mimetype && prefer_exif
       end
     end
 

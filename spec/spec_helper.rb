@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'simplecov'
 SimpleCov.start
 
@@ -52,7 +54,7 @@ TEST_RES3_TEI = File.join(TEST_INPUT_DIR, 'res3_teifile.txt')
 
 TEST_FILE_NO_EXIF = File.join(TEST_INPUT_DIR, 'file_with_no_exif.xml')
 
-TEST_OBJ_FILE=File.join(TEST_INPUT_DIR,'someobject.obj')
-TEST_PLY_FILE=File.join(TEST_INPUT_DIR,'someobject.ply')
+TEST_OBJ_FILE = File.join(TEST_INPUT_DIR, 'someobject.obj')
+TEST_PLY_FILE = File.join(TEST_INPUT_DIR, 'someobject.ply')
 
-TEST_DRUID = 'nx288wh8889'.freeze
+TEST_DRUID = 'nx288wh8889'

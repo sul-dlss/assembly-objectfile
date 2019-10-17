@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Assembly::ContentMetadata do
@@ -512,8 +514,8 @@ describe Assembly::ContentMetadata do
   end
 
   it 'generates valid content metadata for a 3d object with one 3d type files and three other supporting files (where one supporting file is a non-viewable but downloadable 3d file)' do
-    objects=[Assembly::ObjectFile.new(TEST_OBJ_FILE),Assembly::ObjectFile.new(TEST_PLY_FILE),Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),Assembly::ObjectFile.new(TEST_PDF_FILE)]
-    result = Assembly::ContentMetadata.create_content_metadata(:druid=>TEST_DRUID,:style=>:'3d',:objects=>objects)
+    objects = [Assembly::ObjectFile.new(TEST_OBJ_FILE), Assembly::ObjectFile.new(TEST_PLY_FILE), Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(TEST_PDF_FILE)]
+    result = described_class.create_content_metadata(druid: TEST_DRUID, style: :'3d', objects: objects)
     expect(result.class).to be String
     xml = Nokogiri::XML(result)
     expect(xml.errors.size).to be 0
@@ -600,9 +602,9 @@ describe Assembly::ContentMetadata do
 
   it 'generates an error message when an unknown style is passed in' do
     objects = []
-    expect {
+    expect do
       described_class.create_content_metadata(druid: TEST_DRUID, bundle: :prebundled, style: :borked, objects: objects)
-    }.to raise_error { |error|
+    end.to raise_error { |error|
       expect(error.message).to eq('Supplied style (borked) not valid')
     }
   end
