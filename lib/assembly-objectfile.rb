@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Assembly
   # the path to the gem, used to access profiles stored with the gem
   PATH_TO_GEM = File.expand_path(File.dirname(__FILE__) + '/..')
@@ -14,23 +16,24 @@ module Assembly
   TRUSTED_MIMETYPES = ['text/plain', 'plain/text', 'application/pdf', 'text/html', 'application/xml'].freeze
 
   # default publish/preserve/shelve attributes used in content metadata
-  FILE_ATTRIBUTES = {}
   # if no mimetype specific attributes are specified for a given file, define some defaults, and override for specific mimetypes below
-  FILE_ATTRIBUTES['default'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['image/tif'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['image/tiff'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['image/jp2'] = { preserve: 'no', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['image/jpeg'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['audio/wav'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['audio/x-wav'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['audio/mp3'] = { preserve: 'no', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['audio/mpeg'] = { preserve: 'no', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['application/pdf'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['plain/text'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['text/plain'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
-  FILE_ATTRIBUTES['image/png'] = { preserve: 'yes', shelve: 'yes', publish: 'no'}
-  FILE_ATTRIBUTES['application/zip'] = { preserve: 'yes', shelve: 'no', publish: 'no' }
-  FILE_ATTRIBUTES['application/json'] = { preserve: 'yes', shelve: 'yes', publish: 'yes' }
+  FILE_ATTRIBUTES = {
+    'default' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'image/tif' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'image/tiff' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'image/jp2' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+    'image/jpeg' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'audio/wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'audio/x-wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'audio/mp3' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+    'audio/mpeg' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+    'application/pdf' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+    'plain/text' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+    'text/plain' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+    'image/png' => { preserve: 'yes', shelve: 'yes', publish: 'no' },
+    'application/zip' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+    'application/json' => { preserve: 'yes', shelve: 'yes', publish: 'yes' }
+  }.freeze
 end
 
 require 'assembly-objectfile/content_metadata'

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'nokogiri'
 
 module Assembly
@@ -156,12 +158,12 @@ module Assembly
               when :map
                 resource_type_description = resource_type_descriptions[:map]
               when :'3d'
-                 resource_extensions = resource_files.collect {|obj| obj.ext}
-                 if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
-                   resource_type_description = resource_type_descriptions[:file]
-                 else # otherwise the resource type is 3d
-                   resource_type_description = resource_type_descriptions[:'3d']
-                 end
+                resource_extensions = resource_files.collect(&:ext)
+                resource_type_description = if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
+                                              resource_type_descriptions[:file]
+                                            else # otherwise the resource type is 3d
+                                              resource_type_descriptions[:'3d']
+                                            end
                end
             end
 

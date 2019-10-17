@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rubygems'
 
 environment  = ENV['ENVIRONMENT'] ||= 'development'

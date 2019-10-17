@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Assembly
   # This class contains generic methods to operate on any file.
   class ObjectFile
