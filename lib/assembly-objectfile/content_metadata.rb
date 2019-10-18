@@ -45,23 +45,13 @@ module Assembly
     #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true.
     # Example:
     #    Assembly::ContentMetadata.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
-    def self.create_content_metadata(params = {})
-      druid = params[:druid]
-      objects = params[:objects]
-
-      raise 'No objects and/or druid supplied' if druid.nil? || objects.nil?
+    def self.create_content_metadata(druid:, objects:, auto_labels: true,
+                                     add_exif: false, bundle: :default, style: :simple_image,
+                                     add_file_attributes: false, file_attributes: {},
+                                     preserve_common_paths: false, flatten_folder_structure: false,
+                                     include_root_xml: nil)
 
       pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
-
-      style = params[:style] || :simple_image
-      bundle = params[:bundle] || :default
-      add_exif = params[:add_exif] || false
-      auto_labels = (params[:auto_labels].nil? ? true : params[:auto_labels])
-      add_file_attributes = params[:add_file_attributes] || false
-      file_attributes = params[:file_attributes] || {}
-      preserve_common_paths = params[:preserve_common_paths] || false
-      flatten_folder_structure = params[:flatten_folder_structure] || false
-      include_root_xml = params[:include_root_xml]
 
       all_paths = []
       objects.flatten.each do |obj|
@@ -72,104 +62,26 @@ module Assembly
 
       common_path = Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
 
-      # these are the valid strings for each type of document to be use contentMetadata type and resourceType
-      content_type_descriptions = { file: 'file', image: 'image', book: 'book', map: 'map', '3d': '3d' }
-      resource_type_descriptions = { object: 'object', file: 'file', image: 'image', book: 'page', map: 'image', '3d': '3d' }
-
-      # global sequence for resource IDs
-      sequence = 0
-
       # a counter to use when creating auto-labels for resources, with incremenets for each type
       resource_type_counters = Hash.new(0)
 
-      # set the object level content type id
-      case style
-      when :simple_image
-        content_type_description = content_type_descriptions[:image]
-      when :file
-        content_type_description = content_type_descriptions[:file]
-      when :simple_book, :book_with_pdf, :book_as_image
-        content_type_description = content_type_descriptions[:book]
-      when :map
-        content_type_description = content_type_descriptions[:map]
-      when :'3d'
-        content_type_description = content_type_descriptions[:'3d']
-      else
-        raise "Supplied style (#{style}) not valid"
-      end
-
-      puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
-
-      # determine how many resources to create
-      # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
-      case bundle
-      when :default # one resource per object
-        resources = objects.collect { |obj| [obj] }
-      when :filename # one resource per distinct filename (excluding extension)
-        # loop over distinct filenames, this determines how many resources we will have and
-        # create one resource node per distinct filename, collecting the relevant objects with the distinct filename into that resource
-        resources = []
-        distinct_filenames = objects.collect(&:filename_without_ext).uniq # find all the unique filenames in the set of objects, leaving off extensions and base paths
-        distinct_filenames.each { |distinct_filename| resources << objects.collect { |obj| obj if obj.filename_without_ext == distinct_filename }.compact }
-      when :dpg # group by DPG filename
-        # loop over distinct dpg base names, this determines how many resources we will have and
-        # create one resource node per distinct dpg base name, collecting the relevant objects with the distinct names into that resource
-        resources = []
-        distinct_filenames = objects.collect(&:dpg_basename).uniq # find all the unique DPG filenames in the set of objects
-        distinct_filenames.each do |distinct_filename|
-          resources << objects.collect { |obj| obj if obj.dpg_basename == distinct_filename && !is_special_dpg_folder?(obj.dpg_folder) }.compact
-        end
-        objects.each { |obj| resources << [obj] if is_special_dpg_folder?(obj.dpg_folder) } # certain subfolders require individual resources for files within them regardless of file-naming convention
-      when :prebundled
-        # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
-        resources = objects
-      else
-        raise 'Invalid bundle method'
-      end
-
-      resources.delete([]) # delete any empty elements
+      resources = create_resources(bundle, objects)
 
       builder = Nokogiri::XML::Builder.new do |xml|
-        xml.contentMetadata(objectId: druid.to_s, type: content_type_description) do
-          resources.each do |resource_files| # iterate over all the resources
+        xml.contentMetadata(objectId: druid.to_s, type: object_level_type(style)) do
+          resources.each_with_index do |resource_files, index| # iterate over all the resources
             # start a new resource element
-            sequence += 1
-            resource_id = "#{pid}_#{sequence}"
+            sequence = index + 1
 
-            # grab all of the file types within a resource into an array so we can decide what the resource type should be
-            resource_file_types = resource_files.collect(&:object_type)
-            resource_has_non_images = !(resource_file_types - [:image]).empty?
-            resource_from_special_dpg_folder = resource_files.collect { |obj| is_special_dpg_folder?(obj.dpg_folder) }.uniq
-
-            if bundle == :dpg && resource_from_special_dpg_folder.include?(true) # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
-              resource_type_description = resource_type_descriptions[:object]
-            else # otherwise look at the style to determine the resource_type_description
-              case style
-              when :simple_image
-                resource_type_description = resource_type_descriptions[:image]
-              when :file
-                resource_type_description = resource_type_descriptions[:file]
-              when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
-                resource_type_description = resource_has_non_images && resource_file_types.include?(:image) == false ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-              when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
-                resource_type_description = resource_has_non_images && resource_file_types.include?(:image) == false ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
-              when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
-                resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-              when :map
-                resource_type_description = resource_type_descriptions[:map]
-              when :'3d'
-                resource_extensions = resource_files.collect(&:ext)
-                resource_type_description = if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
-                                              resource_type_descriptions[:file]
-                                            else # otherwise the resource type is 3d
-                                              resource_type_descriptions[:'3d']
-                                            end
-               end
-            end
+            resource_type_description = if special_dpg_resource?(bundle, resource_files) # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
+                                          'object'
+                                        else # otherwise look at the style to determine the resource_type_description
+                                          resource_type_descriptions(style, resource_files)
+                                        end
 
             resource_type_counters[resource_type_description.to_sym] += 1 # each resource type description gets its own incrementing counter
 
-            xml.resource(id: resource_id, sequence: sequence, type: resource_type_description) do
+            xml.resource(id: "#{pid}_#{sequence}", sequence: sequence, type: resource_type_description) do
               # create a generic resource label if needed
               resource_label = (auto_labels == true ? "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}" : '')
 
@@ -235,5 +147,93 @@ module Assembly
     def self.is_special_dpg_folder?(folder)
       SPECIAL_DPG_FOLDERS.include?(folder)
     end
+
+    def self.create_resources(bundle, objects)
+      # determine how many resources to create
+      # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
+      resources = case bundle
+                  when :default # one resource per object
+                    objects.collect { |obj| [obj] }
+                  when :filename # one resource per distinct filename (excluding extension)
+                    # loop over distinct filenames, this determines how many resources we will have and
+                    # create one resource node per distinct filename, collecting the relevant objects with the distinct filename into that resource
+                    distinct_filenames = objects.collect(&:filename_without_ext).uniq # find all the unique filenames in the set of objects, leaving off extensions and base paths
+                    distinct_filenames.map { |distinct_filename| objects.collect { |obj| obj if obj.filename_without_ext == distinct_filename }.compact }
+                  when :dpg # group by DPG filename
+                    # loop over distinct dpg base names, this determines how many resources we will have and
+                    # create one resource node per distinct dpg base name, collecting the relevant objects with the distinct names into that resource
+
+                    distinct_filenames = objects.collect(&:dpg_basename).uniq # find all the unique DPG filenames in the set of objects
+                    resources = distinct_filenames.map do |distinct_filename|
+                      objects.collect { |obj| obj if obj.dpg_basename == distinct_filename && !is_special_dpg_folder?(obj.dpg_folder) }.compact
+                    end
+                    objects.each { |obj| resources << [obj] if is_special_dpg_folder?(obj.dpg_folder) } # certain subfolders require individual resources for files within them regardless of file-naming convention
+                    resources
+                  when :prebundled
+                    # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
+                    objects
+                  else
+                    raise 'Invalid bundle method'
+                  end
+
+      resources.delete([]) # delete any empty elements
+      resources
+    end
+
+    def self.object_level_type(style)
+      puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
+
+      case style
+      when :simple_image
+        'image'
+      when :file
+        'file'
+      when :simple_book, :book_with_pdf, :book_as_image
+        'book'
+      when :map
+        'map'
+      when :'3d'
+        '3d'
+      else
+        raise "Supplied style (#{style}) not valid"
+      end
+    end
+    private_class_method :object_level_type
+
+    def self.special_dpg_resource?(bundle, resource_files)
+      resource_from_special_dpg_folder = resource_files.collect { |obj| is_special_dpg_folder?(obj.dpg_folder) }.uniq
+
+      bundle == :dpg && resource_from_special_dpg_folder.include?(true)
+    end
+    private_class_method :special_dpg_resource?
+
+    def self.resource_type_descriptions(style, resource_files)
+      # grab all of the file types within a resource into an array so we can decide what the resource type should be
+      resource_file_types = resource_files.collect(&:object_type)
+      resource_has_non_images = !(resource_file_types - [:image]).empty?
+
+      case style
+      when :simple_image
+        'image'
+      when :file
+        'file'
+      when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
+        resource_has_non_images && resource_file_types.include?(:image) == false ? 'object' : 'page'
+      when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
+        resource_has_non_images && resource_file_types.include?(:image) == false ? 'object' : 'image'
+      when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
+        resource_has_non_images ? 'object' : 'page'
+      when :map
+        'image'
+      when :'3d'
+        resource_extensions = resource_files.collect(&:ext)
+        if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
+          'file'
+        else # otherwise the resource type is 3d
+          '3d'
+        end
+      end
+    end
+    private_class_method :resource_type_descriptions
   end # class
 end # module
