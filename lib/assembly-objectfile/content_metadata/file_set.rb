@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_support'
 require 'active_support/core_ext/object/blank'
 
 module Assembly
@@ -24,6 +23,10 @@ module Assembly
 
       def label_from_file(default:)
         resource_files.find { |obj| obj.label.present? }&.label || default
+      end
+
+      def files
+        resource_files.map { |file| File.new(file: file) }
       end
 
       private

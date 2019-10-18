@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require 'nokogiri'
+require 'active_support'
+require 'assembly-objectfile/content_metadata/file'
 require 'assembly-objectfile/content_metadata/file_set'
 
 module Assembly
@@ -54,14 +56,7 @@ module Assembly
 
       pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
 
-      all_paths = []
-      objects.flatten.each do |obj|
-        raise "File '#{obj.path}' not found" unless obj.file_exists?
-
-        all_paths << obj.path unless preserve_common_paths # collect all of the filenames into an array
-      end
-
-      common_path = Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
+      common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
 
       # a counter to use when creating auto-labels for resources, with incremenets for each type
       resource_type_counters = Hash.new(0)
@@ -86,41 +81,16 @@ module Assembly
               resource_label = fileset.label_from_file(default: default_label)
 
               xml.label(resource_label) unless resource_label.empty?
+              fileset.files.each do |obj| # iterate over all the files in a resource
+                xml_file_params = { id: obj.file_id(common_path: common_path, flatten_folder_structure: flatten_folder_structure) }
+                xml_file_params.merge!(obj.file_attributes(file_attributes)) if add_file_attributes
+                xml_file_params.merge!(mimetype: obj.mimetype, size: obj.filesize) if add_exif
 
-              resource_files.each do |obj| # iterate over all the files in a resource
-                mimetype = obj.mimetype if add_file_attributes || add_exif # we only need to compute the mimetype if we are adding file attributes or exif info, otherwise skip it for performance reasons
-
-                # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
-                if obj.relative_path
-                  file_id = obj.relative_path
-                else
-                  # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path
-                  file_id = preserve_common_paths ? obj.path : obj.path.gsub(common_path, '')
-                  file_id = File.basename(file_id) if flatten_folder_structure
-                end
-
-                xml_file_params = { id: file_id }
-
-                if add_file_attributes
-                  file_attributes_hash = obj.file_attributes || file_attributes[mimetype] || file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
-                  xml_file_params.merge!(
-                    preserve: file_attributes_hash[:preserve],
-                    publish: file_attributes_hash[:publish],
-                    shelve: file_attributes_hash[:shelve],
-                    role: file_attributes_hash[:role]
-                  )
-                  xml_file_params.reject! { |_k, v| v.nil? || v.empty? }
-                end
-
-                if add_exif
-                  xml_file_params[:mimetype] = mimetype
-                  xml_file_params[:size] = obj.filesize
-                end
                 xml.file(xml_file_params) do
                   if add_exif # add exif info if the user requested it
                     xml.checksum(obj.sha1, type: 'sha1')
                     xml.checksum(obj.md5, type: 'md5')
-                    xml.imageData(height: obj.exif.imageheight, width: obj.exif.imagewidth) if obj.image? # add image data for an image
+                    xml.imageData(obj.image_data) if obj.image? # add image data for an image
                   elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
                     xml.checksum(obj.provider_sha1, type: 'sha1') if obj.provider_sha1
                     xml.checksum(obj.provider_md5, type: 'md5') if obj.provider_md5
@@ -144,6 +114,17 @@ module Assembly
     def self.is_special_dpg_folder?(folder)
       SPECIAL_DPG_FOLDERS.include?(folder)
     end
+
+    def self.find_common_path(objects)
+      all_paths = objects.flatten.map do |obj|
+        raise "File '#{obj.path}' not found" unless obj.file_exists?
+
+        obj.path # collect all of the filenames into an array
+      end
+
+      Assembly::ObjectFile.common_path(all_paths) # find common paths to all files provided if needed
+    end
+    private_class_method :find_common_path
 
     def self.create_resources(bundle, objects)
       # determine how many resources to create
@@ -176,6 +157,7 @@ module Assembly
       resources.delete([]) # delete any empty elements
       resources
     end
+    private_class_method :create_resources
 
     def self.object_level_type(style)
       puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
