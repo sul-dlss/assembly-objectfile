@@ -5,6 +5,7 @@ require 'active_support'
 require 'assembly-objectfile/content_metadata/file'
 require 'assembly-objectfile/content_metadata/file_set'
 require 'assembly-objectfile/content_metadata/file_set_builder'
+require 'assembly-objectfile/content_metadata/config'
 
 module Assembly
   SPECIAL_DPG_FOLDERS = %w[31 44 50].freeze # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
@@ -55,17 +56,38 @@ module Assembly
                                      preserve_common_paths: false, flatten_folder_structure: false,
                                      include_root_xml: nil)
 
-      pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
-
       common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
-
-      # a counter to use when creating auto-labels for resources, with incremenets for each type
-      resource_type_counters = Hash.new(0)
 
       filesets = FileSetBuilder.build(bundle: bundle, objects: objects, style: style)
 
-      builder = Nokogiri::XML::Builder.new do |xml|
-        xml.contentMetadata(objectId: druid.to_s, type: object_level_type(style)) do
+      config = Config.new(auto_labels: auto_labels,
+                          flatten_folder_structure: flatten_folder_structure,
+                          add_file_attributes: add_file_attributes,
+                          file_attributes: file_attributes,
+                          add_exif: add_exif)
+
+      builder = content_metadata_ng_xml(druid: druid,
+                                        filesets: filesets,
+                                        type: object_level_type(style),
+                                        common_path: common_path,
+                                        config: config)
+
+      result = if include_root_xml == false
+                 builder.doc.root.to_xml
+               else
+                 builder.to_xml
+               end
+
+      result
+    end # create_content_metadata
+
+    def self.content_metadata_ng_xml(filesets:, type:, druid:, common_path:, config:)
+      # a counter to use when creating auto-labels for resources, with incremenets for each type
+      resource_type_counters = Hash.new(0)
+      pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
+
+      Nokogiri::XML::Builder.new do |xml|
+        xml.contentMetadata(objectId: druid.to_s, type: type) do
           filesets.each_with_index do |fileset, index| # iterate over all the resources
             # start a new resource element
             sequence = index + 1
@@ -74,19 +96,19 @@ module Assembly
 
             xml.resource(id: "#{pid}_#{sequence}", sequence: sequence, type: fileset.resource_type_description) do
               # create a generic resource label if needed
-              default_label = auto_labels ? "#{fileset.resource_type_description.capitalize} #{resource_type_counters[fileset.resource_type_description]}" : ''
+              default_label = config.auto_labels ? "#{fileset.resource_type_description.capitalize} #{resource_type_counters[fileset.resource_type_description]}" : ''
 
               # but if one of the files has a label, use it instead
               resource_label = fileset.label_from_file(default: default_label)
 
               xml.label(resource_label) unless resource_label.empty?
               fileset.files.each do |obj| # iterate over all the files in a resource
-                xml_file_params = { id: obj.file_id(common_path: common_path, flatten_folder_structure: flatten_folder_structure) }
-                xml_file_params.merge!(obj.file_attributes(file_attributes)) if add_file_attributes
-                xml_file_params.merge!(mimetype: obj.mimetype, size: obj.filesize) if add_exif
+                xml_file_params = { id: obj.file_id(common_path: common_path, flatten_folder_structure: config.flatten_folder_structure) }
+                xml_file_params.merge!(obj.file_attributes(config.file_attributes)) if config.add_file_attributes
+                xml_file_params.merge!(mimetype: obj.mimetype, size: obj.filesize) if config.add_exif
 
                 xml.file(xml_file_params) do
-                  if add_exif # add exif info if the user requested it
+                  if config.add_exif # add exif info if the user requested it
                     xml.checksum(obj.sha1, type: 'sha1')
                     xml.checksum(obj.md5, type: 'md5')
                     xml.imageData(obj.image_data) if obj.image? # add image data for an image
@@ -100,15 +122,7 @@ module Assembly
           end # resources.each
         end
       end
-
-      result = if include_root_xml == false
-                 builder.doc.root.to_xml
-               else
-                 builder.to_xml
-               end
-
-      result
-    end # create_content_metadata
+    end
 
     def self.special_dpg_folder?(folder)
       SPECIAL_DPG_FOLDERS.include?(folder)
@@ -143,6 +157,5 @@ module Assembly
         raise "Supplied style (#{style}) not valid"
       end
     end
-    private_class_method :object_level_type
   end # class
 end # module
