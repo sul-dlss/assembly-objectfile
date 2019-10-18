@@ -36,7 +36,7 @@ module Assembly
       def special_dpg_resource?
         return false unless dpg
 
-        resource_files.collect { |obj| ContentMetadata.is_special_dpg_folder?(obj.dpg_folder) }.include?(true)
+        resource_files.collect { |obj| ContentMetadata.special_dpg_folder?(obj.dpg_folder) }.include?(true)
       end
 
       def resource_type_descriptions
