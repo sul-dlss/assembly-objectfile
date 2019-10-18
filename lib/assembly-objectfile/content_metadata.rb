@@ -61,15 +61,13 @@ module Assembly
       # a counter to use when creating auto-labels for resources, with incremenets for each type
       resource_type_counters = Hash.new(0)
 
-      resources = create_resources(bundle, objects)
+      filesets = create_file_sets(bundle: bundle, objects: objects, style: style)
 
       builder = Nokogiri::XML::Builder.new do |xml|
         xml.contentMetadata(objectId: druid.to_s, type: object_level_type(style)) do
-          resources.each_with_index do |resource_files, index| # iterate over all the resources
+          filesets.each_with_index do |fileset, index| # iterate over all the resources
             # start a new resource element
             sequence = index + 1
-
-            fileset = FileSet.new(bundle: bundle, resource_files: resource_files, style: style)
 
             resource_type_counters[fileset.resource_type_description] += 1 # each resource type description gets its own incrementing counter
 
@@ -126,30 +124,34 @@ module Assembly
     end
     private_class_method :find_common_path
 
-    def self.create_resources(bundle, objects)
+    def self.create_file_sets(bundle:, objects:, style:)
       # determine how many resources to create
       # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
       resources = case bundle
                   when :default # one resource per object
-                    objects.collect { |obj| [obj] }
+                    objects.collect { |obj| FileSet.new(resource_files: [obj], style: style) }
+
                   when :filename # one resource per distinct filename (excluding extension)
                     # loop over distinct filenames, this determines how many resources we will have and
                     # create one resource node per distinct filename, collecting the relevant objects with the distinct filename into that resource
                     distinct_filenames = objects.collect(&:filename_without_ext).uniq # find all the unique filenames in the set of objects, leaving off extensions and base paths
-                    distinct_filenames.map { |distinct_filename| objects.collect { |obj| obj if obj.filename_without_ext == distinct_filename }.compact }
+                    distinct_filenames.map do |distinct_filename|
+                      FileSet.new(resource_files: objects.collect { |obj| obj if obj.filename_without_ext == distinct_filename }.compact,
+                                  style: style)
+                    end
                   when :dpg # group by DPG filename
                     # loop over distinct dpg base names, this determines how many resources we will have and
                     # create one resource node per distinct dpg base name, collecting the relevant objects with the distinct names into that resource
 
                     distinct_filenames = objects.collect(&:dpg_basename).uniq # find all the unique DPG filenames in the set of objects
                     resources = distinct_filenames.map do |distinct_filename|
-                      objects.collect { |obj| obj if obj.dpg_basename == distinct_filename && !is_special_dpg_folder?(obj.dpg_folder) }.compact
+                      FileSet.new(dpg: true, resource_files: objects.collect { |obj| obj if obj.dpg_basename == distinct_filename && !is_special_dpg_folder?(obj.dpg_folder) }.compact, style: style)
                     end
-                    objects.each { |obj| resources << [obj] if is_special_dpg_folder?(obj.dpg_folder) } # certain subfolders require individual resources for files within them regardless of file-naming convention
+                    objects.each { |obj| resources << FileSet.new(dpg: true, resource_files: [obj], style: style) if is_special_dpg_folder?(obj.dpg_folder) } # certain subfolders require individual resources for files within them regardless of file-naming convention
                     resources
                   when :prebundled
                     # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
-                    objects
+                    objects.map { |inner| FileSet.new(resource_files: inner, style: style) }
                   else
                     raise 'Invalid bundle method'
                   end
@@ -157,7 +159,7 @@ module Assembly
       resources.delete([]) # delete any empty elements
       resources
     end
-    private_class_method :create_resources
+    private_class_method :create_file_sets
 
     def self.object_level_type(style)
       puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style

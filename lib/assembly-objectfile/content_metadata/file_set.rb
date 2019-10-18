@@ -6,11 +6,11 @@ module Assembly
   class ContentMetadata
     # Represents a groups of related Files, such as a single master file and the derivatives
     class FileSet
-      # @param [Symbol] bundle
+      # @param [Boolean] dpg (false) is it a dpg bundle?
       # @param [Array] resource_files
       # @param style
-      def initialize(bundle:, resource_files:, style:)
-        @bundle = bundle
+      def initialize(dpg: false, resource_files:, style:)
+        @dpg = dpg
         @resource_files = resource_files
         @style = style
       end
@@ -31,10 +31,10 @@ module Assembly
 
       private
 
-      attr_reader :bundle, :resource_files, :style
+      attr_reader :dpg, :resource_files, :style
 
       def special_dpg_resource?
-        return false unless bundle == :dpg
+        return false unless dpg
 
         resource_files.collect { |obj| ContentMetadata.is_special_dpg_folder?(obj.dpg_folder) }.include?(true)
       end
