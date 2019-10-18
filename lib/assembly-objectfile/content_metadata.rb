@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'nokogiri'
+require 'assembly-objectfile/content_metadata/file_set'
 
 module Assembly
   SPECIAL_DPG_FOLDERS = %w[31 44 50].freeze # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
@@ -73,20 +74,16 @@ module Assembly
             # start a new resource element
             sequence = index + 1
 
-            resource_type_description = if special_dpg_resource?(bundle, resource_files) # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
-                                          'object'
-                                        else # otherwise look at the style to determine the resource_type_description
-                                          resource_type_descriptions(style, resource_files)
-                                        end
+            fileset = FileSet.new(bundle: bundle, resource_files: resource_files, style: style)
 
-            resource_type_counters[resource_type_description.to_sym] += 1 # each resource type description gets its own incrementing counter
+            resource_type_counters[fileset.resource_type_description] += 1 # each resource type description gets its own incrementing counter
 
-            xml.resource(id: "#{pid}_#{sequence}", sequence: sequence, type: resource_type_description) do
+            xml.resource(id: "#{pid}_#{sequence}", sequence: sequence, type: fileset.resource_type_description) do
               # create a generic resource label if needed
-              resource_label = (auto_labels == true ? "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}" : '')
+              default_label = auto_labels ? "#{fileset.resource_type_description.capitalize} #{resource_type_counters[fileset.resource_type_description]}" : ''
 
               # but if one of the files has a label, use it instead
-              resource_files.each { |obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
+              resource_label = fileset.label_from_file(default: default_label)
 
               xml.label(resource_label) unless resource_label.empty?
 
@@ -199,41 +196,5 @@ module Assembly
       end
     end
     private_class_method :object_level_type
-
-    def self.special_dpg_resource?(bundle, resource_files)
-      resource_from_special_dpg_folder = resource_files.collect { |obj| is_special_dpg_folder?(obj.dpg_folder) }.uniq
-
-      bundle == :dpg && resource_from_special_dpg_folder.include?(true)
-    end
-    private_class_method :special_dpg_resource?
-
-    def self.resource_type_descriptions(style, resource_files)
-      # grab all of the file types within a resource into an array so we can decide what the resource type should be
-      resource_file_types = resource_files.collect(&:object_type)
-      resource_has_non_images = !(resource_file_types - [:image]).empty?
-
-      case style
-      when :simple_image
-        'image'
-      when :file
-        'file'
-      when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
-        resource_has_non_images && resource_file_types.include?(:image) == false ? 'object' : 'page'
-      when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
-        resource_has_non_images && resource_file_types.include?(:image) == false ? 'object' : 'image'
-      when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
-        resource_has_non_images ? 'object' : 'page'
-      when :map
-        'image'
-      when :'3d'
-        resource_extensions = resource_files.collect(&:ext)
-        if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
-          'file'
-        else # otherwise the resource type is 3d
-          '3d'
-        end
-      end
-    end
-    private_class_method :resource_type_descriptions
   end # class
 end # module
