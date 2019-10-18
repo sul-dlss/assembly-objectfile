@@ -4,16 +4,17 @@ module Assembly
   class ContentMetadata
     # Builds a nokogiri representation of the content metadata
     class NokogiriBuilder
+      # @param [Array<Fileset>] filesets
+      # @param [String] druid
+      # @param [String] common_path
       # @param [Config] config
-      # @param [Config] config
-      # @param [Config] config
-      def self.build(filesets:, type:, druid:, common_path:, config:)
+      def self.build(filesets:, druid:, common_path:, config:)
         # a counter to use when creating auto-labels for resources, with incremenets for each type
         resource_type_counters = Hash.new(0)
         pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
 
         Nokogiri::XML::Builder.new do |xml|
-          xml.contentMetadata(objectId: druid.to_s, type: type) do
+          xml.contentMetadata(objectId: druid.to_s, type: config.type) do
             filesets.each_with_index do |fileset, index| # iterate over all the resources
               # start a new resource element
               sequence = index + 1

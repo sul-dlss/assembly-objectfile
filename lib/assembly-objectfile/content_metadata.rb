@@ -65,11 +65,11 @@ module Assembly
                           flatten_folder_structure: flatten_folder_structure,
                           add_file_attributes: add_file_attributes,
                           file_attributes: file_attributes,
-                          add_exif: add_exif)
+                          add_exif: add_exif,
+                          type: object_level_type(style))
 
       builder = NokogiriBuilder.build(druid: druid,
                                       filesets: filesets,
-                                      type: object_level_type(style),
                                       common_path: common_path,
                                       config: config)
 
