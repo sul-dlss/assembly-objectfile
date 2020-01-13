@@ -20,9 +20,9 @@ module Assembly
       n += 1 while strings.all? { |s| s[n] && (s[n] == x[n]) }
       common_prefix = x[0...n]
       if common_prefix[-1, 1] != '/' # check if last element of the common string is the end of a directory
-        return common_prefix.split('/')[0..-2].join('/') + '/' # if not, split string along directories, and reject last one
+        common_prefix.split('/')[0..-2].join('/') + '/' # if not, split string along directories, and reject last one
       else
-        return common_prefix # if it was, then return the common prefix directly
+        common_prefix # if it was, then return the common prefix directly
       end
     end
   end
