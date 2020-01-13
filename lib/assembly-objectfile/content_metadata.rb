@@ -1,6 +1,12 @@
 # frozen_string_literal: true
 
 require 'nokogiri'
+require 'active_support'
+require 'assembly-objectfile/content_metadata/file'
+require 'assembly-objectfile/content_metadata/file_set'
+require 'assembly-objectfile/content_metadata/file_set_builder'
+require 'assembly-objectfile/content_metadata/config'
+require 'assembly-objectfile/content_metadata/nokogiri_builder'
 
 module Assembly
   SPECIAL_DPG_FOLDERS = %w[31 44 50].freeze # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
@@ -45,183 +51,27 @@ module Assembly
     #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true.
     # Example:
     #    Assembly::ContentMetadata.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
-    def self.create_content_metadata(params = {})
-      druid = params[:druid]
-      objects = params[:objects]
+    def self.create_content_metadata(druid:, objects:, auto_labels: true,
+                                     add_exif: false, bundle: :default, style: :simple_image,
+                                     add_file_attributes: false, file_attributes: {},
+                                     preserve_common_paths: false, flatten_folder_structure: false,
+                                     include_root_xml: nil)
 
-      raise 'No objects and/or druid supplied' if druid.nil? || objects.nil?
+      common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
 
-      pid = druid.gsub('druid:', '') # remove druid prefix when creating IDs
+      filesets = FileSetBuilder.build(bundle: bundle, objects: objects, style: style)
 
-      style = params[:style] || :simple_image
-      bundle = params[:bundle] || :default
-      add_exif = params[:add_exif] || false
-      auto_labels = (params[:auto_labels].nil? ? true : params[:auto_labels])
-      add_file_attributes = params[:add_file_attributes] || false
-      file_attributes = params[:file_attributes] || {}
-      preserve_common_paths = params[:preserve_common_paths] || false
-      flatten_folder_structure = params[:flatten_folder_structure] || false
-      include_root_xml = params[:include_root_xml]
+      config = Config.new(auto_labels: auto_labels,
+                          flatten_folder_structure: flatten_folder_structure,
+                          add_file_attributes: add_file_attributes,
+                          file_attributes: file_attributes,
+                          add_exif: add_exif,
+                          type: object_level_type(style))
 
-      all_paths = []
-      objects.flatten.each do |obj|
-        raise "File '#{obj.path}' not found" unless obj.file_exists?
-
-        all_paths << obj.path unless preserve_common_paths # collect all of the filenames into an array
-      end
-
-      common_path = Assembly::ObjectFile.common_path(all_paths) unless preserve_common_paths # find common paths to all files provided if needed
-
-      # these are the valid strings for each type of document to be use contentMetadata type and resourceType
-      content_type_descriptions = { file: 'file', image: 'image', book: 'book', map: 'map', '3d': '3d' }
-      resource_type_descriptions = { object: 'object', file: 'file', image: 'image', book: 'page', map: 'image', '3d': '3d' }
-
-      # global sequence for resource IDs
-      sequence = 0
-
-      # a counter to use when creating auto-labels for resources, with incremenets for each type
-      resource_type_counters = Hash.new(0)
-
-      # set the object level content type id
-      case style
-      when :simple_image
-        content_type_description = content_type_descriptions[:image]
-      when :file
-        content_type_description = content_type_descriptions[:file]
-      when :simple_book, :book_with_pdf, :book_as_image
-        content_type_description = content_type_descriptions[:book]
-      when :map
-        content_type_description = content_type_descriptions[:map]
-      when :'3d'
-        content_type_description = content_type_descriptions[:'3d']
-      else
-        raise "Supplied style (#{style}) not valid"
-      end
-
-      puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
-
-      # determine how many resources to create
-      # setup an array of arrays, where the first array is the number of resources, and the second array is the object files containined in that resource
-      case bundle
-      when :default # one resource per object
-        resources = objects.collect { |obj| [obj] }
-      when :filename # one resource per distinct filename (excluding extension)
-        # loop over distinct filenames, this determines how many resources we will have and
-        # create one resource node per distinct filename, collecting the relevant objects with the distinct filename into that resource
-        resources = []
-        distinct_filenames = objects.collect(&:filename_without_ext).uniq # find all the unique filenames in the set of objects, leaving off extensions and base paths
-        distinct_filenames.each { |distinct_filename| resources << objects.collect { |obj| obj if obj.filename_without_ext == distinct_filename }.compact }
-      when :dpg # group by DPG filename
-        # loop over distinct dpg base names, this determines how many resources we will have and
-        # create one resource node per distinct dpg base name, collecting the relevant objects with the distinct names into that resource
-        resources = []
-        distinct_filenames = objects.collect(&:dpg_basename).uniq # find all the unique DPG filenames in the set of objects
-        distinct_filenames.each do |distinct_filename|
-          resources << objects.collect { |obj| obj if obj.dpg_basename == distinct_filename && !is_special_dpg_folder?(obj.dpg_folder) }.compact
-        end
-        objects.each { |obj| resources << [obj] if is_special_dpg_folder?(obj.dpg_folder) } # certain subfolders require individual resources for files within them regardless of file-naming convention
-      when :prebundled
-        # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
-        resources = objects
-      else
-        raise 'Invalid bundle method'
-      end
-
-      resources.delete([]) # delete any empty elements
-
-      builder = Nokogiri::XML::Builder.new do |xml|
-        xml.contentMetadata(objectId: druid.to_s, type: content_type_description) do
-          resources.each do |resource_files| # iterate over all the resources
-            # start a new resource element
-            sequence += 1
-            resource_id = "#{pid}_#{sequence}"
-
-            # grab all of the file types within a resource into an array so we can decide what the resource type should be
-            resource_file_types = resource_files.collect(&:object_type)
-            resource_has_non_images = !(resource_file_types - [:image]).empty?
-            resource_from_special_dpg_folder = resource_files.collect { |obj| is_special_dpg_folder?(obj.dpg_folder) }.uniq
-
-            if bundle == :dpg && resource_from_special_dpg_folder.include?(true) # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
-              resource_type_description = resource_type_descriptions[:object]
-            else # otherwise look at the style to determine the resource_type_description
-              case style
-              when :simple_image
-                resource_type_description = resource_type_descriptions[:image]
-              when :file
-                resource_type_description = resource_type_descriptions[:file]
-              when :simple_book # in a simple book project, all resources are pages unless they are *all* non-images -- if so, switch the type to object
-                resource_type_description = resource_has_non_images && resource_file_types.include?(:image) == false ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-              when :book_as_image # same as simple book, but all resources are images instead of pages, unless we need to switch them to object type
-                resource_type_description = resource_has_non_images && resource_file_types.include?(:image) == false ? resource_type_descriptions[:object] : resource_type_descriptions[:image]
-              when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
-                resource_type_description = resource_has_non_images ? resource_type_descriptions[:object] : resource_type_descriptions[:book]
-              when :map
-                resource_type_description = resource_type_descriptions[:map]
-              when :'3d'
-                resource_extensions = resource_files.collect(&:ext)
-                resource_type_description = if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
-                                              resource_type_descriptions[:file]
-                                            else # otherwise the resource type is 3d
-                                              resource_type_descriptions[:'3d']
-                                            end
-               end
-            end
-
-            resource_type_counters[resource_type_description.to_sym] += 1 # each resource type description gets its own incrementing counter
-
-            xml.resource(id: resource_id, sequence: sequence, type: resource_type_description) do
-              # create a generic resource label if needed
-              resource_label = (auto_labels == true ? "#{resource_type_description.capitalize} #{resource_type_counters[resource_type_description.to_sym]}" : '')
-
-              # but if one of the files has a label, use it instead
-              resource_files.each { |obj| resource_label = obj.label unless obj.label.nil? || obj.label.empty? }
-
-              xml.label(resource_label) unless resource_label.empty?
-
-              resource_files.each do |obj| # iterate over all the files in a resource
-                mimetype = obj.mimetype if add_file_attributes || add_exif # we only need to compute the mimetype if we are adding file attributes or exif info, otherwise skip it for performance reasons
-
-                # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
-                if obj.relative_path
-                  file_id = obj.relative_path
-                else
-                  # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path
-                  file_id = preserve_common_paths ? obj.path : obj.path.gsub(common_path, '')
-                  file_id = File.basename(file_id) if flatten_folder_structure
-                end
-
-                xml_file_params = { id: file_id }
-
-                if add_file_attributes
-                  file_attributes_hash = obj.file_attributes || file_attributes[mimetype] || file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
-                  xml_file_params.merge!(
-                    preserve: file_attributes_hash[:preserve],
-                    publish: file_attributes_hash[:publish],
-                    shelve: file_attributes_hash[:shelve],
-                    role: file_attributes_hash[:role]
-                  )
-                  xml_file_params.reject! { |_k, v| v.nil? || v.empty? }
-                end
-
-                if add_exif
-                  xml_file_params[:mimetype] = mimetype
-                  xml_file_params[:size] = obj.filesize
-                end
-                xml.file(xml_file_params) do
-                  if add_exif # add exif info if the user requested it
-                    xml.checksum(obj.sha1, type: 'sha1')
-                    xml.checksum(obj.md5, type: 'md5')
-                    xml.imageData(height: obj.exif.imageheight, width: obj.exif.imagewidth) if obj.image? # add image data for an image
-                  elsif obj.provider_md5 || obj.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
-                    xml.checksum(obj.provider_sha1, type: 'sha1') if obj.provider_sha1
-                    xml.checksum(obj.provider_md5, type: 'md5') if obj.provider_md5
-                  end # add_exif
-                end
-              end # end resource_files.each
-            end
-          end # resources.each
-        end
-      end
+      builder = NokogiriBuilder.build(druid: druid,
+                                      filesets: filesets,
+                                      common_path: common_path,
+                                      config: config)
 
       result = if include_root_xml == false
                  builder.doc.root.to_xml
@@ -230,10 +80,40 @@ module Assembly
                end
 
       result
-    end # create_content_metadata
+    end
 
-    def self.is_special_dpg_folder?(folder)
+    def self.special_dpg_folder?(folder)
       SPECIAL_DPG_FOLDERS.include?(folder)
+    end
+
+    def self.find_common_path(objects)
+      all_paths = objects.flatten.map do |obj|
+        raise "File '#{obj.path}' not found" unless obj.file_exists?
+
+        obj.path # collect all of the filenames into an array
+      end
+
+      Assembly::ObjectFile.common_path(all_paths) # find common paths to all files provided if needed
+    end
+    private_class_method :find_common_path
+
+    def self.object_level_type(style)
+      puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
+
+      case style
+      when :simple_image
+        'image'
+      when :file
+        'file'
+      when :simple_book, :book_with_pdf, :book_as_image
+        'book'
+      when :map
+        'map'
+      when :'3d'
+        '3d'
+      else
+        raise "Supplied style (#{style}) not valid"
+      end
     end
   end # class
 end # module
