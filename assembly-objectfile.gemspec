@@ -14,8 +14,6 @@ Gem::Specification.new do |s|
   s.description = 'Get exif data, file sizes and more.'
   s.license     = 'ALv2'
 
-  s.rubyforge_project = 'assembly-objectfile'
-
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.bindir        = 'exe'
