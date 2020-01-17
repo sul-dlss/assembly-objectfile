@@ -25,6 +25,8 @@ describe Assembly::ObjectFile do
     expect(@ai.exif).not_to be nil
     expect(@ai.mimetype).to eq('image/tiff')
     expect(@ai.file_mimetype).to eq('image/tiff')
+    expect(@ai.extension_mimetype).to eq('image/tiff')
+    expect(@ai.exif_mimetype).to eq('image/tiff')
     expect(@ai.object_type).to eq(:image)
     expect(@ai.valid_image?).to eq(true)
     expect(@ai.jp2able?).to eq(true)
@@ -51,6 +53,16 @@ describe Assembly::ObjectFile do
   it 'sets the correct mimetype of plain/text for .obj 3d files' do
     @ai = described_class.new(TEST_OBJ_FILE)
     expect(@ai.mimetype).to eq('text/plain')
+  end
+
+  it 'sets a mimetype of application/x-tgif for .obj 3d files if we prefer the mimetype extension gem over unix file system command' do
+    @ai = described_class.new(TEST_OBJ_FILE, mime_type_order: %i[extension file exif])
+    expect(@ai.mimetype).to eq('application/x-tgif')
+  end
+
+  it 'ignores invald mimetype generation methods and still sets a mimetype of application/x-tgif for .obj 3d files if we prefer the mimetype extension gem over unix file system command' do
+    @ai = described_class.new(TEST_OBJ_FILE, mime_type_order: %i[bogus extension file])
+    expect(@ai.mimetype).to eq('application/x-tgif')
   end
 
   it 'sets the correct mimetype of plain/text for .ply 3d files' do
