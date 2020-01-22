@@ -2,12 +2,12 @@
 
 require 'mini_exiftool'
 require 'mime/types'
-# require 'checksum-tools'
 
 module Assembly
   # Common behaviors we need for other classes in the gem
   module ObjectFileable
-    attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path
+    attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path, :mime_type_order
+    VALID_MIMETYPE_METHODS = %i[exif file extension].freeze
 
     # @param [String] path full path to the file to be worked with
     # @param [Hash<Symbol => Object>] params options used during content metadata generation
@@ -16,6 +16,9 @@ module Assembly
     # @option params [String] :provider_md5 pre-computed MD5 checksum
     # @option params [String] :provider_sha1 pre-computed SHA1 checksum
     # @option params [String] :relative_path if you want the file ids in the content metadata it can be set, otherwise content metadata will get the full path
+    # @option params [Array] :mime_type_order can be set to the order in which you want mimetypes to be determined
+    #                                          options are :exif (from exif if exists), :extension (from file extension), and :file (from unix file system command)
+    #                                          the default is defined in the private `default_mime_type_order` method but you can override to set your own order
     # @example
     #   Assembly::ObjectFile.new('/input/path_to_file.tif')
     def initialize(path, params = {})
@@ -25,6 +28,7 @@ module Assembly
       @relative_path = params[:relative_path]
       @provider_md5 = params[:provider_md5]
       @provider_sha1 = params[:provider_sha1]
+      @mime_type_order = params[:mime_type_order] || default_mime_type_order
     end
 
     # @return [String] DPG base filename, removing the extension and the '00','05', etc. placeholders
@@ -110,22 +114,33 @@ module Assembly
       @sha1 ||= Digest::SHA1.file(path).hexdigest
     end
 
-    # Returns mimetype information for the current file based on
-    #   (1) exifdata (if available), (2) unix file type or (3) file extension using the mimetypes gem, in this priority order
+    # Returns mimetype information for the current file based on the ordering set in default_mime_type_order
+    #   We stop computing mimetypes as soon as we have a method that returns a value
     # @return [String] mime type
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
     #   puts source_file.mimetype # 'text/plain'
     def mimetype
       @mimetype ||= begin
-        if exif_mimetype # first, try the exif data
-          exif_mimetype
-        elsif file_mimetype # next, try exif/unix file system command
-          file_mimetype
-        else # finally, get it from the mime-types gem (using the file extension) if both of those failed for some reason
-          mtype = MIME::Types.type_for(path).first
-          mtype ? mtype.content_type : ''
+        check_for_file
+        mimetype = ''
+        mime_type_order.each do |mime_type_method|
+          mimetype = public_send("#{mime_type_method}_mimetype") if VALID_MIMETYPE_METHODS.include?(mime_type_method)
+          break if !mimetype.nil? && mimetype != ''
         end
+        mimetype
+      end
+    end
+
+    # Returns mimetype information using the mime-types gem (based on a file extension lookup)
+    # @return [String] mime type for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.extension_mimetype # 'text/plain'
+    def extension_mimetype
+      @extension_mimetype ||= begin
+        mtype = MIME::Types.type_for(path).first
+        mtype ? mtype.content_type : ''
       end
     end
 
@@ -234,10 +249,15 @@ exif&.mimetype && prefer_exif
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.file_exists? # true
     def file_exists?
-      File.exist?(path) && !File.directory?(path)
+      @file_exists ||= (File.exist?(path) && !File.directory?(path))
     end
 
     private
+
+    # prive method defining default preferred ordering of how mimetypes are determined
+    def default_mime_type_order
+      %i[exif file extension]
+    end
 
     # private method to check for file existence before operating on it
     def check_for_file
