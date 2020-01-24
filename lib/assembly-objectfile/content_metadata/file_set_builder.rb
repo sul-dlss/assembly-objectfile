@@ -25,6 +25,7 @@ module Assembly
           build_for_dpg
         when :prebundled
           # if the user specifies this method, they will pass in an array of arrays, indicating resources, so we don't need to bundle in the gem
+          # This is used by the assemblyWF if you have stubContentMetadata.xml
           objects.map { |inner| FileSet.new(resource_files: inner, style: style) }
         else
           raise 'Invalid bundle method'
