@@ -7,7 +7,7 @@ module Assembly
     # Represents a groups of related Files, such as a single master file and the derivatives
     class FileSet
       # @param [Boolean] dpg (false) is it a dpg bundle?
-      # @param [Array] resource_files
+      # @param [Array<Assembly::ObjectFile>] resource_files
       # @param style
       def initialize(dpg: false, resource_files:, style:)
         @dpg = dpg

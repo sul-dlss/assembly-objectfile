@@ -4,6 +4,9 @@ module Assembly
   class ContentMetadata
     # Builds a groups of related Files, based on bundle
     class FileSetBuilder
+      # @param [Symbol] bundle one of: :default, :filename, :dpg or :prebundled
+      # @param [Array<Assembly::ObjectFile>] objects
+      # @param [Symbol] style one of: :simple_image, :file, :simple_book, :book_as_image, :book_with_pdf, :map, or :'3d'
       def self.build(bundle:, objects:, style:)
         new(bundle: bundle, objects: objects, style: style).build
       end
