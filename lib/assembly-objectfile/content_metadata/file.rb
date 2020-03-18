@@ -6,6 +6,26 @@ module Assembly
   class ContentMetadata
     # Represents a single File
     class File
+      # default publish/preserve/shelve attributes used in content metadata
+      # if no mimetype specific attributes are specified for a given file, define some defaults, and override for specific mimetypes below
+      ATTRIBUTES_FOR_TYPE = {
+        'default' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'image/tif' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'image/tiff' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'image/jp2' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+        'image/jpeg' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'audio/wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'audio/x-wav' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'audio/mp3' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+        'audio/mpeg' => { preserve: 'no', shelve: 'yes', publish: 'yes' },
+        'application/pdf' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+        'plain/text' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+        'text/plain' => { preserve: 'yes', shelve: 'yes', publish: 'yes' },
+        'image/png' => { preserve: 'yes', shelve: 'yes', publish: 'no' },
+        'application/zip' => { preserve: 'yes', shelve: 'no', publish: 'no' },
+        'application/json' => { preserve: 'yes', shelve: 'yes', publish: 'yes' }
+      }.freeze
+
       # @param [Symbol] bundle
       # @param [Assembly::ObjectFile] file
       # @param style
@@ -28,7 +48,7 @@ module Assembly
       end
 
       def file_attributes(provided_file_attributes)
-        file.file_attributes || provided_file_attributes[mimetype] || provided_file_attributes['default'] || Assembly::FILE_ATTRIBUTES[mimetype] || Assembly::FILE_ATTRIBUTES['default']
+        file.file_attributes || provided_file_attributes[mimetype] || provided_file_attributes['default'] || ATTRIBUTES_FOR_TYPE[mimetype] || ATTRIBUTES_FOR_TYPE['default']
       end
 
       def image_data
