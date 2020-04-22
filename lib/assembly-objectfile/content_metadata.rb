@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'nokogiri'
+require 'deprecation'
 require 'active_support'
 require 'assembly-objectfile/content_metadata/file'
 require 'assembly-objectfile/content_metadata/file_set'
@@ -98,7 +99,7 @@ module Assembly
     private_class_method :find_common_path
 
     def self.object_level_type(style)
-      puts "WARNING - the style #{style} is now deprecated and should not be used." if DEPRECATED_STYLES.include? style
+      Deprecation.warn(self, "the style #{style} is now deprecated and should not be used. This will be removed in assembly-objectfile 2.0") if DEPRECATED_STYLES.include? style
 
       case style
       when :simple_image
