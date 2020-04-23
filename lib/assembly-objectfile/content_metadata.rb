@@ -14,6 +14,7 @@ module Assembly
   # these are used when :bundle=>:dpg only
 
   DEPRECATED_STYLES = %i[book_with_pdf book_as_image].freeze
+  VALID_STYLES = %i[simple_image simple_book file map document 3d].freeze
 
   # This class generates content metadata for image files
   class ContentMetadata
@@ -61,7 +62,6 @@ module Assembly
       common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
 
       filesets = FileSetBuilder.build(bundle: bundle, objects: objects, style: style)
-
       config = Config.new(auto_labels: auto_labels,
                           flatten_folder_structure: flatten_folder_structure,
                           add_file_attributes: add_file_attributes,
@@ -100,20 +100,15 @@ module Assembly
 
     def self.object_level_type(style)
       Deprecation.warn(self, "the style #{style} is now deprecated and should not be used. This will be removed in assembly-objectfile 2.0") if DEPRECATED_STYLES.include? style
+      raise "Supplied style (#{style}) not valid" unless (VALID_STYLES + DEPRECATED_STYLES).include? style
 
       case style
       when :simple_image
         'image'
-      when :file
-        'file'
       when :simple_book, :book_with_pdf, :book_as_image
         'book'
-      when :map
-        'map'
-      when :'3d'
-        '3d'
       else
-        raise "Supplied style (#{style}) not valid"
+        style.to_s
       end
     end
   end # class

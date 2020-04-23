@@ -39,6 +39,7 @@ module Assembly
         resource_files.collect { |obj| ContentMetadata.special_dpg_folder?(obj.dpg_folder) }.include?(true)
       end
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def resource_type_descriptions
         # grab all of the file types within a resource into an array so we can decide what the resource type should be
         resource_file_types = resource_files.collect(&:object_type)
@@ -57,6 +58,8 @@ module Assembly
           resource_has_non_images ? 'object' : 'page'
         when :map
           'image'
+        when :document
+          'document'
         when :'3d'
           resource_extensions = resource_files.collect(&:ext)
           if (resource_extensions & VALID_THREE_DIMENSION_EXTENTIONS).empty? # if this resource contains no known 3D file extensions, the resource type is file
@@ -66,6 +69,7 @@ module Assembly
           end
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
     end
   end
 end
