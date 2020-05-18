@@ -84,11 +84,6 @@ RSpec/InstanceVariable:
   Exclude:
     - 'spec/object_file_spec.rb'
 
-# Offense count: 38
-# Configuration parameters: AggregateFailuresByDefault.
-RSpec/MultipleExpectations:
-  Max: 36
-
 # Offense count: 2
 RSpec/RepeatedDescription:
   Exclude:

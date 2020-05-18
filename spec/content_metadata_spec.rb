@@ -616,7 +616,7 @@ RSpec.describe Assembly::ContentMetadata do
       end
     end
 
-    context 'when using a 3d object with one 3d type files and three other supporting files (where two supporting files are non-viewable but downloadable 3d file)' do
+    context 'when using a 3d object with one 3d type files and three other supporting files (where two supporting files are non-viewable but downloadable 3d files)' do
       let(:objects) do
         [Assembly::ObjectFile.new(TEST_OBJ_FILE),
          Assembly::ObjectFile.new(TEST_PLY_FILE),

@@ -21,6 +21,9 @@ Metrics/BlockLength:
 Layout/SpaceAroundMethodCallOperator:
   Enabled: true
 
+RSpec/MultipleExpectations:
+  Enabled: false
+
 Lint/RaiseException:
   Enabled: true
 
