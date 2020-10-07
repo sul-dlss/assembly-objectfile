@@ -337,7 +337,12 @@ RSpec.describe Assembly::ContentMetadata do
       context 'when using a single tif and jp2' do
         it 'generates valid content metadata with overriding file attributes, including a default value, and no exif data' do
           objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
-          result = described_class.create_content_metadata(style: :map, druid: TEST_DRUID, add_file_attributes: true, file_attributes: { 'default' => { publish: 'yes', preserve: 'no', shelve: 'no' }, 'image/jp2' => { publish: 'yes', preserve: 'yes', shelve: 'yes' } }, objects: objects)
+          result = described_class.create_content_metadata(style: :map,
+                                                           druid: TEST_DRUID,
+                                                           add_file_attributes: true,
+                                                           file_attributes: { 'default' => { publish: 'yes', preserve: 'no', shelve: 'no' },
+                                                                              'image/jp2' => { publish: 'yes', preserve: 'yes', shelve: 'yes' } },
+                                                           objects: objects)
           expect(result.class).to be String
           xml = Nokogiri::XML(result)
           expect(xml.errors.size).to eq 0
