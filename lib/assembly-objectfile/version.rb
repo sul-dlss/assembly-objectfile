@@ -4,6 +4,6 @@
 module Assembly
   class ObjectFile
     # Project version number
-    VERSION = '1.10.1'
+    VERSION = '1.10.2'
   end
 end
