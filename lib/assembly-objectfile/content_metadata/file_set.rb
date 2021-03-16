@@ -9,7 +9,7 @@ module Assembly
       # @param [Boolean] dpg (false) is it a dpg bundle?
       # @param [Array<Assembly::ObjectFile>] resource_files
       # @param style
-      def initialize(dpg: false, resource_files:, style:)
+      def initialize(resource_files:, style:, dpg: false)
         @dpg = dpg
         @resource_files = resource_files
         @style = style

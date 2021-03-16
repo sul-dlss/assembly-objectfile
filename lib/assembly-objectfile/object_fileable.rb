@@ -87,11 +87,11 @@ module Assembly
     #   puts source_file.exif # hash with exif information
     def exif
       @exif ||= begin
-                  check_for_file
-                  MiniExiftool.new(path, replace_invalid_chars: '?')
-                rescue StandardError
-                  nil
-                end
+        check_for_file
+        MiniExiftool.new(path, replace_invalid_chars: '?')
+      rescue StandardError
+        nil
+      end
     end
 
     # Computes md5 checksum or returns cached value
@@ -208,7 +208,7 @@ exif&.mimetype && prefer_exif
     def valid_image?
       return false unless image?
 
-      mimetype == 'image/jp2' || jp2able? ? true : false
+      mimetype == 'image/jp2' || jp2able?
     end
 
     # @return [Boolean] true if image has a color profile, false if not.

@@ -74,13 +74,11 @@ module Assembly
                                       common_path: common_path,
                                       config: config)
 
-      result = if include_root_xml == false
-                 builder.doc.root.to_xml
-               else
-                 builder.to_xml
-               end
-
-      result
+      if include_root_xml == false
+        builder.doc.root.to_xml
+      else
+        builder.to_xml
+      end
     end
 
     def self.special_dpg_folder?(folder)
