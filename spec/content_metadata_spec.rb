@@ -8,7 +8,7 @@ RSpec.describe Assembly::ContentMetadata do
 
     let(:xml) { Nokogiri::XML(result) }
 
-    context 'when style is simple_image' do
+    context 'when style=simple_image' do
       context 'when using a single tif and jp2' do
         it 'generates valid content metadata with exif, adding file attributes' do
           objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
@@ -333,7 +333,7 @@ RSpec.describe Assembly::ContentMetadata do
       end
     end
 
-    context 'when style is webarchive-seed' do
+    context 'when style=webarchive-seed' do
       context 'when using a jp2' do
         it 'generates valid content metadata with exif, adding file attributes' do
           objects = [Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
@@ -342,6 +342,7 @@ RSpec.describe Assembly::ContentMetadata do
           xml = Nokogiri::XML(result)
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('webarchive-seed')
+          expect(xml.xpath('//bookData').length).to eq 0
           expect(xml.xpath('//resource').length).to eq 1
           expect(xml.xpath('//resource/file').length).to eq 1
           expect(xml.xpath('//resource/file/checksum').length).to eq 2
@@ -375,6 +376,7 @@ RSpec.describe Assembly::ContentMetadata do
           xml = Nokogiri::XML(result)
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('map')
+          expect(xml.xpath('//bookData').length).to eq 0
           expect(xml.xpath('//resource/file').length).to eq 2
           expect(xml.xpath('//resource/file')[0].attributes['mimetype']).to be_nil
           expect(xml.xpath('//resource/file')[0].attributes['publish'].value).to eq('yes')
@@ -404,6 +406,7 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('book')
           expect(xml.xpath('//contentMetadata')[0].attributes['objectId'].value).to eq(TEST_DRUID.to_s)
+          expect(xml.xpath('//bookData')[0].attributes['readingOrder'].value).to eq('ltr')
           expect(xml.xpath('//resource').length).to eq 4
           expect(xml.xpath('//resource/file').length).to eq 6
           expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('oo000oo0001_00_001.tif')
@@ -428,20 +431,21 @@ RSpec.describe Assembly::ContentMetadata do
         end
       end
 
-      context "when item has a 'druid:' prefix. Using two tifs, two associated jp2s, two associated pdfs and one lingering PDF using bundle=dpg" do
+      context "when item has a 'druid:' prefix and specified book order. Using two tifs, two associated jp2s, two associated pdfs and one lingering PDF using bundle=dpg" do
         it 'generates valid content metadata with flattening folder structure' do
           objects = [Assembly::ObjectFile.new(TEST_DPG_TIF), Assembly::ObjectFile.new(TEST_DPG_JP),
                      Assembly::ObjectFile.new(TEST_DPG_PDF), Assembly::ObjectFile.new(TEST_DPG_TIF2),
                      Assembly::ObjectFile.new(TEST_DPG_JP2), Assembly::ObjectFile.new(TEST_DPG_PDF2),
                      Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF1)]
           test_druid = "druid:#{TEST_DRUID}"
-          result = described_class.create_content_metadata(druid: test_druid, bundle: :dpg, objects: objects, style: :simple_book, flatten_folder_structure: true)
+          result = described_class.create_content_metadata(druid: test_druid, bundle: :dpg, objects: objects, style: :simple_book, flatten_folder_structure: true, reading_order: 'rtl')
           expect(result.class).to be String
           expect(result.include?('<?xml')).to be true
           xml = Nokogiri::XML(result)
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('book')
           expect(xml.xpath('//contentMetadata')[0].attributes['objectId'].value).to eq(test_druid)
+          expect(xml.xpath('//bookData')[0].attributes['readingOrder'].value).to eq('rtl')
           expect(test_druid).to eq("druid:#{TEST_DRUID}")
           expect(xml.xpath('//resource').length).to eq 3
           expect(xml.xpath('//resource/file').length).to be 7
@@ -463,6 +467,14 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath("//resource[@sequence='3']/file").length).to eq 1
           expect(xml.xpath('//label')[2].text).to eq('Object 1')
           expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('object')
+        end
+      end
+
+      context 'throws an error with invalid reading order' do
+        subject(:result) { described_class.create_content_metadata(druid: "druid:#{TEST_DRUID}", bundle: :dpg, objects: [], style: :simple_book, flatten_folder_structure: true, reading_order: 'bogus') }
+
+        it 'generates valid content metadata with flattening folder structure' do
+          expect { result }.to raise_error(Dry::Struct::Error)
         end
       end
 
@@ -493,7 +505,7 @@ RSpec.describe Assembly::ContentMetadata do
       end
     end
 
-    context 'when using style=book_with_pdf' do
+    context 'when style=book_with_pdf' do
       context 'when using two tiffs and a pdf' do
         let(:objects) do
           [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE),
@@ -580,6 +592,7 @@ RSpec.describe Assembly::ContentMetadata do
           xml = Nokogiri::XML(result)
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('file')
+          expect(xml.xpath('//bookData').length).to eq 0
           expect(xml.xpath('//resource').length).to eq 4
           expect(xml.xpath('//resource/file').length).to eq 4
           expect(xml.xpath('//label').length).to eq 4
@@ -611,6 +624,7 @@ RSpec.describe Assembly::ContentMetadata do
       it 'generates valid content metadata for two tifs' do
         expect(xml.errors.size).to eq 0
         expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('book')
+        expect(xml.xpath('//bookData').length).to eq 1
         expect(xml.xpath('//resource').length).to eq 2
         expect(xml.xpath('//resource/file').length).to eq 2
         expect(xml.xpath('//label').length).to eq 2
@@ -641,6 +655,7 @@ RSpec.describe Assembly::ContentMetadata do
       it 'generates valid content metadata' do
         expect(xml.errors.size).to eq 0
         expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('document')
+        expect(xml.xpath('//bookData').length).to eq 0
         expect(xml.xpath('//resource').length).to eq 1
         expect(xml.xpath('//resource/file').length).to eq 1
         expect(xml.xpath('//label').length).to eq 1
@@ -713,6 +728,7 @@ RSpec.describe Assembly::ContentMetadata do
       it 'generates valid content metadata' do
         expect(xml.errors.size).to eq 0
         expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('3d')
+        expect(xml.xpath('//bookData').length).to eq 0
         expect(xml.xpath('//resource').length).to eq 4
         expect(xml.xpath('//resource/file').length).to eq 4
         expect(xml.xpath('//label').length).to eq 4

@@ -52,13 +52,15 @@ module Assembly
     #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).
     #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.
     #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true.
+    #   See https://consul.stanford.edu/pages/viewpage.action?spaceKey=chimera&title=DOR+content+types%2C+resource+types+and+interpretive+metadata for next two settings
+    #   :reading_order = optional - only valid for simple_book, can be 'rtl' or 'ltr'.  The default is 'ltr'.
     # Example:
     #    Assembly::ContentMetadata.create_content_metadata(:druid=>'druid:nx288wh8889',:style=>:simple_image,:objects=>object_files,:add_file_attributes=>false)
     def self.create_content_metadata(druid:, objects:, auto_labels: true,
                                      add_exif: false, bundle: :default, style: :simple_image,
                                      add_file_attributes: false, file_attributes: {},
                                      preserve_common_paths: false, flatten_folder_structure: false,
-                                     include_root_xml: nil)
+                                     include_root_xml: nil, reading_order: 'ltr')
 
       common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
 
@@ -68,6 +70,7 @@ module Assembly
                           add_file_attributes: add_file_attributes,
                           file_attributes: file_attributes,
                           add_exif: add_exif,
+                          reading_order: reading_order,
                           type: object_level_type(style))
 
       builder = NokogiriBuilder.build(druid: druid,
