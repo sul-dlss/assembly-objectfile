@@ -3,7 +3,7 @@
 require 'simplecov'
 SimpleCov.start
 
-bootfile = File.expand_path(File.dirname(__FILE__) + '/../config/boot')
+bootfile = File.expand_path("#{File.dirname(__FILE__)}/../config/boot")
 require bootfile
 
 RSpec.configure do |config|

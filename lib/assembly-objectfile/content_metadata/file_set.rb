@@ -9,7 +9,7 @@ module Assembly
       # @param [Boolean] dpg (false) is it a dpg bundle?
       # @param [Array<Assembly::ObjectFile>] resource_files
       # @param style
-      def initialize(dpg: false, resource_files:, style:)
+      def initialize(resource_files:, style:, dpg: false)
         @dpg = dpg
         @resource_files = resource_files
         @style = style
@@ -46,7 +46,7 @@ module Assembly
         resource_has_non_images = !(resource_file_types - [:image]).empty?
 
         case style
-        when :simple_image
+        when :simple_image, :map
           'image'
         when :file
           'file'
@@ -56,8 +56,6 @@ module Assembly
           resource_has_non_images && resource_file_types.include?(:image) == false ? 'object' : 'image'
         when :book_with_pdf # in book with PDF type, if we find a resource with *any* non images, switch it's type from book to object
           resource_has_non_images ? 'object' : 'page'
-        when :map
-          'image'
         when :document
           'document'
         when :'3d'

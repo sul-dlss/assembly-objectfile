@@ -2,7 +2,7 @@
 
 module Assembly
   # the path to the gem, used to access profiles stored with the gem
-  PATH_TO_GEM = File.expand_path(File.dirname(__FILE__) + '/..')
+  PATH_TO_GEM = File.expand_path("#{File.dirname(__FILE__)}/..")
 
   # if input image is not one of these mime types, it will not be regarded as a valid image for the purpose of generating a JP2 derivative
   VALID_IMAGE_MIMETYPES = ['image/jpeg', 'image/tiff', 'image/tif', 'image/png'].freeze

@@ -29,7 +29,7 @@ module Assembly
       # @param [Symbol] bundle
       # @param [Assembly::ObjectFile] file
       # @param style
-      def initialize(bundle: nil, file:, style: nil)
+      def initialize(file:, bundle: nil, style: nil)
         @bundle = bundle
         @file = file
         @style = style
