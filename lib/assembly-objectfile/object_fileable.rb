@@ -7,6 +7,7 @@ module Assembly
   # Common behaviors we need for other classes in the gem
   module ObjectFileable
     attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path, :mime_type_order
+
     VALID_MIMETYPE_METHODS = %i[exif file extension].freeze
 
     # @param [String] path full path to the file to be worked with

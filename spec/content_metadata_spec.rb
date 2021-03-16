@@ -333,6 +333,34 @@ RSpec.describe Assembly::ContentMetadata do
       end
     end
 
+    context 'when style is webarchive-seed' do
+      context 'when using a jp2' do
+        it 'generates valid content metadata with exif, adding file attributes' do
+          objects = [Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
+          result = described_class.create_content_metadata(style: :'webarchive-seed', druid: TEST_DRUID, add_exif: true, add_file_attributes: true, objects: objects)
+          expect(result.class).to be String
+          xml = Nokogiri::XML(result)
+          expect(xml.errors.size).to eq 0
+          expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('webarchive-seed')
+          expect(xml.xpath('//resource').length).to eq 1
+          expect(xml.xpath('//resource/file').length).to eq 1
+          expect(xml.xpath('//resource/file/checksum').length).to eq 2
+          expect(xml.xpath('//resource/file/checksum')[0].text).to eq('b965b5787e0100ec2d43733144120feab327e88c')
+          expect(xml.xpath('//resource/file/checksum')[1].text).to eq('4eb54050d374291ece622d45e84f014d')
+          expect(xml.xpath('//label').length).to eq 1
+          expect(xml.xpath('//label')[0].text).to match(/Image 1/)
+          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource/file')[0].attributes['size'].value).to eq('306')
+          expect(xml.xpath('//resource/file')[0].attributes['mimetype'].value).to eq('image/jp2')
+          expect(xml.xpath('//resource/file')[0].attributes['publish'].value).to eq('yes')
+          expect(xml.xpath('//resource/file')[0].attributes['preserve'].value).to eq('no')
+          expect(xml.xpath('//resource/file')[0].attributes['shelve'].value).to eq('yes')
+          expect(xml.xpath('//resource/file/imageData')[0].attributes['width'].value).to eq('100')
+          expect(xml.xpath('//resource/file/imageData')[0].attributes['height'].value).to eq('100')
+        end
+      end
+    end
+
     context 'when style=map' do
       context 'when using a single tif and jp2' do
         it 'generates valid content metadata with overriding file attributes, including a default value, and no exif data' do
