@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Metrics/CyclomaticComplexity
-# rubocop:disable Metrics/PerceivedComplexity
-# rubocop:disable Metrics/AbcSize
 module Assembly
   class ContentMetadata
     # Builds a nokogiri representation of the content metadata
@@ -56,6 +53,3 @@ module Assembly
     end
   end
 end
-# rubocop:enable Metrics/CyclomaticComplexity
-# rubocop:enable Metrics/PerceivedComplexity
-# rubocop:enable Metrics/AbcSize
