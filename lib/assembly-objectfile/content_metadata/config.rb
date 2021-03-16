@@ -12,7 +12,7 @@ module Assembly
 
     # Represents a configuration for generating the content metadata
     class Config < Dry::Struct
-      STYLES = %w[image file book map 3d document].freeze
+      STYLES = %w[image file book map 3d document webarchive-seed].freeze
       attribute :auto_labels, Types::Strict::Bool.default(true)
       attribute :flatten_folder_structure, Types::Strict::Bool.default(false)
       attribute :add_file_attributes, Types::Strict::Bool.default(false)

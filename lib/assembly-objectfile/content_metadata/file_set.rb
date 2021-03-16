@@ -46,7 +46,7 @@ module Assembly
         resource_has_non_images = !(resource_file_types - [:image]).empty?
 
         case style
-        when :simple_image, :map
+        when :simple_image, :map, :'webarchive-seed'
           'image'
         when :file
           'file'

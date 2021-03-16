@@ -14,7 +14,7 @@ module Assembly
   # these are used when :bundle=>:dpg only
 
   DEPRECATED_STYLES = %i[book_with_pdf book_as_image].freeze
-  VALID_STYLES = %i[simple_image simple_book file map document 3d].freeze
+  VALID_STYLES = %i[simple_image simple_book file map document 3d webarchive-seed].freeze
 
   # This class generates content metadata for image files
   class ContentMetadata
@@ -34,6 +34,7 @@ module Assembly
     #                 :book_as_image, as simple_book, but with contentMetadata type="book", resource type="image" (same rule applies for resources with non images)  - NOTE: THIS IS DEPRECATED
     #                 :map, like simple_image, but with contentMetadata type="map", resource type="image"
     #                 :3d, contentMetadata type="3d", ".obj" and other configured 3d extension files go into resource_type="3d", everything else into resource_type="file"
+    #                 :webarchive-seed, contentMetadata type="webarchive-seed", resource type="image"
     #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
     #                 :default = all files get their own resources (default)
     #                 :filename = files with the same filename but different extensions get bundled together in a single resource
