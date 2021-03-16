@@ -15,6 +15,8 @@ module Assembly
 
         Nokogiri::XML::Builder.new do |xml|
           xml.contentMetadata(objectId: druid.to_s, type: config.type) do
+            xml.bookData(readingOrder: config.reading_order) if config.type == 'book'
+
             filesets.each_with_index do |fileset, index| # iterate over all the resources
               # start a new resource element
               sequence = index + 1
