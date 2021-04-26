@@ -70,6 +70,13 @@ describe Assembly::ObjectFile do
     expect(@ai.mimetype).to eq('text/plain')
   end
 
+  it 'overrides the mimetype generators and uses the manual mapping to set the correct mimetype of application/json for a .json file' do
+    @ai = described_class.new(TEST_JSON_FILE)
+    expect(@ai.exif_mimetype).to be_nil # exif returns nil
+    expect(@ai.file_mimetype).to eq('text/plain') # unix file system command returns plain text
+    expect(@ai.mimetype).to eq('application/json') # but our configured mapping overrides both and returns application/json
+  end
+
   it 'sets the correct mimetype of image/tiff for .tif files' do
     @ai = described_class.new(TEST_TIF_INPUT_FILE)
     expect(@ai.mimetype).to eq('image/tiff')
