@@ -54,6 +54,8 @@ TEST_RES3_TEI = File.join(TEST_INPUT_DIR, 'res3_teifile.txt')
 
 TEST_FILE_NO_EXIF = File.join(TEST_INPUT_DIR, 'file_with_no_exif.xml')
 
+TEST_JSON_FILE = File.join(TEST_INPUT_DIR, 'test.json')
+
 TEST_OBJ_FILE = File.join(TEST_INPUT_DIR, 'someobject.obj')
 TEST_PLY_FILE = File.join(TEST_INPUT_DIR, 'someobject.ply')
 

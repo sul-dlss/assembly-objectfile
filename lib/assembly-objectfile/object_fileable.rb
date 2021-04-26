@@ -8,7 +8,7 @@ module Assembly
   module ObjectFileable
     attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path, :mime_type_order
 
-    VALID_MIMETYPE_METHODS = %i[exif file extension].freeze
+    VALID_MIMETYPE_METHODS = %i[override exif file extension].freeze
 
     # @param [String] path full path to the file to be worked with
     # @param [Hash<Symbol => Object>] params options used during content metadata generation
@@ -18,7 +18,8 @@ module Assembly
     # @option params [String] :provider_sha1 pre-computed SHA1 checksum
     # @option params [String] :relative_path if you want the file ids in the content metadata it can be set, otherwise content metadata will get the full path
     # @option params [Array] :mime_type_order can be set to the order in which you want mimetypes to be determined
-    #                                          options are :exif (from exif if exists), :extension (from file extension), and :file (from unix file system command)
+    #                                          options are :override (from manual overide mapping if exists), :exif (from exif if exists),
+    #                                                      :extension (from file extension), and :file (from unix file system command)
     #                                          the default is defined in the private `default_mime_type_order` method but you can override to set your own order
     # @example
     #   Assembly::ObjectFile.new('/input/path_to_file.tif')
@@ -127,10 +128,19 @@ module Assembly
         mimetype = ''
         mime_type_order.each do |mime_type_method|
           mimetype = public_send("#{mime_type_method}_mimetype") if VALID_MIMETYPE_METHODS.include?(mime_type_method)
-          break if !mimetype.nil? && mimetype != ''
+          break if mimetype.present?
         end
         mimetype
       end
+    end
+
+    # Returns mimetype information using the manual override mapping (based on a file extension lookup)
+    # @return [String] mime type for supplied file if a mapping exists for the file's extension
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.json')
+    #   puts source_file.override_mimetype # 'application/json'
+    def override_mimetype
+      @override_mimetype ||= Assembly::OVERRIDE_MIMETYPES.fetch(ext.to_sym, '')
     end
 
     # Returns mimetype information using the mime-types gem (based on a file extension lookup)
@@ -257,7 +267,7 @@ exif&.mimetype && prefer_exif
 
     # prive method defining default preferred ordering of how mimetypes are determined
     def default_mime_type_order
-      %i[exif file extension]
+      %i[override exif file extension]
     end
 
     # private method to check for file existence before operating on it
