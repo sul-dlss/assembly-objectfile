@@ -40,7 +40,7 @@ module Assembly
                     if config.add_exif # add exif info if the user requested it
                       xml.checksum(cm_file.sha1, type: 'sha1')
                       xml.checksum(cm_file.md5, type: 'md5')
-                      xml.imageData(cm_file.image_data) if cm_file.image? # add image data for an image
+                      xml.imageData(cm_file.image_data) if cm_file.valid_image? # add image data for an image
                     elsif cm_file.provider_md5 || cm_file.provider_sha1 # if we did not add exif info, see if there are user supplied checksums to add
                       xml.checksum(cm_file.provider_sha1, type: 'sha1') if cm_file.provider_sha1
                       xml.checksum(cm_file.provider_md5, type: 'md5') if cm_file.provider_md5
