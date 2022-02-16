@@ -9,7 +9,7 @@ RSpec.describe Assembly::ContentMetadata do
     let(:xml) { Nokogiri::XML(result) }
 
     context 'when style=simple_image' do
-      context 'when using a single tif and jp2' do
+      context 'when using a single tif and jp2 with add_exif: true' do
         it 'generates valid content metadata with exif, adding file attributes' do
           objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)]
           result = described_class.create_content_metadata(druid: TEST_DRUID, add_exif: true, add_file_attributes: true, objects: objects)
@@ -44,46 +44,8 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath('//resource/file/imageData')[1].attributes['width'].value).to eq('100')
           expect(xml.xpath('//resource/file/imageData')[1].attributes['height'].value).to eq('100')
         end
-      end
 
-      context 'when using a single tif and jp2' do
-        it 'generates valid content metadata with no exif adding specific file attributes for 2 objects, and defaults for 1 object' do
-          obj1 = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
-          obj2 = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
-          obj3 = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)
-          obj1.file_attributes = { publish: 'no', preserve: 'no', shelve: 'no' }
-          obj2.file_attributes = { publish: 'yes', preserve: 'yes', shelve: 'yes' }
-          objects = [obj1, obj2, obj3]
-          result = described_class.create_content_metadata(druid: TEST_DRUID, add_exif: false, add_file_attributes: true, objects: objects)
-          expect(result.class).to be String
-          xml = Nokogiri::XML(result)
-          expect(xml.errors.size).to eq 0
-          expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('image')
-          expect(xml.xpath('//resource').length).to eq 3
-          expect(xml.xpath('//resource/file').length).to eq 3
-          expect(xml.xpath('//resource/file/checksum').length).to eq 0
-          expect(xml.xpath('//resource/file/imageData').length).to eq 0
-          expect(xml.xpath('//label').length).to eq 3
-          expect(xml.xpath('//label')[0].text).to match(/Image 1/)
-          expect(xml.xpath('//label')[1].text).to match(/Image 2/)
-          expect(xml.xpath('//label')[2].text).to match(/Image 3/)
-          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('image')
-          expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('image')
-          expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('image')
-          expect(xml.xpath('//resource/file')[0].attributes['publish'].value).to eq('no') # specificially set in object
-          expect(xml.xpath('//resource/file')[0].attributes['preserve'].value).to eq('no') # specificially set in object
-          expect(xml.xpath('//resource/file')[0].attributes['shelve'].value).to eq('no') # specificially set in object
-          expect(xml.xpath('//resource/file')[1].attributes['publish'].value).to eq('yes') # specificially set in object
-          expect(xml.xpath('//resource/file')[1].attributes['preserve'].value).to eq('yes') # specificially set in object
-          expect(xml.xpath('//resource/file')[1].attributes['shelve'].value).to eq('yes')  # specificially set in object
-          expect(xml.xpath('//resource/file')[2].attributes['publish'].value).to eq('yes') # defaults by mimetype
-          expect(xml.xpath('//resource/file')[2].attributes['preserve'].value).to eq('no') # defaults by mimetype
-          expect(xml.xpath('//resource/file')[2].attributes['shelve'].value).to eq('yes') # defaults by mimetype
-        end
-      end
-
-      context 'when using a single tif and jp2' do
-        it 'generates valid content metadata with exif, overriding file labels' do
+        it 'generates valid content metadata, overriding file labels' do
           objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE, label: 'Sample tif label!'), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE, label: 'Sample jp2 label!')]
           result = described_class.create_content_metadata(druid: TEST_DRUID, add_exif: true, add_file_attributes: true, objects: objects)
           expect(result.class).to be String
@@ -116,6 +78,42 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath('//resource/file')[1].attributes['shelve'].value).to eq('yes')
           expect(xml.xpath('//resource/file/imageData')[1].attributes['width'].value).to eq('100')
           expect(xml.xpath('//resource/file/imageData')[1].attributes['height'].value).to eq('100')
+        end
+      end
+
+      context 'when using a single tif and jp2 with add_exif: false' do
+        it 'generates valid content metadata adding specific file attributes for 2 objects, and defaults for 1 object' do
+          obj1 = Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE)
+          obj2 = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE)
+          obj3 = Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)
+          obj1.file_attributes = { publish: 'no', preserve: 'no', shelve: 'no' }
+          obj2.file_attributes = { publish: 'yes', preserve: 'yes', shelve: 'yes' }
+          objects = [obj1, obj2, obj3]
+          result = described_class.create_content_metadata(druid: TEST_DRUID, add_exif: false, add_file_attributes: true, objects: objects)
+          expect(result.class).to be String
+          xml = Nokogiri::XML(result)
+          expect(xml.errors.size).to eq 0
+          expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource').length).to eq 3
+          expect(xml.xpath('//resource/file').length).to eq 3
+          expect(xml.xpath('//resource/file/checksum').length).to eq 0
+          expect(xml.xpath('//resource/file/imageData').length).to eq 0
+          expect(xml.xpath('//label').length).to eq 3
+          expect(xml.xpath('//label')[0].text).to match(/Image 1/)
+          expect(xml.xpath('//label')[1].text).to match(/Image 2/)
+          expect(xml.xpath('//label')[2].text).to match(/Image 3/)
+          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource/file')[0].attributes['publish'].value).to eq('no') # specificially set in object
+          expect(xml.xpath('//resource/file')[0].attributes['preserve'].value).to eq('no') # specificially set in object
+          expect(xml.xpath('//resource/file')[0].attributes['shelve'].value).to eq('no') # specificially set in object
+          expect(xml.xpath('//resource/file')[1].attributes['publish'].value).to eq('yes') # specificially set in object
+          expect(xml.xpath('//resource/file')[1].attributes['preserve'].value).to eq('yes') # specificially set in object
+          expect(xml.xpath('//resource/file')[1].attributes['shelve'].value).to eq('yes')  # specificially set in object
+          expect(xml.xpath('//resource/file')[2].attributes['publish'].value).to eq('yes') # defaults by mimetype
+          expect(xml.xpath('//resource/file')[2].attributes['preserve'].value).to eq('no') # defaults by mimetype
+          expect(xml.xpath('//resource/file')[2].attributes['shelve'].value).to eq('yes') # defaults by mimetype
         end
       end
 
