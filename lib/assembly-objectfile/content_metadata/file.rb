@@ -35,7 +35,7 @@ module Assembly
         @style = style
       end
 
-      delegate :sha1, :md5, :provider_md5, :provider_sha1, :mimetype, :filesize, :image?, to: :file
+      delegate :sha1, :md5, :provider_md5, :provider_sha1, :mimetype, :filesize, :image?, :valid_image?, to: :file
 
       def file_id(common_path:, flatten_folder_structure:)
         # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that

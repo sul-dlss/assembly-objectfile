@@ -329,6 +329,26 @@ RSpec.describe Assembly::ContentMetadata do
           end
         end
       end
+
+      context 'when using a single svg with add_exif: true' do
+        subject(:result) { described_class.create_content_metadata(druid: TEST_DRUID, add_exif: true, auto_labels: false, add_file_attributes: true, objects: objects) }
+
+        let(:objects) { [Assembly::ObjectFile.new(TEST_SVG_INPUT_FILE)] }
+
+        it 'generates no imageData node' do
+          xml = Nokogiri::XML(result)
+          expect(xml.errors.size).to eq 0
+          expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('image')
+          expect(xml.xpath('//resource/file').length).to eq 1
+          expect(xml.xpath('//resource/file')[0]['mimetype']).to eq 'image/svg+xml'
+          expect(xml.xpath('//resource/file')[0]['publish']).to eq('no')
+          expect(xml.xpath('//resource/file')[0]['preserve']).to eq('yes')
+          expect(xml.xpath('//resource/file')[0]['shelve']).to eq('no')
+          expect(xml.xpath("//resource[@sequence='1']/file").length).to eq 1
+          expect(xml.xpath('//imageData')).not_to be_present
+          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('image')
+        end
+      end
     end
 
     context 'when style=webarchive-seed' do
