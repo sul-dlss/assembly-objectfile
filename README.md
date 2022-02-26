@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/sul-dlss/assembly-objectfile.svg?branch=main)](https://travis-ci.com/sul-dlss/assembly-objectfile)
+[![CircleCI](https://circleci.com/gh/sul-dlss/assembly-objectfile/tree/main.svg?style=svg)](https://circleci.com/gh/sul-dlss/assembly-objectfile/tree/main)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/2310962acce78d78e76c/test_coverage)](https://codeclimate.com/github/sul-dlss/assembly-objectfile/test_coverage)
 [![Maintainability](https://api.codeclimate.com/v1/badges/2310962acce78d78e76c/maintainability)](https://codeclimate.com/github/sul-dlss/assembly-objectfile/maintainability)
 [![Gem Version](https://badge.fury.io/rb/assembly-objectfile.svg)](https://badge.fury.io/rb/assembly-objectfile)
