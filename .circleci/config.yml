@@ -1,10 +1,14 @@
 version: 2.1
 orbs:
-  ruby-rails: sul-dlss/ruby-rails@3.0.0
+  ruby-rails: sul-dlss/ruby-rails@3.0.1
 workflows:
   build:
     jobs:
-      - ruby-rails/lint:
+      - ruby-rails/lint-gem:
           name: lint
       - ruby-rails/test-gem:
           name: test
+          before-test:
+            - run:
+                name: Install exiftool
+                command: curl -L http://cpanmin.us | perl - --sudo Image::ExifTool
