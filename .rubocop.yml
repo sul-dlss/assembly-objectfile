@@ -2,20 +2,12 @@ inherit_from: .rubocop_todo.yml
 require: rubocop-rspec
 
 AllCops:
-  TargetRubyVersion: 2.5
-
-RSpec/ContextWording:
-  Enabled: false # too dogmatic
-
-RSpec/ExampleLength:
-  Max: 25
-
-# we like 'expect(x).to receive' better than 'have_received'
-RSpec/MessageSpies:
-  Enabled: false
-
-RSpec/NestedGroups:
-  Max: 4 # default: 3
+  TargetRubyVersion: 3.0
+  DisplayCopNames: true
+  Exclude:
+    - 'Gemfile.lock'
+    - '**/*.md'
+    - 'vendor/**/*' # avoid running rubocop on cached bundler
 
 Metrics/BlockLength:
   Exclude:
@@ -134,4 +126,63 @@ Style/RedundantArgument: # (new in 1.4)
   Enabled: true
 
 Style/SwapValues: # (new in 1.1)
+  Enabled: true
+
+Gemspec/RequireMFA: # new in 1.23
+  Enabled: true
+Layout/LineEndStringConcatenationIndentation: # new in 1.18
+  Enabled: true
+Lint/AmbiguousOperatorPrecedence: # new in 1.21
+  Enabled: true
+Lint/AmbiguousRange: # new in 1.19
+  Enabled: true
+Lint/EmptyInPattern: # new in 1.16
+  Enabled: true
+Lint/IncompatibleIoSelectWithFiberScheduler: # new in 1.21
+  Enabled: true
+Lint/RequireRelativeSelfPath: # new in 1.22
+  Enabled: true
+Lint/UselessRuby2Keywords: # new in 1.23
+  Enabled: true
+Naming/BlockForwarding: # new in 1.24
+  Enabled: true
+Security/IoMethods: # new in 1.22
+  Enabled: true
+Style/FileRead: # new in 1.24
+  Enabled: true
+Style/FileWrite: # new in 1.24
+  Enabled: true
+Style/InPatternThen: # new in 1.16
+  Enabled: true
+Style/MapToHash: # new in 1.24
+  Enabled: true
+Style/MultilineInPatternThen: # new in 1.16
+  Enabled: true
+Style/NumberedParameters: # new in 1.22
+  Enabled: true
+Style/NumberedParametersLimit: # new in 1.22
+  Enabled: true
+Style/OpenStructUse: # new in 1.23
+  Enabled: true
+Style/QuotedSymbols: # new in 1.16
+  Enabled: true
+Style/RedundantSelfAssignmentBranch: # new in 1.19
+  Enabled: true
+Style/SelectByRegexp: # new in 1.22
+  Enabled: true
+Style/StringChars: # new in 1.12
+  Enabled: true
+RSpec/BeEq: # new in 2.9.0
+  Enabled: true
+RSpec/BeNil: # new in 2.9.0
+  Enabled: true
+RSpec/ExcessiveDocstringSpacing: # new in 2.5
+  Enabled: true
+RSpec/IdenticalEqualityAssertion: # new in 2.4
+  Enabled: true
+RSpec/SubjectDeclaration: # new in 2.5
+  Enabled: true
+RSpec/FactoryBot/SyntaxMethods: # new in 2.7
+  Enabled: true
+RSpec/Rails/AvoidSetupHook: # new in 2.4
   Enabled: true

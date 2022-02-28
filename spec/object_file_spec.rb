@@ -21,15 +21,15 @@ describe Assembly::ObjectFile do
   it 'tells us if an input file is an image' do
     expect(File.exist?(TEST_TIF_INPUT_FILE)).to be true
     @ai = described_class.new(TEST_TIF_INPUT_FILE)
-    expect(@ai.image?).to eq(true)
-    expect(@ai.exif).not_to be nil
+    expect(@ai.image?).to be(true)
+    expect(@ai.exif).not_to be_nil
     expect(@ai.mimetype).to eq('image/tiff')
     expect(@ai.file_mimetype).to eq('image/tiff')
     expect(@ai.extension_mimetype).to eq('image/tiff')
     expect(@ai.exif_mimetype).to eq('image/tiff')
     expect(@ai.object_type).to eq(:image)
-    expect(@ai.valid_image?).to eq(true)
-    expect(@ai.jp2able?).to eq(true)
+    expect(@ai.valid_image?).to be(true)
+    expect(@ai.jp2able?).to be(true)
   end
 
   it 'tells us information about the input file' do
@@ -114,31 +114,31 @@ describe Assembly::ObjectFile do
   it 'tells us that a jp2 file is not jp2able but does have a color profile' do
     expect(File.exist?(TEST_JP2_INPUT_FILE)).to be true
     @ai = described_class.new(TEST_JP2_INPUT_FILE)
-    expect(@ai.image?).to eq(true)
+    expect(@ai.image?).to be(true)
     expect(@ai.object_type).to eq(:image)
-    expect(@ai.valid_image?).to eq(true)
-    expect(@ai.jp2able?).to eq(false)
-    expect(@ai.has_color_profile?).to eq(true)
+    expect(@ai.valid_image?).to be(true)
+    expect(@ai.jp2able?).to be(false)
+    expect(@ai.has_color_profile?).to be(true)
   end
 
   it 'tells us that a tiff file is jp2able and has a color profile' do
     expect(File.exist?(TEST_RES1_TIF1)).to be true
     @ai = described_class.new(TEST_RES1_TIF1)
-    expect(@ai.image?).to eq(true)
+    expect(@ai.image?).to be(true)
     expect(@ai.object_type).to eq(:image)
-    expect(@ai.valid_image?).to eq(true)
-    expect(@ai.jp2able?).to eq(true)
-    expect(@ai.has_color_profile?).to eq(true)
+    expect(@ai.valid_image?).to be(true)
+    expect(@ai.jp2able?).to be(true)
+    expect(@ai.has_color_profile?).to be(true)
   end
 
   it 'tells us that a tiff file is not jp2able and is not valid since it has no profile' do
     expect(File.exist?(TEST_TIFF_NO_COLOR_FILE)).to be true
     @ai = described_class.new(TEST_TIFF_NO_COLOR_FILE)
-    expect(@ai.image?).to eq(true)
+    expect(@ai.image?).to be(true)
     expect(@ai.object_type).to eq(:image)
-    expect(@ai.valid_image?).to eq(true)
-    expect(@ai.jp2able?).to eq(true)
-    expect(@ai.has_color_profile?).to eq(false)
+    expect(@ai.valid_image?).to be(true)
+    expect(@ai.jp2able?).to be(true)
+    expect(@ai.has_color_profile?).to be(false)
   end
 
   it 'computes checksums for an image file' do
@@ -189,16 +189,16 @@ describe Assembly::ObjectFile do
     non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/object_file_spec.rb')
     expect(File.exist?(non_image_file)).to be true
     @ai = described_class.new(non_image_file)
-    expect(@ai.image?).to eq(false)
+    expect(@ai.image?).to be(false)
     expect(@ai.object_type).not_to eq(:image)
-    expect(@ai.valid_image?).to eq(false)
+    expect(@ai.valid_image?).to be(false)
 
     non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
     expect(File.exist?(non_image_file)).to be true
     @ai = described_class.new(non_image_file)
-    expect(@ai.image?).to eq(false)
+    expect(@ai.image?).to be(false)
     expect(@ai.object_type).not_to eq(:image)
-    expect(@ai.valid_image?).to eq(false)
+    expect(@ai.valid_image?).to be(false)
   end
 
   it 'tells us the size of an input file' do
