@@ -13,6 +13,7 @@ Gem::Specification.new do |s|
   s.summary     = 'Ruby immplementation of file services needed to prepare objects to be accessioned in SULAIR digital library'
   s.description = 'Get exif data, file sizes and more.'
   s.license     = 'ALv2'
+  s.metadata['rubygems_mfa_required'] = 'true'
 
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
@@ -20,7 +21,7 @@ Gem::Specification.new do |s|
   s.executables   = s.files.grep(%r{^exe/}) { |f| File.basename(f) }
   s.require_paths = ['lib']
 
-  s.required_ruby_version = '>= 2.5', '< 4'
+  s.required_ruby_version = '>= 3.0'
 
   s.add_dependency 'activesupport', '>= 5.2.0'
   s.add_dependency 'deprecation'
