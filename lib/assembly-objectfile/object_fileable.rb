@@ -176,8 +176,7 @@ module Assembly
       @exif_mimetype ||= begin
         check_for_file
         prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
-        exif.mimetype if
-exif&.mimetype && prefer_exif
+        exif.mimetype if exif&.mimetype && prefer_exif
       end
     end
 
