@@ -214,4 +214,9 @@ describe Assembly::ObjectFile do
     expect(@ai.file_mimetype).to eq('image/tiff')
     expect(@ai.encoding).to eq('binary')
   end
+
+  it 'raises MiniExiftool::Error if exiftool raises one' do
+    object_file = described_class.new('spec/test_data/empty.txt')
+    expect { object_file.exif }.to raise_error(MiniExiftool::Error)
+  end
 end
