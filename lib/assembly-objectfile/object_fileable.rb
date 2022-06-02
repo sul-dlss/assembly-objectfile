@@ -91,8 +91,6 @@ module Assembly
       @exif ||= begin
         check_for_file
         MiniExiftool.new(path, replace_invalid_chars: '?')
-      rescue StandardError
-        nil
       end
     end
 
