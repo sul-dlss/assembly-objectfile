@@ -5,9 +5,9 @@ require 'spec_helper'
 describe Assembly::ObjectFile do
   it 'does not run if no input file is passed in' do
     object_file = described_class.new('')
-    expect { object_file.filesize }.to raise_error(RuntimeError, 'input file  does not exist')
-    expect { object_file.sha1 }.to raise_error(RuntimeError, 'input file  does not exist')
-    expect { object_file.md5 }.to raise_error(RuntimeError, 'input file  does not exist')
+    expect { object_file.filesize }.to raise_error(RuntimeError, 'input file  does not exist or is a directory')
+    expect { object_file.sha1 }.to raise_error(RuntimeError, 'input file  does not exist or is a directory')
+    expect { object_file.md5 }.to raise_error(RuntimeError, 'input file  does not exist or is a directory')
   end
 
   it 'returns the common directory of a set of filenames passed into it, where the common part does not terminate on a directory' do

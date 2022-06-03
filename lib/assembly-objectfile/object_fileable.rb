@@ -269,7 +269,7 @@ module Assembly
 
     # private method to check for file existence before operating on it
     def check_for_file
-      raise "input file #{path} does not exist" unless file_exists?
+      raise "input file #{path} does not exist or is a directory" unless file_exists?
     end
   end
 end
