@@ -25,6 +25,5 @@ module Assembly
 end
 
 require 'assembly-objectfile/content_metadata'
-require 'assembly-objectfile/object_fileable'
 require 'assembly-objectfile/object_file'
 require 'assembly-objectfile/version'
