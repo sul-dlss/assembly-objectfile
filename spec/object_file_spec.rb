@@ -19,7 +19,6 @@ describe Assembly::ObjectFile do
   end
 
   it 'tells us if an input file is an image' do
-    expect(File.exist?(TEST_TIF_INPUT_FILE)).to be true
     object_file = described_class.new(TEST_TIF_INPUT_FILE)
     expect(object_file.image?).to be(true)
     expect(object_file.exif).not_to be_nil
@@ -112,7 +111,6 @@ describe Assembly::ObjectFile do
   end
 
   it 'tells us that a jp2 file is not jp2able but does have a color profile' do
-    expect(File.exist?(TEST_JP2_INPUT_FILE)).to be true
     object_file = described_class.new(TEST_JP2_INPUT_FILE)
     expect(object_file.image?).to be(true)
     expect(object_file.object_type).to eq(:image)
@@ -122,7 +120,6 @@ describe Assembly::ObjectFile do
   end
 
   it 'tells us that a tiff file is jp2able and has a color profile' do
-    expect(File.exist?(TEST_RES1_TIF1)).to be true
     object_file = described_class.new(TEST_RES1_TIF1)
     expect(object_file.image?).to be(true)
     expect(object_file.object_type).to eq(:image)
@@ -132,7 +129,6 @@ describe Assembly::ObjectFile do
   end
 
   it 'tells us that a tiff file is not jp2able and is not valid since it has no profile' do
-    expect(File.exist?(TEST_TIFF_NO_COLOR_FILE)).to be true
     object_file = described_class.new(TEST_TIFF_NO_COLOR_FILE)
     expect(object_file.image?).to be(true)
     expect(object_file.object_type).to eq(:image)
@@ -142,7 +138,6 @@ describe Assembly::ObjectFile do
   end
 
   it 'computes checksums for an image file' do
-    expect(File.exist?(TEST_TIF_INPUT_FILE)).to be true
     object_file = described_class.new(TEST_TIF_INPUT_FILE)
     expect(object_file.md5).to eq('a2400500acf21e43f5440d93be894101')
     expect(object_file.sha1).to eq('8d11fab63089a24c8b17063d29a4b0eac359fb41')

@@ -726,7 +726,6 @@ RSpec.describe Assembly::ContentMetadata do
 
     context 'when not all input files exist' do
       it 'does not generate valid content metadata' do
-        expect(File.exist?(TEST_TIF_INPUT_FILE)).to be true
         junk_file = '/tmp/flim_flam_floom.jp2'
         expect(File.exist?(junk_file)).to be false
         objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(junk_file)]
