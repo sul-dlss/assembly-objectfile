@@ -25,8 +25,8 @@ describe Assembly::ObjectFile do
     expect(object_file.exif).not_to be_nil
     expect(object_file.mimetype).to eq('image/tiff')
     expect(object_file.file_mimetype).to eq('image/tiff')
-    expect(object_file.extension_mimetype).to eq('image/tiff')
-    expect(object_file.exif_mimetype).to eq('image/tiff')
+    expect(object_file.send(:extension_mimetype)).to eq('image/tiff')
+    expect(object_file.send(:exif_mimetype)).to eq('image/tiff')
     expect(object_file.object_type).to eq(:image)
     expect(object_file.valid_image?).to be(true)
     expect(object_file.jp2able?).to be(true)
