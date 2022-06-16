@@ -146,68 +146,10 @@ module Assembly
         check_for_file
         mimetype = ''
         mime_type_order.each do |mime_type_method|
-          mimetype = public_send("#{mime_type_method}_mimetype") if VALID_MIMETYPE_METHODS.include?(mime_type_method)
+          mimetype = send("#{mime_type_method}_mimetype") if VALID_MIMETYPE_METHODS.include?(mime_type_method)
           break if mimetype.present?
         end
         mimetype
-      end
-    end
-
-    # Returns mimetype information using the manual override mapping (based on a file extension lookup)
-    # @return [String] mime type for supplied file if a mapping exists for the file's extension
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.json')
-    #   puts source_file.override_mimetype # 'application/json'
-    def override_mimetype
-      @override_mimetype ||= Assembly::OVERRIDE_MIMETYPES.fetch(ext.to_sym, '')
-    end
-
-    # Returns mimetype information using the mime-types gem (based on a file extension lookup)
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.extension_mimetype # 'text/plain'
-    def extension_mimetype
-      @extension_mimetype ||= begin
-        mtype = MIME::Types.type_for(path).first
-        mtype ? mtype.content_type : ''
-      end
-    end
-
-    # Returns mimetype information for the current file based on unix file system command.
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.file_mimetype # 'text/plain'
-    def file_mimetype
-      @file_mimetype ||= begin
-        check_for_file
-        `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
-      end
-    end
-
-    # Returns mimetype information for the current file based on exif data (if available and not a trusted source that we'd rather get from the file system command)
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.exif_mimetype # 'text/plain'
-    def exif_mimetype
-      @exif_mimetype ||= begin
-        check_for_file
-        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
-        exif.mimetype if exif&.mimetype && prefer_exif
-      end
-    end
-
-    # @note Uses shell call to "file", only expected to work on unix based systems
-    # @return [String] encoding for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.encoding # 'us-ascii'
-    def encoding
-      @encoding ||= begin
-        check_for_file
-        `file --mime-encoding "#{path}"`.delete("\n").split(':')[1].strip
       end
     end
 
@@ -283,14 +225,72 @@ module Assembly
 
     private
 
+    # private method to check for file existence before operating on it
+    def check_for_file
+      raise "input file #{path} does not exist or is a directory" unless file_exists?
+    end
+
     # prive method defining default preferred ordering of how mimetypes are determined
     def default_mime_type_order
       %i[override exif file extension]
     end
 
-    # private method to check for file existence before operating on it
-    def check_for_file
-      raise "input file #{path} does not exist or is a directory" unless file_exists?
+    # Returns mimetype information using the mime-types gem (based on a file extension lookup)
+    # @return [String] mime type for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.extension_mimetype # 'text/plain'
+    def extension_mimetype
+      @extension_mimetype ||= begin
+        mtype = MIME::Types.type_for(path).first
+        mtype ? mtype.content_type : ''
+      end
+    end
+
+    # Returns mimetype information for the current file based on unix file system command.
+    # @return [String] mime type for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.file_mimetype # 'text/plain'
+    def file_mimetype
+      @file_mimetype ||= begin
+        check_for_file
+        `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
+      end
+    end
+
+    # Returns mimetype information for the current file based on exif data (if available and not a trusted source that we'd rather get from the file system command)
+    # @return [String] mime type for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.exif_mimetype # 'text/plain'
+    def exif_mimetype
+      @exif_mimetype ||= begin
+        check_for_file
+        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        exif.mimetype if exif&.mimetype && prefer_exif
+      end
+    end
+
+    # Returns mimetype information using the manual override mapping (based on a file extension lookup)
+    # @return [String] mime type for supplied file if a mapping exists for the file's extension
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.json')
+    #   puts source_file.override_mimetype # 'application/json'
+    def override_mimetype
+      @override_mimetype ||= Assembly::OVERRIDE_MIMETYPES.fetch(ext.to_sym, '')
+    end
+
+    # @note Uses shell call to "file", only expected to work on unix based systems
+    # @return [String] encoding for supplied file
+    # @example
+    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
+    #   puts source_file.encoding # 'us-ascii'
+    def encoding
+      @encoding ||= begin
+        check_for_file
+        `file --mime-encoding "#{path}"`.delete("\n").split(':')[1].strip
+      end
     end
   end
 end
