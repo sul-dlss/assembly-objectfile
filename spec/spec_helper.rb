@@ -4,7 +4,7 @@ require 'simplecov'
 SimpleCov.start
 
 require File.expand_path("#{File.dirname(__FILE__)}/../config/boot")
-require 'byebug'
+require 'pry-byebug'
 
 RSpec.configure do |config|
   config.order = 'random'
