@@ -15,7 +15,6 @@ module Assembly
       STYLES = %w[image file book map 3d document webarchive-seed].freeze
       READING_ORDERS = %w[ltr rtl].freeze
       attribute :auto_labels, Types::Strict::Bool.default(true)
-      attribute :flatten_folder_structure, Types::Strict::Bool.default(false)
       attribute :add_file_attributes, Types::Strict::Bool.default(false)
       attribute :add_exif, Types::Strict::Bool.default(false)
       attribute :file_attributes, Types::Strict::Hash.default({}.freeze)

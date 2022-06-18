@@ -399,8 +399,8 @@ RSpec.describe Assembly::ContentMetadata do
           ]
         end
 
-        it 'generates valid content metadata and no exif data and no root xml node, flattening folder structure' do
-          result = described_class.create_content_metadata(druid: TEST_DRUID, style: :simple_book, bundle: :filename, objects: objects, include_root_xml: false, flatten_folder_structure: true)
+        it 'generates valid content metadata and no exif data and no root xml node' do
+          result = described_class.create_content_metadata(druid: TEST_DRUID, style: :simple_book, bundle: :filename, objects: objects, include_root_xml: false)
           expect(result.class).to be String
           expect(result.include?('<?xml')).to be false
           xml = Nokogiri::XML(result)
@@ -449,9 +449,9 @@ RSpec.describe Assembly::ContentMetadata do
           ]
         end
 
-        it 'generates valid content metadata with flattening folder structure' do
+        it 'generates valid content metadata' do
           test_druid = "druid:#{TEST_DRUID}"
-          result = described_class.create_content_metadata(druid: test_druid, bundle: :filename, objects: objects, style: :simple_book, flatten_folder_structure: true, reading_order: 'rtl')
+          result = described_class.create_content_metadata(druid: test_druid, bundle: :filename, objects: objects, style: :simple_book, reading_order: 'rtl')
           expect(result.class).to be String
           expect(result.include?('<?xml')).to be true
           xml = Nokogiri::XML(result)
@@ -483,10 +483,10 @@ RSpec.describe Assembly::ContentMetadata do
         end
       end
 
-      context 'throws an error with invalid reading order' do
-        subject(:result) { described_class.create_content_metadata(druid: "druid:#{TEST_DRUID}", bundle: :filename, objects: [], style: :simple_book, flatten_folder_structure: true, reading_order: 'bogus') }
+      context 'with invalid reading order' do
+        subject(:result) { described_class.create_content_metadata(druid: "druid:#{TEST_DRUID}", bundle: :filename, objects: [], style: :simple_book, reading_order: 'bogus') }
 
-        it 'generates valid content metadata with flattening folder structure' do
+        it 'throws an error' do
           expect { result }.to raise_error(Dry::Struct::Error)
         end
       end

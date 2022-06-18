@@ -37,14 +37,12 @@ module Assembly
 
       delegate :sha1, :md5, :provider_md5, :provider_sha1, :mimetype, :filesize, :image?, :valid_image?, to: :file
 
-      def file_id(common_path:, flatten_folder_structure:)
+      def file_id(common_path:)
         # set file id attribute, first check the relative_path parameter on the object, and if it is set, just use that
         return file.relative_path if file.relative_path
 
         # if the relative_path attribute is not set, then use the path attribute and check to see if we need to remove the common part of the path
-        file_id = common_path ? file.path.gsub(common_path, '') : file.path
-        file_id = ::File.basename(file_id) if flatten_folder_structure
-        file_id
+        common_path ? file.path.gsub(common_path, '') : file.path
       end
 
       def file_attributes(provided_file_attributes)
