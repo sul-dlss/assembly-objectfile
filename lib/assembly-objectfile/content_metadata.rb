@@ -10,9 +10,6 @@ require 'assembly-objectfile/content_metadata/config'
 require 'assembly-objectfile/content_metadata/nokogiri_builder'
 
 module Assembly
-  SPECIAL_DPG_FOLDERS = %w[31 44 50].freeze # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
-  # these are used when :bundle=>:dpg only
-
   DEPRECATED_STYLES = %i[book_with_pdf book_as_image].freeze
   VALID_STYLES = %i[simple_image simple_book file map document 3d webarchive-seed].freeze
 
@@ -38,7 +35,6 @@ module Assembly
     #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
     #                 :default = all files get their own resources (default)
     #                 :filename = files with the same filename but different extensions get bundled together in a single resource
-    #                 :dpg = files representing the same image but of different mimetype that use the SULAIR DPG filenaming standard (00 vs 05) get bundled together in a single resource
     #                 :prebundlded = this option requires you to prebundled the files passed in as an array of arrays, indicating how files are bundlded into resources; this is the most flexible option since it gives you full control
     #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
     #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve/role attributes should be added using defaults or by supplied override by mime/type, defaults to false and is not required if project goes through assembly
@@ -83,10 +79,6 @@ module Assembly
       else
         builder.to_xml
       end
-    end
-
-    def self.special_dpg_folder?(folder)
-      SPECIAL_DPG_FOLDERS.include?(folder)
     end
 
     def self.find_common_path(objects)

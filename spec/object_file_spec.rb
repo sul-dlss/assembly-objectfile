@@ -297,22 +297,6 @@ describe Assembly::ObjectFile do
     end
   end
 
-  describe '#dpg_basename' do
-    it 'returns the DPG base name for a file' do
-      test_file = File.join(TEST_INPUT_DIR, 'oo000oo0001_00_001.tif')
-      object_file = described_class.new(test_file)
-      expect(object_file.dpg_basename).to eq('oo000oo0001_001')
-    end
-  end
-
-  describe '#dpg_folder' do
-    it 'returns the DPG subfolder name for a file' do
-      test_file = File.join(TEST_INPUT_DIR, 'oo000oo0001_05_001.tif')
-      object_file = described_class.new(test_file)
-      expect(object_file.dpg_folder).to eq('05')
-    end
-  end
-
   describe '#jp2able?' do
     context 'with jp2 file' do
       it 'false' do

@@ -22,16 +22,6 @@ TEST_SVG_INPUT_FILE  = File.join(TEST_INPUT_DIR, 'test.svg')
 TEST_JP2_OUTPUT_FILE = File.join(TEST_OUTPUT_DIR, 'test.jp2')
 TEST_PDF_FILE = File.join(TEST_INPUT_DIR, 'test.pdf')
 
-TEST_DPG_TIF = File.join(TEST_INPUT_DIR, 'oo000oo0001', '00', 'oo000oo0001_00_001.tif')
-TEST_DPG_TIF2 = File.join(TEST_INPUT_DIR, 'oo000oo0001', '00', 'oo000oo0001_00_002.tif')
-TEST_DPG_JP = File.join(TEST_INPUT_DIR, 'oo000oo0001', '05', 'oo000oo0001_05_001.jp2')
-TEST_DPG_JP2 = File.join(TEST_INPUT_DIR, 'oo000oo0001', '05', 'oo000oo0001_05_002.jp2')
-TEST_DPG_PDF = File.join(TEST_INPUT_DIR, 'oo000oo0001', '15', 'oo000oo0001_15_001.pdf')
-TEST_DPG_PDF2 = File.join(TEST_INPUT_DIR, 'oo000oo0001', '15', 'oo000oo0001_15_002.pdf')
-TEST_DPG_SPECIAL_PDF1 = File.join(TEST_INPUT_DIR, 'oo000oo0001', 'oo000oo0001_book.pdf')
-TEST_DPG_SPECIAL_PDF2 = File.join(TEST_INPUT_DIR, 'oo000oo0001', '31', 'oo000oo0001_31_001.pdf')
-TEST_DPG_SPECIAL_TIF = File.join(TEST_INPUT_DIR, 'oo000oo0001', '50', 'oo000oo0001_50_001.tif')
-
 TEST_TIFF_NO_COLOR_FILE = File.join(TEST_INPUT_DIR, 'test_no_color_profile.tif')
 
 TEST_RES1_TIF1 = File.join(TEST_INPUT_DIR, 'res1_image1.tif')
