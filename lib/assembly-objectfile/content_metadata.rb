@@ -10,9 +10,6 @@ require 'assembly-objectfile/content_metadata/config'
 require 'assembly-objectfile/content_metadata/nokogiri_builder'
 
 module Assembly
-  SPECIAL_DPG_FOLDERS = %w[31 44 50].freeze # these special dpg folders will force any files contained in them into their own resources, regardless of filenaming convention
-  # these are used when :bundle=>:dpg only
-
   DEPRECATED_STYLES = %i[book_with_pdf book_as_image].freeze
   VALID_STYLES = %i[simple_image simple_book file map document 3d webarchive-seed].freeze
 
@@ -38,7 +35,6 @@ module Assembly
     #   :bundle = optional - a symbol containing the method of bundling files into resources, allowed values are
     #                 :default = all files get their own resources (default)
     #                 :filename = files with the same filename but different extensions get bundled together in a single resource
-    #                 :dpg = files representing the same image but of different mimetype that use the SULAIR DPG filenaming standard (00 vs 05) get bundled together in a single resource
     #                 :prebundlded = this option requires you to prebundled the files passed in as an array of arrays, indicating how files are bundlded into resources; this is the most flexible option since it gives you full control
     #   :add_exif = optional - a boolean to indicate if exif data should be added (mimetype, filesize, image height/width, etc.) to each file, defaults to false and is not required if project goes through assembly
     #   :add_file_attributes = optional - a boolean to indicate if publish/preserve/shelve/role attributes should be added using defaults or by supplied override by mime/type, defaults to false and is not required if project goes through assembly
@@ -49,8 +45,6 @@ module Assembly
     #   :preserve_common_paths = optional - When creating the file "id" attribute, content metadata uses the "relative_path" attribute of the ObjectFile objects passed in.  If the "relative_path" attribute is not set,  the "path" attribute is used instead,
     #                   which includes a full path to the file. If the "preserve_common_paths" parameter is set to false or left off, then the common paths of all of the ObjectFile's passed in are removed from any "path" attributes.  This should turn full paths into
     #                   the relative paths that are required in content metadata file id nodes.  If you do not want this behavior, set "preserve_common_paths" to true.  The default is false.
-    #   :flatten_folder_structure = optional - Will remove *all* folder structure when genearting file IDs (e.g. DPG subfolders like '00','05' will be removed) when generating file IDs.  This is useful if the folder structure is flattened when staging files (like for DPG).
-    #                                             The default is false.  If set to true, will override the "preserve_common_paths" parameter.
     #   :auto_labels = optional - Will add automated resource labels (e.g. "File 1") when labels are not provided by the user.  The default is true.
     #   See https://consul.stanford.edu/pages/viewpage.action?spaceKey=chimera&title=DOR+content+types%2C+resource+types+and+interpretive+metadata for next two settings
     #   :reading_order = optional - only valid for simple_book, can be 'rtl' or 'ltr'.  The default is 'ltr'.
@@ -59,14 +53,13 @@ module Assembly
     def self.create_content_metadata(druid:, objects:, auto_labels: true,
                                      add_exif: false, bundle: :default, style: :simple_image,
                                      add_file_attributes: false, file_attributes: {},
-                                     preserve_common_paths: false, flatten_folder_structure: false,
-                                     include_root_xml: nil, reading_order: 'ltr')
+                                     preserve_common_paths: false, include_root_xml: nil,
+                                     reading_order: 'ltr')
 
       common_path = find_common_path(objects) unless preserve_common_paths # find common paths to all files provided if needed
 
       filesets = FileSetBuilder.build(bundle: bundle, objects: objects, style: style)
       config = Config.new(auto_labels: auto_labels,
-                          flatten_folder_structure: flatten_folder_structure,
                           add_file_attributes: add_file_attributes,
                           file_attributes: file_attributes,
                           add_exif: add_exif,
@@ -83,10 +76,6 @@ module Assembly
       else
         builder.to_xml
       end
-    end
-
-    def self.special_dpg_folder?(folder)
-      SPECIAL_DPG_FOLDERS.include?(folder)
     end
 
     def self.find_common_path(objects)

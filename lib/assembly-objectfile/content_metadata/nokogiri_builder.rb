@@ -32,7 +32,7 @@ module Assembly
 
                 xml.label(resource_label) unless resource_label.empty?
                 fileset.files.each do |cm_file| # iterate over all the files in a resource
-                  xml_file_params = { id: cm_file.file_id(common_path: common_path, flatten_folder_structure: config.flatten_folder_structure) }
+                  xml_file_params = { id: cm_file.file_id(common_path: common_path) }
                   xml_file_params.merge!(cm_file.file_attributes(config.file_attributes)) if config.add_file_attributes
                   xml_file_params.merge!(mimetype: cm_file.mimetype, size: cm_file.filesize) if config.add_exif
 

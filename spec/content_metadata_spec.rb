@@ -212,34 +212,6 @@ RSpec.describe Assembly::ContentMetadata do
         end
       end
 
-      context 'when using two tifs and two associated jp2s using bundle=dpg' do
-        it 'generates valid content metadata and no exif data and no root xml node' do
-          objects = [Assembly::ObjectFile.new(TEST_DPG_TIF), Assembly::ObjectFile.new(TEST_DPG_JP), Assembly::ObjectFile.new(TEST_DPG_TIF2), Assembly::ObjectFile.new(TEST_DPG_JP2)]
-          test_druid = TEST_DRUID.to_s
-          result = described_class.create_content_metadata(druid: test_druid, bundle: :dpg, objects: objects, include_root_xml: false)
-          expect(result.class).to be String
-          expect(result.include?('<?xml')).to be false
-          xml = Nokogiri::XML(result)
-          expect(xml.errors.size).to eq 0
-          expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('image')
-          expect(test_druid).to eq(TEST_DRUID)
-          expect(xml.xpath('//contentMetadata')[0].attributes['objectId'].value).to eq(TEST_DRUID.to_s)
-          expect(xml.xpath('//resource').length).to eq 2
-          expect(xml.xpath('//resource/file').length).to eq 4
-          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('00/oo000oo0001_00_001.tif')
-          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('05/oo000oo0001_05_001.jp2')
-          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('00/oo000oo0001_00_002.tif')
-          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('05/oo000oo0001_05_002.jp2')
-          expect(xml.xpath('//label').length).to eq 2
-          expect(xml.xpath('//resource/file/imageData').length).to eq 0
-          (0..1).each do |i|
-            expect(xml.xpath("//resource[@sequence='#{i + 1}']/file").length).to eq 2
-            expect(xml.xpath('//label')[i].text).to eq("Image #{i + 1}")
-            expect(xml.xpath('//resource')[i].attributes['type'].value).to eq('image')
-          end
-        end
-      end
-
       context 'when using two tifs and two associated jp2s using bundle=default' do
         it 'generates valid content metadata and no exif data' do
           objects = [Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE), Assembly::ObjectFile.new(TEST_TIF_INPUT_FILE2), Assembly::ObjectFile.new(TEST_JP2_INPUT_FILE2)]
@@ -414,10 +386,21 @@ RSpec.describe Assembly::ContentMetadata do
     end
 
     context 'when style=simple_book' do
-      context 'when using two tifs, two associated jp2s, one combined pdf and one special tif using bundle=dpg' do
-        it 'generates valid content metadata and no exif data and no root xml node, flattening folder structure' do
-          objects = [Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF2), Assembly::ObjectFile.new(TEST_DPG_SPECIAL_TIF), Assembly::ObjectFile.new(TEST_DPG_TIF), Assembly::ObjectFile.new(TEST_DPG_JP), Assembly::ObjectFile.new(TEST_DPG_TIF2), Assembly::ObjectFile.new(TEST_DPG_JP2)]
-          result = described_class.create_content_metadata(druid: TEST_DRUID, style: :simple_book, bundle: :dpg, objects: objects, include_root_xml: false, flatten_folder_structure: true)
+      context 'when using two tifs, two associated jp2s, one pdf and two txts using bundle=filename' do
+        let(:objects) do
+          [
+            Assembly::ObjectFile.new(TEST_RES1_TIF1),
+            Assembly::ObjectFile.new(TEST_RES1_TIF2),
+            Assembly::ObjectFile.new(TEST_RES1_JP2),
+            Assembly::ObjectFile.new(TEST_RES1_PDF),
+            Assembly::ObjectFile.new(TEST_RES1_JP1),
+            Assembly::ObjectFile.new(TEST_RES1_TEXT),
+            Assembly::ObjectFile.new(TEST_RES1_TEI)
+          ]
+        end
+
+        it 'generates valid content metadata and no exif data and no root xml node' do
+          result = described_class.create_content_metadata(druid: TEST_DRUID, style: :simple_book, bundle: :filename, objects: objects, include_root_xml: false)
           expect(result.class).to be String
           expect(result.include?('<?xml')).to be false
           xml = Nokogiri::XML(result)
@@ -425,15 +408,16 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('book')
           expect(xml.xpath('//contentMetadata')[0].attributes['objectId'].value).to eq(TEST_DRUID.to_s)
           expect(xml.xpath('//bookData')[0].attributes['readingOrder'].value).to eq('ltr')
-          expect(xml.xpath('//resource').length).to eq 4
-          expect(xml.xpath('//resource/file').length).to eq 6
-          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('oo000oo0001_00_001.tif')
-          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('oo000oo0001_05_001.jp2')
-          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('oo000oo0001_00_002.tif')
-          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('oo000oo0001_05_002.jp2')
-          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('oo000oo0001_31_001.pdf')
-          expect(xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value).to eq('oo000oo0001_50_001.tif')
-          expect(xml.xpath('//label').length).to eq 4
+          expect(xml.xpath('//resource').length).to eq 5
+          expect(xml.xpath('//resource/file').length).to eq 7
+          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('res1_image1.tif')
+          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('res1_image1.jp2')
+          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('res1_image2.tif')
+          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('res1_image2.jp2')
+          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('res1_transcript.pdf')
+          expect(xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value).to eq('res1_textfile.txt')
+          expect(xml.xpath("//resource[@sequence='5']/file")[0].attributes['id'].value).to eq('res1_teifile.txt')
+          expect(xml.xpath('//label').length).to eq 5
           expect(xml.xpath('//resource/file/imageData').length).to eq 0
           (0..1).each do |i|
             expect(xml.xpath("//resource[@sequence='#{i + 1}']/file").length).to eq 2
@@ -446,17 +430,28 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath("//resource[@sequence='4']/file").length).to eq 1
           expect(xml.xpath('//label')[3].text).to eq('Object 2')
           expect(xml.xpath('//resource')[3].attributes['type'].value).to eq('object')
+          expect(xml.xpath("//resource[@sequence='5']/file").length).to eq 1
+          expect(xml.xpath('//label')[4].text).to eq('Object 3')
+          expect(xml.xpath('//resource')[4].attributes['type'].value).to eq('object')
         end
       end
 
-      context "when item has a 'druid:' prefix and specified book order. Using two tifs, two associated jp2s, two associated pdfs and one lingering PDF using bundle=dpg" do
-        it 'generates valid content metadata with flattening folder structure' do
-          objects = [Assembly::ObjectFile.new(TEST_DPG_TIF), Assembly::ObjectFile.new(TEST_DPG_JP),
-                     Assembly::ObjectFile.new(TEST_DPG_PDF), Assembly::ObjectFile.new(TEST_DPG_TIF2),
-                     Assembly::ObjectFile.new(TEST_DPG_JP2), Assembly::ObjectFile.new(TEST_DPG_PDF2),
-                     Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF1)]
+      context "when item has a 'druid:' prefix and specified book order. Using two tifs, two associated jp2s, one pdf and two txts using bundle=filename" do
+        let(:objects) do
+          [
+            Assembly::ObjectFile.new(TEST_RES1_TIF1),
+            Assembly::ObjectFile.new(TEST_RES1_TIF2),
+            Assembly::ObjectFile.new(TEST_RES1_JP2),
+            Assembly::ObjectFile.new(TEST_RES1_PDF),
+            Assembly::ObjectFile.new(TEST_RES1_JP1),
+            Assembly::ObjectFile.new(TEST_RES1_TEXT),
+            Assembly::ObjectFile.new(TEST_RES1_TEI)
+          ]
+        end
+
+        it 'generates valid content metadata' do
           test_druid = "druid:#{TEST_DRUID}"
-          result = described_class.create_content_metadata(druid: test_druid, bundle: :dpg, objects: objects, style: :simple_book, flatten_folder_structure: true, reading_order: 'rtl')
+          result = described_class.create_content_metadata(druid: test_druid, bundle: :filename, objects: objects, style: :simple_book, reading_order: 'rtl')
           expect(result.class).to be String
           expect(result.include?('<?xml')).to be true
           xml = Nokogiri::XML(result)
@@ -465,20 +460,20 @@ RSpec.describe Assembly::ContentMetadata do
           expect(xml.xpath('//contentMetadata')[0].attributes['objectId'].value).to eq(test_druid)
           expect(xml.xpath('//bookData')[0].attributes['readingOrder'].value).to eq('rtl')
           expect(test_druid).to eq("druid:#{TEST_DRUID}")
-          expect(xml.xpath('//resource').length).to eq 3
+          expect(xml.xpath('//resource').length).to eq 5
           expect(xml.xpath('//resource/file').length).to be 7
 
-          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('oo000oo0001_00_001.tif')
-          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('oo000oo0001_05_001.jp2')
-          expect(xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value).to eq('oo000oo0001_15_001.pdf')
-          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('oo000oo0001_00_002.tif')
-          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('oo000oo0001_05_002.jp2')
-          expect(xml.xpath("//resource[@sequence='2']/file")[2].attributes['id'].value).to eq('oo000oo0001_15_002.pdf')
-          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('oo000oo0001_book.pdf')
-          expect(xml.xpath('//label').length).to eq 3
+          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('res1_image1.tif')
+          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('res1_image1.jp2')
+          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('res1_image2.tif')
+          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('res1_image2.jp2')
+          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('res1_transcript.pdf')
+          expect(xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value).to eq('res1_textfile.txt')
+          expect(xml.xpath("//resource[@sequence='5']/file")[0].attributes['id'].value).to eq('res1_teifile.txt')
+          expect(xml.xpath('//label').length).to eq 5
           expect(xml.xpath('//resource/file/imageData').length).to eq 0
           (0..1).each do |i|
-            expect(xml.xpath("//resource[@sequence='#{i + 1}']/file").length).to eq 3
+            expect(xml.xpath("//resource[@sequence='#{i + 1}']/file").length).to eq 2
             expect(xml.xpath('//label')[i].text).to eq("Page #{i + 1}")
             expect(xml.xpath('//resource')[i].attributes['type'].value).to eq('page')
           end
@@ -488,10 +483,10 @@ RSpec.describe Assembly::ContentMetadata do
         end
       end
 
-      context 'throws an error with invalid reading order' do
-        subject(:result) { described_class.create_content_metadata(druid: "druid:#{TEST_DRUID}", bundle: :dpg, objects: [], style: :simple_book, flatten_folder_structure: true, reading_order: 'bogus') }
+      context 'with invalid reading order' do
+        subject(:result) { described_class.create_content_metadata(druid: "druid:#{TEST_DRUID}", bundle: :filename, objects: [], style: :simple_book, reading_order: 'bogus') }
 
-        it 'generates valid content metadata with flattening folder structure' do
+        it 'throws an error' do
           expect { result }.to raise_error(Dry::Struct::Error)
         end
       end
@@ -552,17 +547,18 @@ RSpec.describe Assembly::ContentMetadata do
         end
       end
 
-      context 'when using two tifs, two associated jp2s, two associated pdfs and one lingering PDF using bundle=dpg' do
-        subject(:result) { described_class.create_content_metadata(druid: TEST_DRUID, bundle: :dpg, style: style, objects: objects) }
+      context 'when using two tifs, two associated jp2s, one pdf and two txts using bundle=filename' do
+        subject(:result) { described_class.create_content_metadata(druid: TEST_DRUID, bundle: :filename, style: style, objects: objects) }
 
         let(:objects) do
           [
-            Assembly::ObjectFile.new(TEST_DPG_TIF),
-            Assembly::ObjectFile.new(TEST_DPG_JP),
-            Assembly::ObjectFile.new(TEST_DPG_PDF),
-            Assembly::ObjectFile.new(TEST_DPG_TIF2),
-            Assembly::ObjectFile.new(TEST_DPG_JP2),
-            Assembly::ObjectFile.new(TEST_DPG_SPECIAL_PDF1)
+            Assembly::ObjectFile.new(TEST_RES1_TIF1),
+            Assembly::ObjectFile.new(TEST_RES1_TIF2),
+            Assembly::ObjectFile.new(TEST_RES1_JP2),
+            Assembly::ObjectFile.new(TEST_RES1_PDF),
+            Assembly::ObjectFile.new(TEST_RES1_JP1),
+            Assembly::ObjectFile.new(TEST_RES1_TEXT),
+            Assembly::ObjectFile.new(TEST_RES1_TEI)
           ]
         end
         let(:style) { :book_with_pdf }
@@ -574,25 +570,32 @@ RSpec.describe Assembly::ContentMetadata do
         it 'generates valid content metadata' do
           expect(xml.errors.size).to eq 0
           expect(xml.xpath('//contentMetadata')[0].attributes['type'].value).to eq('book')
-          expect(xml.xpath('//resource').length).to eq 3
-          expect(xml.xpath('//resource/file').length).to eq 6
-          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('00/oo000oo0001_00_001.tif')
-          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('05/oo000oo0001_05_001.jp2')
-          expect(xml.xpath("//resource[@sequence='1']/file")[2].attributes['id'].value).to eq('15/oo000oo0001_15_001.pdf')
-          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('00/oo000oo0001_00_002.tif')
-          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('05/oo000oo0001_05_002.jp2')
-          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('oo000oo0001_book.pdf')
-          expect(xml.xpath('//label').length).to eq 3
+          expect(xml.xpath('//resource').length).to eq 5
+          expect(xml.xpath('//resource/file').length).to eq 7
+          expect(xml.xpath("//resource[@sequence='1']/file")[0].attributes['id'].value).to eq('res1_image1.tif')
+          expect(xml.xpath("//resource[@sequence='1']/file")[1].attributes['id'].value).to eq('res1_image1.jp2')
+          expect(xml.xpath("//resource[@sequence='2']/file")[0].attributes['id'].value).to eq('res1_image2.tif')
+          expect(xml.xpath("//resource[@sequence='2']/file")[1].attributes['id'].value).to eq('res1_image2.jp2')
+          expect(xml.xpath("//resource[@sequence='3']/file")[0].attributes['id'].value).to eq('res1_transcript.pdf')
+          expect(xml.xpath("//resource[@sequence='4']/file")[0].attributes['id'].value).to eq('res1_textfile.txt')
+          expect(xml.xpath("//resource[@sequence='5']/file")[0].attributes['id'].value).to eq('res1_teifile.txt')
+          expect(xml.xpath('//label').length).to eq 5
           expect(xml.xpath('//resource/file/imageData').length).to eq 0
-          expect(xml.xpath("//resource[@sequence='1']/file").length).to eq 3
-          expect(xml.xpath('//label')[0].text).to eq('Object 1')
-          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('object')
+          expect(xml.xpath("//resource[@sequence='1']/file").length).to eq 2
+          expect(xml.xpath('//label')[0].text).to eq('Page 1')
+          expect(xml.xpath('//resource')[0].attributes['type'].value).to eq('page')
           expect(xml.xpath("//resource[@sequence='2']/file").length).to eq 2
-          expect(xml.xpath('//label')[1].text).to eq('Page 1')
+          expect(xml.xpath('//label')[1].text).to eq('Page 2')
           expect(xml.xpath('//resource')[1].attributes['type'].value).to eq('page')
           expect(xml.xpath("//resource[@sequence='3']/file").length).to eq 1
-          expect(xml.xpath('//label')[2].text).to eq('Object 2')
+          expect(xml.xpath('//label')[2].text).to eq('Object 1')
           expect(xml.xpath('//resource')[2].attributes['type'].value).to eq('object')
+          expect(xml.xpath("//resource[@sequence='4']/file").length).to eq 1
+          expect(xml.xpath('//label')[3].text).to eq('Object 2')
+          expect(xml.xpath('//resource')[3].attributes['type'].value).to eq('object')
+          expect(xml.xpath("//resource[@sequence='4']/file").length).to eq 1
+          expect(xml.xpath('//label')[4].text).to eq('Object 3')
+          expect(xml.xpath('//resource')[4].attributes['type'].value).to eq('object')
         end
       end
     end

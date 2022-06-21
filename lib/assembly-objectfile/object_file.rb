@@ -54,24 +54,6 @@ module Assembly
       @mime_type_order = params[:mime_type_order] || default_mime_type_order
     end
 
-    # @return [String] DPG base filename, removing the extension and the '00','05', etc. placeholders
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/cy565rm7188_00_001.tif')
-    #   puts source_file.dpg_basename # "cy565rm7188_001"
-    def dpg_basename
-      file_parts = File.basename(path, ext).split('_')
-      file_parts.size == 3 ? "#{file_parts[0]}_#{file_parts[2]}" : filename_without_ext
-    end
-
-    # @return [String] DPG subfolder for the given filename, i.e. '00','05', etc.
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/cy565rm7188_00_001.tif')
-    #   puts source_file.dpg_folder # "00"
-    def dpg_folder
-      file_parts = File.basename(path, ext).split('_')
-      file_parts.size == 3 ? file_parts[1] : ''
-    end
-
     # @return [String] base filename
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')

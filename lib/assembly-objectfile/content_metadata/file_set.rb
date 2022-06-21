@@ -6,19 +6,16 @@ module Assembly
   class ContentMetadata
     # Represents a groups of related Files, such as a single master file and the derivatives
     class FileSet
-      # @param [Boolean] dpg (false) is it a dpg bundle?
-      # @param [Array<Assembly::ObjectFile>] resource_files
       # @param style
-      def initialize(resource_files:, style:, dpg: false)
-        @dpg = dpg
+      # @param [Array<Assembly::ObjectFile>] resource_files
+      def initialize(resource_files:, style:)
         @resource_files = resource_files
         @style = style
       end
 
-      # objects in the special DPG folders are always type=object when we using :bundle=>:dpg
       # otherwise look at the style to determine the resource_type_description
       def resource_type_description
-        @resource_type_description ||= special_dpg_resource? ? 'object' : resource_type_descriptions
+        @resource_type_description ||= resource_type_descriptions
       end
 
       def label_from_file(default:)
@@ -31,15 +28,10 @@ module Assembly
 
       private
 
-      attr_reader :dpg, :resource_files, :style
-
-      def special_dpg_resource?
-        return false unless dpg
-
-        resource_files.collect { |obj| ContentMetadata.special_dpg_folder?(obj.dpg_folder) }.include?(true)
-      end
+      attr_reader :resource_files, :style
 
       # rubocop:disable Metrics/CyclomaticComplexity
+      # use style attribute to determine the resource_type_description
       def resource_type_descriptions
         # grab all of the file types within a resource into an array so we can decide what the resource type should be
         resource_file_types = resource_files.collect(&:object_type)
