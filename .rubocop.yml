@@ -14,7 +14,7 @@ Metrics/BlockLength:
     - 'spec/**/*.rb'
     - '**/*.gemspec'
 
-Gemspec/DateAssignment: # (new in 1.10)
+Gemspec/DeprecatedAttributeAssignment: # (new in 1.10)
   Enabled: true
 
 Layout/SpaceAroundMethodCallOperator:
