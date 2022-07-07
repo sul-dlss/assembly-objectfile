@@ -24,8 +24,6 @@ Gem::Specification.new do |s|
 
   s.add_dependency 'activesupport', '>= 5.2.0'
   s.add_dependency 'deprecation'
-  s.add_dependency 'dry-struct', '~> 1.0'
-  s.add_dependency 'dry-types', '~> 1.1'
   s.add_dependency 'mime-types', '> 3'
   s.add_dependency 'mini_exiftool'
   s.add_dependency 'nokogiri'
