@@ -2,6 +2,7 @@
 
 require 'mini_exiftool'
 require 'mime/types'
+require 'active_support/core_ext/object/blank'
 
 module Assembly
   # This class contains generic methods to operate on any file.
