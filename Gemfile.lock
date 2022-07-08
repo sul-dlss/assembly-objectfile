@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    assembly-objectfile (1.13.0)
+    assembly-objectfile (2.0.0)
       activesupport (>= 5.2.0)
       deprecation
       mime-types (> 3)
@@ -33,7 +33,7 @@ GEM
     mime-types-data (3.2022.0105)
     mini_exiftool (2.10.2)
     mini_portile2 (2.8.0)
-    minitest (5.16.1)
+    minitest (5.16.2)
     nokogiri (1.13.6)
       mini_portile2 (~> 2.8.0)
       racc (~> 1.4)
