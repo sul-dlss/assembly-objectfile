@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
   s.authors     = ['Peter Mangiafico', 'Renzo Sanchez-Silva', 'Monty Hindman', 'Tony Calavano']
   s.email       = ['pmangiafico@stanford.edu']
   s.homepage    = 'https://github.com/sul-dlss/assembly-objectfile'
-  s.summary     = 'Ruby immplementation of file services needed to prepare objects to be accessioned in SULAIR digital library'
+  s.summary     = 'Ruby implementation of file services needed to prepare objects to be accessioned ' \
+                  'into the Stanford Digital Repository'
   s.description = 'Get exif data, file sizes and more.'
   s.license     = 'ALv2'
   s.metadata['rubygems_mfa_required'] = 'true'
