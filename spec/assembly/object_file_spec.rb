@@ -333,29 +333,6 @@ describe Assembly::ObjectFile do
     end
   end
 
-  describe '#has_color_profile?' do
-    context 'with jp2 file' do
-      it 'true' do
-        object_file = described_class.new(TEST_JP2_INPUT_FILE)
-        expect(object_file.has_color_profile?).to be(true)
-      end
-    end
-
-    context 'with tiff file' do
-      it 'true' do
-        object_file = described_class.new(TEST_RES1_TIF1)
-        expect(object_file.has_color_profile?).to be(true)
-      end
-    end
-
-    context 'with tiff no color file' do
-      it 'false' do
-        object_file = described_class.new(TEST_TIFF_NO_COLOR_FILE)
-        expect(object_file.has_color_profile?).to be(false)
-      end
-    end
-  end
-
   describe '#md5' do
     it 'computes md5 for an image file' do
       object_file = described_class.new(TEST_TIF_INPUT_FILE)
