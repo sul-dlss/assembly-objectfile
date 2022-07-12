@@ -7,13 +7,15 @@ require 'active_support/core_ext/object/blank'
 module Assembly
   # This class contains generic methods to operate on any file.
   class ObjectFile
-    # Class level method that given an array of strings, return the longest common initial path.  Useful for removing a common path from a set of filenames when producing content metadata
+    # Class level method that given an array of strings, return the longest common initial path.
+    # Useful for removing a common path from a set of filenames when producing content metadata
     #
     # @param [Array] strings Array of filenames with paths to operate on
     # @return [String] longest common initial part of path of filenames passed in
     #
     # Example:
-    # puts Assembly::ObjectFile.common_prefix(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2'])  # '/Users/peter/0'
+    #   puts Assembly::ObjectFile.common_prefix(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2'])
+    #   # => '/Users/peter/0'
     def self.common_path(strings)
       return nil if strings.empty?
 
@@ -34,15 +36,22 @@ module Assembly
 
     # @param [String] path full path to the file to be worked with
     # @param [Hash<Symbol => Object>] params options used during content metadata generation
-    # @option params [Hash<Symbol => ['yes', 'no']>] :file_attributes e.g. {:preserve=>'yes',:shelve=>'no',:publish=>'no'}, defaults pulled from mimetype
-    # @option params [String] :label a resource label (files bundlded together will just get the first file's label attribute if set)
+    # @option params [Hash<Symbol => ['yes', 'no']>] :file_attributes e.g.:
+    #                                                {:preserve=>'yes',:shelve=>'no',:publish=>'no'},
+    #                                                defaults pulled from mimetype
+    # @option params [String] :label a resource label (files bundled together will just get the first
+    #                                file's label attribute if set)
     # @option params [String] :provider_md5 pre-computed MD5 checksum
     # @option params [String] :provider_sha1 pre-computed SHA1 checksum
-    # @option params [String] :relative_path if you want the file ids in the content metadata it can be set, otherwise content metadata will get the full path
+    # @option params [String] :relative_path if you want the file ids in the content metadata it can be set,
+    #                                        otherwise content metadata will get the full path
     # @option params [Array] :mime_type_order can be set to the order in which you want mimetypes to be determined
-    #                                          options are :override (from manual overide mapping if exists), :exif (from exif if exists),
-    #                                                      :extension (from file extension), and :file (from unix file system command)
-    #                                          the default is defined in the private `default_mime_type_order` method but you can override to set your own order
+    #                                          options are :override (from manual overide mapping if exists),
+    #                                                      :exif (from exif if exists)
+    #                                                      :extension (from file extension)
+    #                                                      :file (from unix file system command)
+    #                                          the default is defined in the private `default_mime_type_order` method
+    #                                          but you can override to set your own order
     # @example
     #   Assembly::ObjectFile.new('/input/path_to_file.tif')
     def initialize(path, params = {})
@@ -136,7 +145,8 @@ module Assembly
       end
     end
 
-    # @return [Symbol] the type of object, could be :application (for PDF or Word, etc), :audio, :image, :message, :model, :multipart, :text or :video
+    # @return [Symbol] the type of object, could be :application (for PDF or Word, etc),
+    #                  :audio, :image, :message, :model, :multipart, :text or :video
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
     #   puts source_file.object_type # :image
@@ -175,8 +185,10 @@ module Assembly
       exif['profiledescription'] || exif['colorspace'] ? true : false
     end
 
-    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms the existence of a profile description and further restricts mimetypes.
-    # It is used by the assembly robots to decide if a jp2 will be created and is also called before you create a jp2 using assembly-image.
+    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms
+    # the existence of a profile description and further restricts mimetypes.
+    # It is used by the assembly robots to decide if a jp2 will be created and is also called before
+    # you create a jp2 using assembly-image.
     # @return [Boolean] true if image should have a jp2 created, false if not.
     # @example
     #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
@@ -238,11 +250,12 @@ module Assembly
     def file_mimetype
       @file_mimetype ||= begin
         check_for_file
-        `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # first try and get the mimetype from the unix file command
+        `file --mime-type "#{path}"`.delete("\n").split(':')[1].strip # get the mimetype from the unix file command
       end
     end
 
-    # Returns mimetype information for the current file based on exif data (if available and not a trusted source that we'd rather get from the file system command)
+    # Returns mimetype information for the current file based on exif data
+    # (if available and not a trusted source that we'd rather get from the file system command)
     # @return [String] mime type for supplied file
     # @example
     #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
@@ -250,7 +263,8 @@ module Assembly
     def exif_mimetype
       @exif_mimetype ||= begin
         check_for_file
-        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype) # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
+        prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype)
         exif.mimetype if exif&.mimetype && prefer_exif
       end
     end

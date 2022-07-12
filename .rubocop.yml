@@ -9,6 +9,22 @@ AllCops:
     - '**/*.md'
     - 'vendor/**/*' # avoid running rubocop on cached bundler
 
+Layout/LineLength:
+  Max: 120
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MultipleExpectations:
+  Max: 10
+
+RSpec/NestedGroups:
+  Max: 4
+
+Naming/PredicateName:
+  NamePrefix:
+    - 'is_'
+
 Metrics/BlockLength:
   Exclude:
     - 'spec/**/*.rb'

@@ -6,13 +6,15 @@ describe Assembly::ObjectFile do
   describe '.common_path' do
     context 'when common path is 2 nodes out of 4' do
       it 'returns the common directory' do
-        expect(described_class.common_path(['/Users/peter/00/test.tif', '/Users/peter/05/test.jp2'])).to eq('/Users/peter/')
+        expect(described_class.common_path(['/Users/peter/00/test.tif',
+                                            '/Users/peter/05/test.jp2'])).to eq('/Users/peter/')
       end
     end
 
     context 'when common path is 3 nodes out of 4' do
       it 'returns the common directory' do
-        expect(described_class.common_path(['/Users/peter/00/test.tif', '/Users/peter/00/test.jp2'])).to eq('/Users/peter/00/')
+        expect(described_class.common_path(['/Users/peter/00/test.tif',
+                                            '/Users/peter/00/test.jp2'])).to eq('/Users/peter/00/')
       end
     end
 
@@ -25,8 +27,9 @@ describe Assembly::ObjectFile do
 
   describe '#new' do
     context 'without params' do
+      let(:object_file) { described_class.new('/some/file.txt') }
+
       it 'does not set attributes' do
-        object_file = described_class.new('/some/file.txt')
         expect(object_file.path).to eq('/some/file.txt')
         expect(object_file.label).to be_nil
         expect(object_file.file_attributes).to be_nil
@@ -37,8 +40,15 @@ describe Assembly::ObjectFile do
     end
 
     context 'with params' do
+      let(:object_file) do
+        described_class.new('/some/file.txt', label: 'some label',
+                                              file_attributes: { 'shelve' => 'yes',
+                                                                 'publish' => 'yes',
+                                                                 'preserve' => 'no' },
+                                              relative_path: '/tmp')
+      end
+
       it 'sets attributes to passed params' do
-        object_file = described_class.new('/some/file.txt', label: 'some label', file_attributes: { 'shelve' => 'yes', 'publish' => 'yes', 'preserve' => 'no' }, relative_path: '/tmp')
         expect(object_file.path).to eq('/some/file.txt')
         expect(object_file.label).to eq('some label')
         expect(object_file.file_attributes).to eq('shelve' => 'yes', 'publish' => 'yes', 'preserve' => 'no')
@@ -47,9 +57,12 @@ describe Assembly::ObjectFile do
         expect(object_file.relative_path).to eq('/tmp')
       end
 
-      it 'sets provider_md5 to passed param' do
-        object_file = described_class.new('/some/file.txt', provider_md5: 'XYZ')
-        expect(object_file.provider_md5).to eq('XYZ')
+      context 'with provider_md5' do
+        let(:object_file) { described_class.new('/some/file.txt', provider_md5: 'XYZ') }
+
+        it 'sets provider_md5 to passed param' do
+          expect(object_file.provider_md5).to eq('XYZ')
+        end
       end
     end
   end
@@ -100,7 +113,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/object_file_spec.rb')
+        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.image?).to be(false)
       end
@@ -132,7 +145,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it ':text' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/object_file_spec.rb')
+        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.object_type).to eq(:text)
       end
@@ -178,7 +191,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/object_file_spec.rb')
+        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.valid_image?).to be(false)
       end
