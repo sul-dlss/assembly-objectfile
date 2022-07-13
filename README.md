@@ -8,15 +8,15 @@
 ## Overview
 This gem contains classes used by the Stanford University Digital Library to
 perform file operations necessary for accessioning of content.  It is also
-used by related gems to perform content type specific operations (such as jp2
-generation).
+used by related gems that perform content type specific operations (e.g.
+assembly-image for jp2 generation).
 
 ## Usage
 
 The gem currently has methods for:
 * filesize
-* exif
-* generate content metadata
+* mimetype
+* exif - consumers use ExifTool to get file information
 
 ## Running tests
 
@@ -34,8 +34,8 @@ rake release
 
 1.  Exiftool
 
-    RHEL: (RPM to install comming soon) Download latest version from:
-    http://www.sno.phy.queensu.ca/~phil/exiftool
+    RHEL: (RPM to install coming soon) Download latest version from:
+    https://exiftool.org/
 
         tar -xf Image-ExifTool-#.##.tar.gz
         cd Image-ExifTool-#.##
