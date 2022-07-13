@@ -175,16 +175,6 @@ module Assembly
       mimetype == 'image/jp2' || jp2able?
     end
 
-    # @return [Boolean] true if image has a color profile, false if not.
-    # @example
-    #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_img.has_color_profile? # true
-    def has_color_profile?
-      return false unless exif
-
-      exif['profiledescription'] || exif['colorspace'] ? true : false
-    end
-
     # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms
     # the existence of a profile description and further restricts mimetypes.
     # It is used by the assembly robots to decide if a jp2 will be created and is also called before
