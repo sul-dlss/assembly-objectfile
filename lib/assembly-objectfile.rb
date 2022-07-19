@@ -24,5 +24,4 @@ module Assembly
   }.freeze
 end
 
-require 'assembly-objectfile/object_file'
-require 'assembly-objectfile/version'
+require 'assembly/object_file'
