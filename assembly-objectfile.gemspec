@@ -24,12 +24,9 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 3.0'
 
   s.add_dependency 'activesupport', '>= 5.2.0'
-  s.add_dependency 'deprecation'
   s.add_dependency 'mime-types', '> 3'
   s.add_dependency 'mini_exiftool'
-  s.add_dependency 'nokogiri'
 
-  s.add_development_dependency 'json'
   s.add_development_dependency 'pry-byebug'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.0'
