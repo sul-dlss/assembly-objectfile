@@ -12,14 +12,9 @@ AllCops:
 Layout/LineLength:
   Max: 120
 
-RSpec/ExampleLength:
-  Max: 10
-
-RSpec/MultipleExpectations:
-  Max: 10
-
-RSpec/NestedGroups:
-  Max: 4
+Naming/FileName:
+  Exclude:
+    - 'lib/assembly-objectfile.rb'
 
 Naming/PredicateName:
   NamePrefix:
@@ -29,6 +24,15 @@ Metrics/BlockLength:
   Exclude:
     - 'spec/**/*.rb'
     - '**/*.gemspec'
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MultipleExpectations:
+  Max: 10
+
+RSpec/NestedGroups:
+  Max: 4
 
 Gemspec/DeprecatedAttributeAssignment: # (new in 1.10)
   Enabled: true
@@ -222,4 +226,17 @@ Style/RedundantInitialize: # new in 1.27
 RSpec/ChangeByZero: # new in 2.11.0
   Enabled: true
 RSpec/VerifiedDoubleReference: # new in 2.10.0
+  Enabled: true
+
+Layout/LineContinuationLeadingSpace: # new in 1.31
+  Enabled: true
+Layout/LineContinuationSpacing: # new in 1.31
+  Enabled: true
+Lint/ConstantOverwrittenInRescue: # new in 1.31
+  Enabled: true
+Lint/NonAtomicFileOperation: # new in 1.31
+  Enabled: true
+RSpec/Capybara/SpecificMatcher: # new in 2.12
+  Enabled: true
+RSpec/Rails/HaveHttpStatus: # new in 2.12
   Enabled: true
