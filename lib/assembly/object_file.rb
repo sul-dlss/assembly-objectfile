@@ -200,17 +200,5 @@ module Assembly
     def override_mimetype
       @override_mimetype ||= Assembly::OVERRIDE_MIMETYPES.fetch(ext.to_sym, '')
     end
-
-    # @note Uses shell call to "file", only expected to work on unix based systems
-    # @return [String] encoding for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.encoding # 'us-ascii'
-    def encoding
-      @encoding ||= begin
-        check_for_file
-        `file --mime-encoding "#{path}"`.delete("\n").split(':')[1].strip
-      end
-    end
   end
 end
