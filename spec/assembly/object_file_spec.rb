@@ -387,22 +387,6 @@ describe Assembly::ObjectFile do
     end
   end
 
-  describe '#encoding' do
-    context 'with .tif file' do
-      it 'binary' do
-        object_file = described_class.new(TEST_TIF_INPUT_FILE)
-        expect(object_file.send(:encoding)).to eq('binary')
-      end
-    end
-
-    context 'with .txt file' do
-      it 'binary' do
-        object_file = described_class.new(TEST_RES1_TEXT)
-        expect(object_file.send(:encoding)).to eq('us-ascii')
-      end
-    end
-  end
-
   describe '#exif' do
     it 'returns MiniExiftool object' do
       object_file = described_class.new(TEST_TIF_INPUT_FILE)
