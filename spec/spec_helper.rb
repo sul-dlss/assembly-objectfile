@@ -10,13 +10,10 @@ RSpec.configure do |config|
   config.order = 'random'
 end
 
-TEST_DATA_DIR = File.join(Assembly::PATH_TO_GEM, 'spec', 'test_data')
-TEST_INPUT_DIR       = File.join(TEST_DATA_DIR, 'input')
-TEST_OUTPUT_DIR      = File.join(TEST_DATA_DIR, 'output')
+PATH_TO_GEM = File.expand_path("#{File.dirname(__FILE__)}/..")
+TEST_INPUT_DIR       = File.join(PATH_TO_GEM, 'spec', 'test_data', 'input')
 TEST_TIF_INPUT_FILE  = File.join(TEST_INPUT_DIR, 'test.tif')
-TEST_JPEG_INPUT_FILE = File.join(TEST_INPUT_DIR, 'test.jpg')
 TEST_JP2_INPUT_FILE = File.join(TEST_INPUT_DIR, 'test.jp2')
-TEST_JP2_OUTPUT_FILE = File.join(TEST_OUTPUT_DIR, 'test.jp2')
 
 TEST_TIFF_NO_COLOR_FILE = File.join(TEST_INPUT_DIR, 'test_no_color_profile.tif')
 
@@ -30,5 +27,3 @@ TEST_JSON_FILE = File.join(TEST_INPUT_DIR, 'test.json')
 
 TEST_OBJ_FILE = File.join(TEST_INPUT_DIR, 'someobject.obj')
 TEST_PLY_FILE = File.join(TEST_INPUT_DIR, 'someobject.ply')
-
-TEST_DRUID = 'nx288wh8889'

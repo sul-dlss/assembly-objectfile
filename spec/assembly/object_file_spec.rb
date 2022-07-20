@@ -113,7 +113,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.image?).to be(false)
       end
@@ -121,7 +121,7 @@ describe Assembly::ObjectFile do
 
     context 'with xml' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
         object_file = described_class.new(non_image_file)
         expect(object_file.image?).to be(false)
       end
@@ -145,7 +145,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it ':text' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.object_type).to eq(:text)
       end
@@ -153,7 +153,7 @@ describe Assembly::ObjectFile do
 
     context 'with xml' do
       it ':application' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
         object_file = described_class.new(non_image_file)
         expect(object_file.object_type).to eq(:application)
       end
@@ -191,7 +191,7 @@ describe Assembly::ObjectFile do
 
     context 'with ruby file' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
         object_file = described_class.new(non_image_file)
         expect(object_file.valid_image?).to be(false)
       end
@@ -199,7 +199,7 @@ describe Assembly::ObjectFile do
 
     context 'with xml' do
       it 'false' do
-        non_image_file = File.join(Assembly::PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
+        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
         object_file = described_class.new(non_image_file)
         expect(object_file.valid_image?).to be(false)
       end
@@ -359,7 +359,7 @@ describe Assembly::ObjectFile do
 
   describe '#file_exists?' do
     it 'false when a valid directory is specified instead of a file' do
-      path = Assembly::PATH_TO_GEM
+      path = PATH_TO_GEM
       object_file = described_class.new(path)
       expect(File.exist?(path)).to be true
       expect(File.directory?(path)).to be true
@@ -367,7 +367,7 @@ describe Assembly::ObjectFile do
     end
 
     it 'false when a non-existent file is specified' do
-      path = File.join(Assembly::PATH_TO_GEM, 'file_not_there.txt')
+      path = File.join(PATH_TO_GEM, 'file_not_there.txt')
       object_file = described_class.new(path)
       expect(File.exist?(path)).to be false
       expect(File.directory?(path)).to be false
