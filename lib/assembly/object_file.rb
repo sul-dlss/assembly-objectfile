@@ -7,11 +7,8 @@ require 'active_support/core_ext/object/blank'
 module Assembly
   # This class contains generic methods to operate on any file.
   class ObjectFile
-    # Class level method that given an array of strings, return the longest common initial path.
-    # Useful for removing a common path from a set of filenames when producing content metadata
-    #
-    # @param [Array] strings Array of filenames with paths to operate on
-    # @return [String] longest common initial part of path of filenames passed in
+    # @param [Array] strings Array of filenames with paths
+    # @return [String] longest common initial path of filenames passed in
     #
     # Example:
     #   puts Assembly::ObjectFile.common_prefix(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2'])
@@ -52,8 +49,6 @@ module Assembly
     #                                                      :file (from unix file system command)
     #                                          the default is defined in the private `default_mime_type_order` method
     #                                          but you can override to set your own order
-    # @example
-    #   Assembly::ObjectFile.new('/input/path_to_file.tif')
     def initialize(path, params = {})
       @path = path
       @label = params[:label]
@@ -64,42 +59,23 @@ module Assembly
       @mime_type_order = params[:mime_type_order] || default_mime_type_order
     end
 
-    # @return [String] base filename
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.filename # "path_to_file.tif"
     def filename
       File.basename(path)
     end
 
-    # @return [String] base directory
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.dirname # "/input"
     def dirname
       File.dirname(path)
     end
 
-    # @return [String] filename extension
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.ext # ".tif"
     def ext
       File.extname(path)
     end
 
-    # @return [String] base filename without extension
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.filename # "path_to_file"
     def filename_without_ext
       File.basename(path, ext)
     end
 
-    # @return [MiniExiftool] exif information stored as a hash and an object
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.exif # hash with exif information
+    # @return [MiniExiftool] exif mini_exiftool gem object wrapper for exiftool
     def exif
       @exif ||= begin
         check_for_file
@@ -114,21 +90,13 @@ module Assembly
       end
     end
 
-    # Computes md5 checksum or returns cached value
-    # @return [String] md5 checksum
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.md5 # 'XXX123XXX1243XX1243'
+    # @return [String] computed md5 checksum
     def md5
       check_for_file unless @md5
       @md5 ||= Digest::MD5.file(path).hexdigest
     end
 
-    # Computes sha1 checksum or return cached value
-    # @return [String] sha1 checksum
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.sha1 # 'XXX123XXX1243XX1243'
+    # @return [String] computed sha1 checksum
     def sha1
       check_for_file unless @sha1
       @sha1 ||= Digest::SHA1.file(path).hexdigest
@@ -136,10 +104,7 @@ module Assembly
 
     # Returns mimetype information for the current file based on the ordering set in default_mime_type_order
     #   We stop computing mimetypes as soon as we have a method that returns a value
-    # @return [String] mime type
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.mimetype # 'text/plain'
+    # @return [String] mimetype of the file
     def mimetype
       @mimetype ||= begin
         check_for_file
@@ -154,84 +119,55 @@ module Assembly
 
     # @return [Symbol] the type of object, could be :application (for PDF or Word, etc),
     #                  :audio, :image, :message, :model, :multipart, :text or :video
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.object_type # :image
     def object_type
       lookup = MIME::Types[mimetype][0]
       lookup.nil? ? :other : lookup.media_type.to_sym
     end
 
-    # @return [Boolean] if object is an image
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.image? # true
+    # @return [Boolean] true if the mime-types gem recognizes it as an image (from file extension lookup)
     def image?
       object_type == :image
     end
 
-    # Examines the input image for validity.  Used to determine if image is a valid and useful image.
-    # If image is not a jp2, also checks if it is jp2able?
-    # @return [Boolean] true if image is valid, false if not.
-    # @example
-    #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_img.valid_image? # true
+    # @return [Boolean] true if the mime-types gem recognizes it as an image (from file extension lookup)
+    #   AND it is a jp2 or jp2able?
     def valid_image?
       return false unless image?
 
       mimetype == 'image/jp2' || jp2able?
     end
 
-    # Examines the input image for validity to create a jp2.  Same as valid_image? but also confirms
-    # the existence of a profile description and further restricts mimetypes.
-    # It is used by the assembly robots to decide if a jp2 will be created and is also called before
-    # you create a jp2 using assembly-image.
-    # @return [Boolean] true if image should have a jp2 created, false if not.
-    # @example
-    #   source_img = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_img.jp2able? # true
+    # @return [Boolean] true if we can create a jp2 from the file
     def jp2able?
       return false unless exif
 
       Assembly::VALID_IMAGE_MIMETYPES.include?(mimetype)
     end
 
-    # Returns file size information for the current file in bytes.
     # @return [Integer] file size in bytes
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.filesize # 1345
     def filesize
       check_for_file
       @filesize ||= File.size(path)
     end
 
-    # Determines if the file exists (and is not a directory)
-    # @return [Boolean] file exists
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.tif')
-    #   puts source_file.file_exists? # true
+    # @return [Boolean] file exists and is not a directory
     def file_exists?
       @file_exists ||= (File.exist?(path) && !File.directory?(path))
     end
 
     private
 
-    # private method to check for file existence before operating on it
+    # check for file existence before operating on it
     def check_for_file
       raise "input file #{path} does not exist or is a directory" unless file_exists?
     end
 
-    # prive method defining default preferred ordering of how mimetypes are determined
+    # defines default preferred ordering of how mimetypes are determined
     def default_mime_type_order
       %i[override exif file extension]
     end
 
-    # Returns mimetype information using the mime-types gem (based on a file extension lookup)
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.extension_mimetype # 'text/plain'
+    # @return [String] mime type for supplied file using the mime-types gem (based on a file extension lookup)
     def extension_mimetype
       @extension_mimetype ||= begin
         mtype = MIME::Types.type_for(path).first
@@ -239,11 +175,7 @@ module Assembly
       end
     end
 
-    # Returns mimetype information for the current file based on unix file system command.
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.file_mimetype # 'text/plain'
+    # @return [String] mime type for supplied file based on unix file system command
     def file_mimetype
       @file_mimetype ||= begin
         check_for_file
@@ -251,12 +183,9 @@ module Assembly
       end
     end
 
-    # Returns mimetype information for the current file based on exif data
-    # (if available and not a trusted source that we'd rather get from the file system command)
-    # @return [String] mime type for supplied file
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.txt')
-    #   puts source_file.exif_mimetype # 'text/plain'
+    # @return [String] mimetype information for the current file based on exif data,
+    #   unless mimetype is configured as one we'd rather get from the file system command
+    #   (e.g. exif struggles or we get better info from file system command)
     def exif_mimetype
       @exif_mimetype ||= begin
         check_for_file
@@ -268,9 +197,6 @@ module Assembly
 
     # Returns mimetype information using the manual override mapping (based on a file extension lookup)
     # @return [String] mime type for supplied file if a mapping exists for the file's extension
-    # @example
-    #   source_file = Assembly::ObjectFile.new('/input/path_to_file.json')
-    #   puts source_file.override_mimetype # 'application/json'
     def override_mimetype
       @override_mimetype ||= Assembly::OVERRIDE_MIMETYPES.fetch(ext.to_sym, '')
     end
