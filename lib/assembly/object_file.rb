@@ -104,6 +104,13 @@ module Assembly
       @exif ||= begin
         check_for_file
         MiniExiftool.new(path, replace_invalid_chars: '?')
+      rescue MiniExiftool::Error
+        # MiniExiftool will throw an exception when it tries to initialize for problematic files,
+        # but the exception it throws does not tell you the file that caused the problem.
+        # Instead, we will raise our own exception with more context in logging/reporting upstream.
+        # Note: if the file that causes the problem should NOT use exiftool to determine mimetype, add it to the skipped
+        # mimetypes in Assembly::TRUSTED_MIMETYPES to bypass initialization of MiniExiftool for mimetype generation
+        raise MiniExiftool::Error, "error initializing MiniExiftool for #{path}"
       end
     end
 
@@ -255,7 +262,7 @@ module Assembly
         check_for_file
         # if it's not a "trusted" mimetype and there is exif data; get the mimetype from the exif
         prefer_exif = !Assembly::TRUSTED_MIMETYPES.include?(file_mimetype)
-        exif.mimetype if exif&.mimetype && prefer_exif
+        exif.mimetype if prefer_exif && exif&.mimetype
       end
     end
 

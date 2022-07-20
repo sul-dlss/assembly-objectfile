@@ -410,9 +410,10 @@ describe Assembly::ObjectFile do
       expect(object_file.exif.class).to eq MiniExiftool
     end
 
-    it 'raises MiniExiftool::Error if exiftool raises one' do
+    it 'raises MiniExiftool::Error with file path if exiftool raises one' do
       object_file = described_class.new('spec/test_data/empty.txt')
-      expect { object_file.exif }.to raise_error(MiniExiftool::Error)
+      expect { object_file.exif }.to raise_error(MiniExiftool::Error,
+                                                 "error initializing MiniExiftool for #{object_file.path}")
     end
   end
 
