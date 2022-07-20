@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    assembly-objectfile (2.1.0)
+    assembly-objectfile (2.1.1)
       activesupport (>= 5.2.0)
       mime-types (> 3)
       mini_exiftool
@@ -76,7 +76,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    tzinfo (2.0.4)
+    tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.2.0)
 
