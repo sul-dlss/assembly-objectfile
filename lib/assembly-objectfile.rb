@@ -9,7 +9,8 @@ module Assembly
   # one of these is returned by the file command, then a check will be made to see if exif data exists...
   # if so, the mimetype returned by the exif data will be used if no exif data exists, then the
   # mimetype returned by the unix file command will be used
-  TRUSTED_MIMETYPES = ['text/plain', 'plain/text', 'application/pdf', 'text/html', 'application/xml'].freeze
+  TRUSTED_MIMETYPES = ['text/plain', 'plain/text', 'application/pdf', 'text/html', 'application/xml',
+                       'application/octet-stream'].freeze
 
   # This is a manual override mapping of file extension to mimetype; if a file with the given extension
   # is found, the mapped mimetype will be returned and no further methods will be used - this is used
