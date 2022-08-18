@@ -81,12 +81,9 @@ module Assembly
         check_for_file
         MiniExiftool.new(path, replace_invalid_chars: '?')
       rescue MiniExiftool::Error
-        # MiniExiftool will throw an exception when it tries to initialize for problematic files,
-        # but the exception it throws does not tell you the file that caused the problem.
-        # Instead, we will raise our own exception with more context in logging/reporting upstream.
-        # Note: if the file that causes the problem should NOT use exiftool to determine mimetype, add it to the skipped
-        # mimetypes in Assembly::TRUSTED_MIMETYPES to bypass initialization of MiniExiftool for mimetype generation
-        raise MiniExiftool::Error, "error initializing MiniExiftool for #{path}"
+        # MiniExiftool may raise an error on files it doesn't know how to handle (disk images for example)
+        # but we don't want this to prevent an ObjectFile from being created, so just swallow it.
+        nil
       end
     end
 

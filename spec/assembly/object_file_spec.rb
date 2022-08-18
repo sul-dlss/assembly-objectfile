@@ -388,16 +388,16 @@ describe Assembly::ObjectFile do
   end
 
   describe '#exif' do
-    it 'returns MiniExiftool object' do
-      object_file = described_class.new(TEST_TIF_INPUT_FILE)
-      expect(object_file.exif).not_to be_nil
-      expect(object_file.exif.class).to eq MiniExiftool
-    end
+    subject(:exif) { object_file.exif }
 
-    it 'raises MiniExiftool::Error with file path if exiftool raises one' do
-      object_file = described_class.new('spec/test_data/empty.txt')
-      expect { object_file.exif }.to raise_error(MiniExiftool::Error,
-                                                 "error initializing MiniExiftool for #{object_file.path}")
+    let(:object_file) { described_class.new(TEST_TIF_INPUT_FILE) }
+
+    it { is_expected.to be_kind_of MiniExiftool }
+
+    context 'when exiftool raises an error initializing the file' do
+      let(:object_file) { described_class.new('spec/test_data/empty.txt') }
+
+      it { is_expected.to be_nil }
     end
   end
 
