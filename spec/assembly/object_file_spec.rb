@@ -97,34 +97,41 @@ describe Assembly::ObjectFile do
   end
 
   describe '#image?' do
+    subject { object_file.image? }
+
     context 'with tiff' do
-      it 'true' do
-        object_file = described_class.new(TEST_TIF_INPUT_FILE)
-        expect(object_file.image?).to be(true)
-      end
+      let(:object_file) { described_class.new(TEST_TIF_INPUT_FILE) }
+
+      it { is_expected.to be true }
     end
 
     context 'with jp2' do
-      it 'true' do
-        object_file = described_class.new(TEST_JP2_INPUT_FILE)
-        expect(object_file.image?).to be(true)
+      let(:object_file) { described_class.new(TEST_JP2_INPUT_FILE) }
+
+      it { is_expected.to be true }
+    end
+
+    context 'with targa file' do
+      before do
+        allow(object_file).to receive(:exif_mimetype).and_return(nil)
+        allow(object_file).to receive(:file_mimetype).and_return('image/x-tga')
       end
+
+      let(:object_file) { described_class.new(TEST_JP2_INPUT_FILE) }
+
+      it { is_expected.to be false }
     end
 
     context 'with ruby file' do
-      it 'false' do
-        non_image_file = File.join(PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')
-        object_file = described_class.new(non_image_file)
-        expect(object_file.image?).to be(false)
-      end
+      let(:object_file) { described_class.new(File.join(PATH_TO_GEM, 'spec/assembly/object_file_spec.rb')) }
+
+      it { is_expected.to be false }
     end
 
     context 'with xml' do
-      it 'false' do
-        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
-        object_file = described_class.new(non_image_file)
-        expect(object_file.image?).to be(false)
-      end
+      let(:object_file) { described_class.new(File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')) }
+
+      it { is_expected.to be false }
     end
   end
 

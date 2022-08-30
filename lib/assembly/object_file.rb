@@ -121,12 +121,17 @@ module Assembly
       lookup.nil? ? :other : lookup.media_type.to_sym
     end
 
-    # @return [Boolean] true if the mime-types gem recognizes it as an image (from file extension lookup)
+    # @return [Boolean] true if the mime-types gem recognizes it as an image
     def image?
-      object_type == :image
+      return false if object_type != :image
+
+      # We exclude TARGA images here because we've seen where the file is a disk image and
+      # when we look for a mime type it is `image/x-tga', however it is not
+      # recognizable by exiftool.  See https://github.com/sul-dlss/assembly-objectfile/issues/98
+      mimetype != 'image/x-tga'
     end
 
-    # @return [Boolean] true if the mime-types gem recognizes it as an image (from file extension lookup)
+    # @return [Boolean] true if the mime-types gem recognizes it as an image
     #   AND it is a jp2 or jp2able?
     def valid_image?
       return false unless image?
