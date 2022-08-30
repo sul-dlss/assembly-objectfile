@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    assembly-objectfile (2.1.2)
+    assembly-objectfile (2.1.3)
       activesupport (>= 5.2.0)
       mime-types (> 3)
       mini_exiftool
