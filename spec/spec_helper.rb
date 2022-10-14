@@ -11,7 +11,7 @@ RSpec.configure do |config|
 end
 
 PATH_TO_GEM = File.expand_path("#{File.dirname(__FILE__)}/..")
-TEST_INPUT_DIR       = File.join(PATH_TO_GEM, 'spec', 'test_data', 'input')
+TEST_INPUT_DIR       = File.join(PATH_TO_GEM, 'spec', 'fixtures', 'input')
 TEST_TIF_INPUT_FILE  = File.join(TEST_INPUT_DIR, 'test.tif')
 TEST_JP2_INPUT_FILE = File.join(TEST_INPUT_DIR, 'test.jp2')
 
