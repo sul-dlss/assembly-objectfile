@@ -129,7 +129,7 @@ describe Assembly::ObjectFile do
     end
 
     context 'with xml' do
-      let(:object_file) { described_class.new(File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')) }
+      let(:object_file) { described_class.new(File.join(TEST_INPUT_DIR, 'file_with_no_exif.xml')) }
 
       it { is_expected.to be false }
     end
@@ -160,7 +160,7 @@ describe Assembly::ObjectFile do
 
     context 'with xml' do
       it ':application' do
-        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
+        non_image_file = File.join(TEST_INPUT_DIR, 'file_with_no_exif.xml')
         object_file = described_class.new(non_image_file)
         expect(object_file.object_type).to eq(:application)
       end
@@ -206,7 +206,7 @@ describe Assembly::ObjectFile do
 
     context 'with xml' do
       it 'false' do
-        non_image_file = File.join(PATH_TO_GEM, 'spec/test_data/input/file_with_no_exif.xml')
+        non_image_file = File.join(TEST_INPUT_DIR, 'file_with_no_exif.xml')
         object_file = described_class.new(non_image_file)
         expect(object_file.valid_image?).to be(false)
       end
@@ -402,7 +402,7 @@ describe Assembly::ObjectFile do
     it { is_expected.to be_kind_of MiniExiftool }
 
     context 'when exiftool raises an error initializing the file' do
-      let(:object_file) { described_class.new('spec/test_data/empty.txt') }
+      let(:object_file) { described_class.new('spec/fixtures/empty.txt') }
 
       it { is_expected.to be_nil }
     end
