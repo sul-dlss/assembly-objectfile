@@ -2,8 +2,7 @@
 *.gem
 .DS_Store
 .bundle
-config/certs/*
-config/environments/*
+.rspec_status
 coverage/*
 doc/*
 log/*
