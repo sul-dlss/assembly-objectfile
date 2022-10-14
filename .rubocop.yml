@@ -45,6 +45,9 @@ RSpec/MultipleExpectations:
   Exclude:
     - spec/features/**/*_spec.rb
 
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+
 RSpec/NestedGroups:
   Max: 4 # default: 3
 
