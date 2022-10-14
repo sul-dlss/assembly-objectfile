@@ -399,7 +399,7 @@ describe Assembly::ObjectFile do
 
     let(:object_file) { described_class.new(TEST_TIF_INPUT_FILE) }
 
-    it { is_expected.to be_kind_of MiniExiftool }
+    it { is_expected.to be_a MiniExiftool }
 
     context 'when exiftool raises an error initializing the file' do
       let(:object_file) { described_class.new('spec/test_data/empty.txt') }
