@@ -46,7 +46,6 @@ describe Assembly::ObjectFile do
         expect(object_file.path).to eq('/some/file.txt')
         expect(object_file.label).to be_nil
         expect(object_file.file_attributes).to be_nil
-        expect(object_file.provider_sha1).to be_nil
         expect(object_file.provider_md5).to be_nil
         expect(object_file.relative_path).to be_nil
       end
@@ -65,7 +64,6 @@ describe Assembly::ObjectFile do
         expect(object_file.path).to eq('/some/file.txt')
         expect(object_file.label).to eq('some label')
         expect(object_file.file_attributes).to eq('shelve' => 'yes', 'publish' => 'yes', 'preserve' => 'no')
-        expect(object_file.provider_sha1).to be_nil
         expect(object_file.provider_md5).to be_nil
         expect(object_file.relative_path).to eq('/tmp')
       end
