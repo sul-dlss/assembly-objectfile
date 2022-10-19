@@ -27,7 +27,7 @@ module Assembly
       end
     end
 
-    attr_accessor :file_attributes, :label, :path, :provider_md5, :provider_sha1, :relative_path, :mime_type_order
+    attr_accessor :file_attributes, :label, :path, :provider_md5, :relative_path, :mime_type_order
 
     VALID_MIMETYPE_METHODS = %i[override exif file extension].freeze
 
@@ -39,7 +39,6 @@ module Assembly
     # @option params [String] :label a resource label (files bundled together will just get the first
     #                                file's label attribute if set)
     # @option params [String] :provider_md5 pre-computed MD5 checksum
-    # @option params [String] :provider_sha1 pre-computed SHA1 checksum
     # @option params [String] :relative_path if you want the file ids in the content metadata it can be set,
     #                                        otherwise content metadata will get the full path
     # @option params [Array] :mime_type_order can be set to the order in which you want mimetypes to be determined
@@ -55,7 +54,6 @@ module Assembly
       @file_attributes = params[:file_attributes]
       @relative_path = params[:relative_path]
       @provider_md5 = params[:provider_md5]
-      @provider_sha1 = params[:provider_sha1]
       @mime_type_order = params[:mime_type_order] || default_mime_type_order
     end
 
