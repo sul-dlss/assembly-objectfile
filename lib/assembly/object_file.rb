@@ -11,8 +11,8 @@ module Assembly
     # @return [String] longest common initial path of filenames passed in
     #
     # Example:
-    #   puts Assembly::ObjectFile.common_prefix(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2'])
-    #   # => '/Users/peter/0'
+    #   puts Assembly::ObjectFile.common_path(['/Users/peter/00/test.tif','/Users/peter/05/test.jp2'])
+    #   # => '/Users/peter/'
     def self.common_path(strings)
       return nil if strings.empty?
 
