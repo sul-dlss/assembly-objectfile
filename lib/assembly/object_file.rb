@@ -88,13 +88,13 @@ module Assembly
     # @return [String] computed md5 checksum
     def md5
       check_for_file unless @md5
-      @md5 ||= Digest::MD5.file(path).hexdigest
+      @md5 ||= Digest(:MD5).file(path).hexdigest
     end
 
     # @return [String] computed sha1 checksum
     def sha1
       check_for_file unless @sha1
-      @sha1 ||= Digest::SHA1.file(path).hexdigest
+      @sha1 ||= Digest(:SHA1).file(path).hexdigest
     end
 
     # Returns mimetype information for the current file based on the ordering set in default_mime_type_order
