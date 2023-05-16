@@ -18,7 +18,8 @@ module Assembly
   # the unix file system command returns the mapping format is "extension with period: returned mimetype",
   # e.g. for any .json file, you will always get `application/json`
   OVERRIDE_MIMETYPES = {
-    '.json': 'application/json'
+    '.json': 'application/json',
+    '.vtt': 'text/vtt'
   }.freeze
 end
 
