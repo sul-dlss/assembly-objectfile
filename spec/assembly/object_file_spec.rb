@@ -15,6 +15,7 @@ describe Assembly::ObjectFile do
   let(:json_fixture_file) { File.join(fixture_input_dir, 'test.json') }
   let(:obj_fixture_file) { File.join(fixture_input_dir, 'someobject.obj') }
   let(:ply_fixture_file) { File.join(fixture_input_dir, 'someobject.ply') }
+  let(:vtt_fixture_file) { File.join(fixture_input_dir, 'test.vtt') }
 
   describe '.common_path' do
     context 'when common path is 2 nodes out of 4' do
@@ -310,6 +311,15 @@ describe Assembly::ObjectFile do
         expect(object_file.mimetype).to eq('application/json') # our configured mapping overrides both
       end
     end
+
+    context 'when .vtt file' do
+      it 'uses the manual mapping to set the correct mimetype of text/vtt for a .vtt file' do
+        object_file = described_class.new(vtt_fixture_file)
+        expect(object_file.send(:exif_mimetype)).to be_nil # exif
+        expect(object_file.send(:file_mimetype)).to eq('text/plain') # unix file system command
+        expect(object_file.mimetype).to eq('text/vtt') # our configured mapping overrides both
+      end
+    end
   end
 
   describe '#file_mimetype (unix file system command)' do
@@ -434,6 +444,13 @@ describe Assembly::ObjectFile do
         expect(object_file.send(:extension_mimetype)).to eq('image/tiff')
       end
     end
+
+    context 'with .vtt file' do
+      it 'text/plain' do
+        object_file = described_class.new(vtt_fixture_file)
+        expect(object_file.send(:extension_mimetype)).to eq('text/vtt')
+      end
+    end
   end
 
   describe '#exif_mimetype' do
@@ -447,6 +464,13 @@ describe Assembly::ObjectFile do
     context 'when .json file' do
       it 'nil' do
         object_file = described_class.new(json_fixture_file)
+        expect(object_file.send(:exif_mimetype)).to be_nil
+      end
+    end
+
+    context 'when .vtt file' do
+      it 'nil' do
+        object_file = described_class.new(vtt_fixture_file)
         expect(object_file.send(:exif_mimetype)).to be_nil
       end
     end
