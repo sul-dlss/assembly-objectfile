@@ -152,7 +152,7 @@ module Assembly
 
     # @return [Boolean] file exists and is not a directory
     def file_exists?
-      @file_exists ||= (File.exist?(path) && !File.directory?(path))
+      @file_exists ||= File.exist?(path) && !File.directory?(path)
     end
 
     private
