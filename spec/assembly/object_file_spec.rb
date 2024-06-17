@@ -125,8 +125,7 @@ describe Assembly::ObjectFile do
 
     context 'with targa file' do
       before do
-        allow(object_file).to receive(:exif_mimetype).and_return(nil)
-        allow(object_file).to receive(:file_mimetype).and_return('image/x-tga')
+        allow(object_file).to receive_messages(exif_mimetype: nil, file_mimetype: 'image/x-tga')
       end
 
       let(:object_file) { described_class.new(jp2_fixture_file) }
