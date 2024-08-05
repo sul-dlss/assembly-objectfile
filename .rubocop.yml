@@ -33,8 +33,9 @@ Naming/FileName:
     - 'lib/assembly-objectfile.rb'
 
 Naming/PredicateName:
-  NamePrefix:
-    - 'is_'
+  ForbiddenPrefixes:
+    - has_
+    - have_
 
 Metrics/BlockLength:
   Exclude:
