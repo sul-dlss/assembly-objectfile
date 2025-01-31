@@ -1,7 +1,13 @@
 # frozen_string_literal: true
 
 require 'simplecov'
-SimpleCov.start
+SimpleCov.start do
+  if ENV['CI']
+    require 'simplecov_json_formatter'
+
+    formatter SimpleCov::Formatter::JSONFormatter
+  end
+end
 
 require File.expand_path("#{File.dirname(__FILE__)}/../config/boot")
 require 'pry-byebug'
