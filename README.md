@@ -1,6 +1,5 @@
 [![CircleCI](https://circleci.com/gh/sul-dlss/assembly-objectfile/tree/main.svg?style=svg)](https://circleci.com/gh/sul-dlss/assembly-objectfile/tree/main)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/2310962acce78d78e76c/test_coverage)](https://codeclimate.com/github/sul-dlss/assembly-objectfile/test_coverage)
-[![Maintainability](https://api.codeclimate.com/v1/badges/2310962acce78d78e76c/maintainability)](https://codeclimate.com/github/sul-dlss/assembly-objectfile/maintainability)
+[![Test Coverage](https://codecov.io/github/sul-dlss/assembly-objectfile/graph/badge.svg?token=N4XeeAvaSH)](https://codecov.io/github/sul-dlss/assembly-objectfile)
 [![Gem Version](https://badge.fury.io/rb/assembly-objectfile.svg)](https://badge.fury.io/rb/assembly-objectfile)
 
 # Assembly-ObjectFile Gem
@@ -34,14 +33,8 @@ rake release
 
 1.  Exiftool
 
-    RHEL: (RPM to install coming soon) Download latest version from:
-    https://exiftool.org/
-
-        tar -xf Image-ExifTool-#.##.tar.gz
-        cd Image-ExifTool-#.##
-        perl Makefile.PL
-        make test
-        sudo make install
+    Ubuntu/Debian:
+        sudo apt install libimage-exiftool-perl
 
     Mac users:
         brew install exiftool
