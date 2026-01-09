@@ -10,7 +10,7 @@ SimpleCov.start do
 end
 
 require File.expand_path("#{File.dirname(__FILE__)}/../config/boot")
-require 'pry-byebug'
+require 'debug'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
