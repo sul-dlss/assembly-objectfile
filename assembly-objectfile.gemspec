@@ -27,7 +27,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'mime-types', '> 3'
   s.add_dependency 'mini_exiftool'
 
-  s.add_development_dependency 'pry-byebug'
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec', '~> 3.0'
   s.add_development_dependency 'rubocop', '~> 1.25'
