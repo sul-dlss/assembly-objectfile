@@ -19,8 +19,11 @@ module Assembly
   # e.g. for any .json file, you will always get `application/json`
   OVERRIDE_MIMETYPES = {
     '.json': 'application/json',
+    '.xml': 'application/xml',
     '.vtt': 'text/vtt',
-    '.shp': 'application/vnd.shp'
+    '.shp': 'application/vnd.shp',
+    '.geojson': 'application/geo+json',
+    '.ovr': 'application/octet-stream'
   }.freeze
 end
 

@@ -248,6 +248,20 @@ describe Assembly::ObjectFile do
       end
     end
 
+    context 'with tif overview file' do
+      it 'application/octet-stream' do
+        object_file = described_class.new(File.join(fixture_input_dir, 'tif_overview.tif.ovr'))
+        expect(object_file.mimetype).to eq('application/octet-stream')
+      end
+    end
+
+    context 'with ESRI XML metadata for a tif' do
+      it 'application/xml' do
+        object_file = described_class.new(File.join(fixture_input_dir, 'arc_metadata.tif.xml'))
+        expect(object_file.mimetype).to eq('application/xml')
+      end
+    end
+
     context 'with .jp2 file' do
       it 'image/jp2' do
         object_file = described_class.new(jp2_fixture_file)
@@ -308,6 +322,14 @@ describe Assembly::ObjectFile do
         expect(object_file.send(:exif_mimetype)).to be_nil # exif
         expect(object_file.send(:file_mimetype)).to eq('text/plain') # unix file system command
         expect(object_file.mimetype).to eq('application/json') # our configured mapping overrides both
+      end
+    end
+
+    context 'when .geojson file' do
+      it 'uses the manual mapping to set the correct mimetype of application/geo+json for a .geojson file' do
+        geojson_fixture_file = File.join(fixture_input_dir, 'index_map.geojson')
+        object_file = described_class.new(geojson_fixture_file)
+        expect(object_file.mimetype).to eq('application/geo+json')
       end
     end
 
