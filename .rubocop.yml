@@ -1,4 +1,4 @@
-require:
+plugins:
   - rubocop-capybara
   - rubocop-factory_bot
   - rubocop-rspec
@@ -221,7 +221,7 @@ Lint/ConstantOverwrittenInRescue: # new in 1.31
   Enabled: true
 Lint/NonAtomicFileOperation: # new in 1.31
   Enabled: true
-Capybara/RSpec/SpecificMatcher: # new in 2.12
+Capybara/SpecificMatcher: # new in 2.12
   Enabled: true
 RSpecRails/HaveHttpStatus: # new in 2.12
   Enabled: true
@@ -287,9 +287,9 @@ Style/RedundantRegexpConstructor: # new in 1.52
   Enabled: true
 Style/RedundantStringEscape: # new in 1.37
   Enabled: true
-Capybara/RSpec/MatchStyle: # new in 2.17
+Capybara/MatchStyle: # new in 2.17
   Enabled: true
-Capybara/RSpec/NegationMatcher: # new in 2.14
+Capybara/NegationMatcher: # new in 2.14
   Enabled: true
 Capybara/SpecificActions: # new in 2.14
   Enabled: true
@@ -462,23 +462,19 @@ Style/TallyMethod: # new in 1.85
   Enabled: true
 Style/YAMLFileRead: # new in 1.53
   Enabled: true
-Capybara/AssertStyle: # new in 2.23
-  Enabled: true
 Capybara/FindAllFirst: # new in 2.22
   Enabled: true
 Capybara/RedundantWithinFind: # new in 2.20
   Enabled: true
-Capybara/RSpec/CurrentPathExpectation: # new in 1.18
-  Enabled: true
-Capybara/RSpec/HaveContent: # new in 2.23
+Capybara/CurrentPathExpectation: # new in 1.18
   Enabled: true
 Capybara/RSpec/HaveSelector: # new in 2.19
   Enabled: true
-Capybara/RSpec/NegationMatcherAfterVisit: # new in 2.22
+Capybara/NegationMatcherAfterVisit: # new in 2.22
   Enabled: true
 Capybara/RSpec/PredicateMatcher: # new in 2.19
   Enabled: true
-Capybara/RSpec/VisibilityMatcher: # new in 1.39
+Capybara/VisibilityMatcher: # new in 1.39
   Enabled: true
 FactoryBot/ExcessiveCreateList: # new in 2.25
   Enabled: true
