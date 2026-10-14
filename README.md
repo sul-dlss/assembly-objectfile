@@ -19,8 +19,10 @@ The gem currently has methods for:
 
 ## Running tests
 
+Use Ruby 4.0.7 for development and testing.
+
 ```
-bundle exec spec
+bundle exec rspec
 ```
 
 ## Releasing the gem

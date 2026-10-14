@@ -334,11 +334,14 @@ describe Assembly::ObjectFile do
     end
 
     context 'when .vtt file' do
-      it 'uses the manual mapping to set the correct mimetype of text/vtt for a .vtt file' do
-        object_file = described_class.new(vtt_fixture_file)
-        expect(object_file.send(:exif_mimetype)).to be_nil # exif
-        expect(object_file.send(:file_mimetype)).to eq('text/plain') # unix file system command
-        expect(object_file.mimetype).to eq('text/vtt') # our configured mapping overrides both
+      let(:object_file) { described_class.new(vtt_fixture_file) }
+
+      before do
+        allow(object_file).to receive_messages(exif_mimetype: 'text/plain', file_mimetype: 'text/plain')
+      end
+
+      it 'uses the manual mapping instead of the competing MIME detectors' do
+        expect(object_file.mimetype).to eq('text/vtt')
       end
     end
   end
@@ -490,9 +493,28 @@ describe Assembly::ObjectFile do
     end
 
     context 'when .vtt file' do
-      it 'nil' do
-        object_file = described_class.new(vtt_fixture_file)
-        expect(object_file.send(:exif_mimetype)).to be_nil
+      let(:object_file) { described_class.new(vtt_fixture_file) }
+
+      context 'when file reports a trusted MIME type' do
+        before do
+          allow(object_file).to receive(:file_mimetype).and_return('text/plain')
+          allow(object_file).to receive(:exif).and_call_original
+        end
+
+        it 'does not consult ExifTool' do
+          expect(object_file.send(:exif_mimetype)).to be_nil
+          expect(object_file).not_to have_received(:exif)
+        end
+      end
+
+      context 'when file reports an untrusted MIME type' do
+        before do
+          allow(object_file).to receive(:file_mimetype).and_return('text/vtt')
+        end
+
+        it 'returns the ExifTool MIME type' do
+          expect(object_file.send(:exif_mimetype)).to eq('text/plain')
+        end
       end
     end
   end
